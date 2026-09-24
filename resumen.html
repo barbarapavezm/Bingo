@@ -98,6 +98,32 @@
       margin-top: 4px;
     }
 
+    .acciones {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 90px;
+    }
+
+    .btn-editar,
+    .btn-eliminar {
+      border: none;
+      border-radius: 7px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-editar {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-eliminar {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
     .error {
       color: #b91c1c;
       font-weight: bold;
@@ -110,6 +136,10 @@
 
       table {
         font-size: 13px;
+      }
+
+      .acciones {
+        min-width: 70px;
       }
     }
   </style>
@@ -187,6 +217,7 @@
           <th>Productos</th>
           <th>Pago</th>
           <th>Total</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -209,13 +240,26 @@ function formatoCLP(valor) {
 }
 
 function formatoFecha(fechaISO) {
-
   const fecha = new Date(fechaISO);
 
   return fecha.toLocaleString("es-CL", {
     dateStyle: "short",
     timeStyle: "short"
   });
+}
+
+async function obtenerVentas() {
+  const respuesta = await fetch(
+    "/.netlify/functions/ventas"
+  );
+
+  if (!respuesta.ok) {
+    throw new Error(
+      "No se pudieron cargar las ventas."
+    );
+  }
+
+  return await respuesta.json();
 }
 
 async function cargarResumen() {
@@ -225,19 +269,8 @@ async function cargarResumen() {
 
   try {
 
-    const respuesta =
-      await fetch(
-        "/.netlify/functions/ventas"
-      );
-
-    if (!respuesta.ok) {
-      throw new Error(
-        "No se pudieron cargar las ventas."
-      );
-    }
-
     const ventas =
-      await respuesta.json();
+      await obtenerVentas();
 
     let totalVendido = 0;
     let totalEfectivo = 0;
@@ -248,38 +281,26 @@ async function cargarResumen() {
     ventas.forEach(venta => {
 
       totalVendido +=
-        Number(
-          venta.total || 0
-        );
+        Number(venta.total || 0);
 
       if (
         venta.metodoPago ===
         "efectivo"
       ) {
-
         totalEfectivo +=
-          Number(
-            venta.total || 0
-          );
-
+          Number(venta.total || 0);
       }
 
       if (
         venta.metodoPago ===
         "transferencia"
       ) {
-
         totalTransferencia +=
-          Number(
-            venta.total || 0
-          );
-
+          Number(venta.total || 0);
       }
 
       const productosVenta =
-        Array.isArray(
-          venta.productos
-        )
+        Array.isArray(venta.productos)
           ? venta.productos
           : [];
 
@@ -291,14 +312,12 @@ async function cargarResumen() {
               producto.nombre
             ]
           ) {
-
             resumenProductos[
               producto.nombre
             ] = {
               cantidad: 0,
               dinero: 0
             };
-
           }
 
           resumenProductos[
@@ -314,32 +333,24 @@ async function cargarResumen() {
             Number(
               producto.subtotal || 0
             );
-
         }
       );
-
     });
 
     document.getElementById(
       "total-vendido"
     ).textContent =
-      formatoCLP(
-        totalVendido
-      );
+      formatoCLP(totalVendido);
 
     document.getElementById(
       "total-efectivo"
     ).textContent =
-      formatoCLP(
-        totalEfectivo
-      );
+      formatoCLP(totalEfectivo);
 
     document.getElementById(
       "total-transferencia"
     ).textContent =
-      formatoCLP(
-        totalTransferencia
-      );
+      formatoCLP(totalTransferencia);
 
     document.getElementById(
       "cantidad-ventas"
@@ -364,9 +375,7 @@ async function cargarResumen() {
 
   } catch (error) {
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     estado.className =
       "error";
@@ -422,9 +431,7 @@ function renderProductos(
         );
 
       fila.innerHTML = `
-        <td>
-          ${nombre}
-        </td>
+        <td>${nombre}</td>
 
         <td>
           ${datos.cantidad}
@@ -440,7 +447,6 @@ function renderProductos(
       tbody.appendChild(
         fila
       );
-
     });
 }
 
@@ -461,7 +467,7 @@ function renderHistorial(
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="5">
+        <td colspan="6">
           Aún no hay ventas registradas.
         </td>
       </tr>
@@ -518,7 +524,6 @@ function renderHistorial(
         </td>
 
         <td>
-
           <strong>
             Mesa ${venta.mesa}
           </strong>
@@ -526,7 +531,6 @@ function renderHistorial(
           <div class="persona">
             ${nombrePersona}
           </div>
-
         </td>
 
         <td>
@@ -538,21 +542,339 @@ function renderHistorial(
         </td>
 
         <td>
-
           <strong>
             ${formatoCLP(
               venta.total
             )}
           </strong>
+        </td>
 
+        <td>
+          <div class="acciones">
+
+            <button
+              class="btn-editar"
+              onclick="editarVenta('${venta.id}')"
+            >
+              ✏️ Editar
+            </button>
+
+            <button
+              class="btn-eliminar"
+              onclick="eliminarVenta('${venta.id}')"
+            >
+              🗑️ Eliminar
+            </button>
+
+          </div>
         </td>
       `;
 
       tbody.appendChild(
         fila
       );
-
     });
+}
+
+async function eliminarVenta(id) {
+
+  const confirmar =
+    confirm(
+      "¿Seguro que quieres eliminar esta venta?\n\n" +
+      "Se descontará del total de caja y de los productos vendidos."
+    );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+
+    const respuesta =
+      await fetch(
+        "/.netlify/functions/ventas?id=" +
+        encodeURIComponent(id),
+        {
+          method: "DELETE"
+        }
+      );
+
+    const resultado =
+      await respuesta.json();
+
+    if (!respuesta.ok) {
+      throw new Error(
+        resultado.error ||
+        "No se pudo eliminar."
+      );
+    }
+
+    alert(
+      "✅ Venta eliminada correctamente."
+    );
+
+    location.reload();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ No se pudo eliminar la venta."
+    );
+  }
+}
+
+async function editarVenta(id) {
+
+  try {
+
+    const ventas =
+      await obtenerVentas();
+
+    const venta =
+      ventas.find(
+        v => v.id === id
+      );
+
+    if (!venta) {
+      alert(
+        "Venta no encontrada."
+      );
+      return;
+    }
+
+
+    const nuevaMesa =
+      prompt(
+        "Número de mesa:",
+        venta.mesa
+      );
+
+    if (
+      nuevaMesa === null
+    ) {
+      return;
+    }
+
+    const mesaNumero =
+      Number(nuevaMesa);
+
+    if (
+      !Number.isInteger(
+        mesaNumero
+      ) ||
+      mesaNumero < 1 ||
+      mesaNumero > 50
+    ) {
+
+      alert(
+        "La mesa debe ser un número entre 1 y 50."
+      );
+
+      return;
+    }
+
+
+    const nuevoNombre =
+      prompt(
+        "Nombre de la persona:",
+        venta.nombre || ""
+      );
+
+    if (
+      nuevoNombre === null
+    ) {
+      return;
+    }
+
+    if (
+      !nuevoNombre.trim()
+    ) {
+
+      alert(
+        "El nombre no puede quedar vacío."
+      );
+
+      return;
+    }
+
+
+    const nuevoPago =
+      prompt(
+        "Método de pago:\n" +
+        "Escribe efectivo o transferencia",
+        venta.metodoPago
+      );
+
+    if (
+      nuevoPago === null
+    ) {
+      return;
+    }
+
+    const pagoNormalizado =
+      nuevoPago
+        .trim()
+        .toLowerCase();
+
+    if (
+      pagoNormalizado !==
+        "efectivo" &&
+      pagoNormalizado !==
+        "transferencia"
+    ) {
+
+      alert(
+        "El método debe ser efectivo o transferencia."
+      );
+
+      return;
+    }
+
+
+    const productosEditados = [];
+
+    const productosVenta =
+      Array.isArray(
+        venta.productos
+      )
+        ? venta.productos
+        : [];
+
+    for (
+      const producto
+      of productosVenta
+    ) {
+
+      const nuevaCantidad =
+        prompt(
+          "Cantidad de " +
+          producto.nombre +
+          ":",
+          producto.cantidad
+        );
+
+      if (
+        nuevaCantidad === null
+      ) {
+        return;
+      }
+
+      const cantidad =
+        Number(
+          nuevaCantidad
+        );
+
+      if (
+        !Number.isInteger(
+          cantidad
+        ) ||
+        cantidad < 0
+      ) {
+
+        alert(
+          "La cantidad debe ser un número entero igual o mayor que 0."
+        );
+
+        return;
+      }
+
+      if (
+        cantidad > 0
+      ) {
+
+        productosEditados.push({
+          ...producto,
+          cantidad,
+          subtotal:
+            Number(
+              producto.precio
+            ) *
+            cantidad
+        });
+      }
+    }
+
+
+    if (
+      productosEditados.length ===
+      0
+    ) {
+
+      alert(
+        "La venta debe tener al menos un producto.\n\n" +
+        "Si quieres eliminarla completamente, usa el botón Eliminar."
+      );
+
+      return;
+    }
+
+
+    const ventaActualizada = {
+      id:
+        venta.id,
+
+      mesa:
+        mesaNumero,
+
+      nombre:
+        nuevoNombre.trim(),
+
+      metodoPago:
+        pagoNormalizado,
+
+      productos:
+        productosEditados
+    };
+
+
+    const guardar =
+      await fetch(
+        "/.netlify/functions/ventas",
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              ventaActualizada
+            )
+        }
+      );
+
+
+    const resultado =
+      await guardar.json();
+
+
+    if (!guardar.ok) {
+
+      throw new Error(
+        resultado.error ||
+        "No se pudo editar."
+      );
+    }
+
+
+    alert(
+      "✅ Venta actualizada correctamente."
+    );
+
+    location.reload();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ No se pudo editar la venta."
+    );
+  }
 }
 
 cargarResumen();
