@@ -1,28 +1,11 @@
 import { getStore } from "@netlify/blobs";
 
-
 const PRECIO_PREVENTA = 10000;
 
 
-const personasStore = getStore({
-  name: "personas-bingo",
-  consistency: "strong"
-});
-
-const ventasStore = getStore({
-  name: "ventas-bingo",
-  consistency: "strong"
-});
-
-const pedidosStore = getStore({
-  name: "pedidos-bingo",
-  consistency: "strong"
-});
-
-
-/* =========================
+/* =====================================================
    UTILIDADES
-========================= */
+===================================================== */
 
 function normalizar(texto) {
   return String(texto || "")
@@ -60,7 +43,10 @@ function generarCodigo() {
 }
 
 
-async function codigoExiste(codigo) {
+async function codigoExiste(
+  codigo,
+  personasStore
+) {
 
   const lista =
     await personasStore.list();
@@ -84,6 +70,7 @@ async function codigoExiste(codigo) {
       ) ===
       normalizarCodigo(codigo)
     ) {
+
       return true;
     }
   }
@@ -93,7 +80,9 @@ async function codigoExiste(codigo) {
 }
 
 
-async function crearCodigoUnico() {
+async function crearCodigoUnico(
+  personasStore
+) {
 
   for (
     let intento = 0;
@@ -106,8 +95,12 @@ async function crearCodigoUnico() {
 
 
     if (
-      !(await codigoExiste(codigo))
+      !(await codigoExiste(
+        codigo,
+        personasStore
+      ))
     ) {
+
       return codigo;
     }
   }
@@ -119,10 +112,15 @@ async function crearCodigoUnico() {
 }
 
 
-async function buscarPorCodigo(codigo) {
+async function buscarPorCodigo(
+  codigo,
+  personasStore
+) {
 
   const buscado =
-    normalizarCodigo(codigo);
+    normalizarCodigo(
+      codigo
+    );
 
 
   const lista =
@@ -146,6 +144,7 @@ async function buscarPorCodigo(codigo) {
         persona.codigoPreventa
       ) === buscado
     ) {
+
       return persona;
     }
   }
@@ -155,50 +154,76 @@ async function buscarPorCodigo(codigo) {
 }
 
 
-/* =========================
-   PREVENTAS / VENTAS
-========================= */
+/* =====================================================
+   PREVENTAS
+===================================================== */
 
-function crearBeneficios(cantidad) {
+function crearBeneficios(
+  cantidad
+) {
 
   return {
 
     juegos: [
+
       {
-        nombre: "Juego 1",
+        nombre:
+          "Juego 1",
+
         cantidad
       },
+
       {
-        nombre: "Juego 2",
+        nombre:
+          "Juego 2",
+
         cantidad
       },
+
       {
-        nombre: "Juego 3",
+        nombre:
+          "Juego 3",
+
         cantidad
       },
+
       {
-        nombre: "Juego 4",
+        nombre:
+          "Juego 4",
+
         cantidad
       },
+
       {
-        nombre: "Juego Mayor",
+        nombre:
+          "Juego Mayor",
+
         cantidad
       }
+
     ],
 
     once: {
+
       cantidad,
-      estado: "pendiente"
+
+      estado:
+        "pendiente"
+
     }
 
   };
 }
 
 
-function obtenerCantidadVenta(venta) {
+function obtenerCantidadVenta(
+  venta
+) {
 
   if (
-    Number(venta?.cantidadPreventas) > 0
+    Number(
+      venta?.cantidadPreventas
+    ) > 0
   ) {
 
     return Number(
@@ -218,13 +243,16 @@ function obtenerCantidadVenta(venta) {
         producto =>
           normalizar(
             producto.nombre
-          ) === "preventa"
+          ) ===
+          "preventa"
       );
 
 
     if (
       preventa &&
-      Number(preventa.cantidad) > 0
+      Number(
+        preventa.cantidad
+      ) > 0
     ) {
 
       return Number(
@@ -253,14 +281,28 @@ function actualizarCantidadVenta(
 
 
   venta.productos = [
+
     {
-      id: 12,
-      nombre: "Preventa",
-      precio: PRECIO_PREVENTA,
+
+      id:
+        12,
+
+      nombre:
+        "Preventa",
+
+      precio:
+        PRECIO_PREVENTA,
+
       cantidad,
-      subtotal: total,
-      categoria: "preventa"
+
+      subtotal:
+        total,
+
+      categoria:
+        "preventa"
+
     }
+
   ];
 
 
@@ -278,8 +320,13 @@ function actualizarCantidadVenta(
 }
 
 
+/* =====================================================
+   OBTENER VENTAS DE PREVENTA
+===================================================== */
+
 async function obtenerVentasPreventa(
-  personaId
+  personaId,
+  ventasStore
 ) {
 
   const lista =
@@ -290,56 +337,68 @@ async function obtenerVentasPreventa(
     [];
 
 
-  for (const blob of lista.blobs) {
+  for (
+    const blob
+    of lista.blobs
+  ) {
 
     const venta =
       await ventasStore.get(
         blob.key,
         {
-          type: "json"
+          type:
+            "json"
         }
       );
 
 
     if (
       venta &&
-      venta.clienteId === personaId &&
+      venta.clienteId ===
+        personaId &&
       (
-        venta.tipoVenta === "preventa" ||
+        venta.tipoVenta ===
+          "preventa" ||
+
         (
           Array.isArray(
             venta.productos
           ) &&
+
           venta.productos.some(
-            p =>
+            producto =>
               normalizar(
-                p.nombre
-              ) === "preventa"
+                producto.nombre
+              ) ===
+              "preventa"
           )
         )
       )
     ) {
 
       ventas.push({
-        key: blob.key,
+
+        key:
+          blob.key,
+
         venta
+
       });
     }
   }
 
 
-  /*
-    Usaremos primero las ventas
-    más recientes.
-  */
-
   ventas.sort(
     (a, b) =>
+
       new Date(
-        b.venta.fecha || 0
+        b.venta.fecha ||
+        0
       ) -
+
       new Date(
-        a.venta.fecha || 0
+        a.venta.fecha ||
+        0
       )
   );
 
@@ -349,56 +408,70 @@ async function obtenerVentasPreventa(
 
 
 async function totalPreventasEnVentas(
-  personaId
+  personaId,
+  ventasStore
 ) {
 
   const ventas =
     await obtenerVentasPreventa(
-      personaId
+      personaId,
+      ventasStore
     );
 
 
   return ventas.reduce(
-    (total, item) =>
+    (
+      total,
+      item
+    ) =>
+
       total +
       obtenerCantidadVenta(
         item.venta
       ),
+
     0
   );
 }
 
 
-/* =========================
-   TRASPASAR VENTAS
-   AL DIVIDIR
-========================= */
+/* =====================================================
+   DIVIDIR VENTAS
+===================================================== */
 
 async function traspasarVentas(
   personaOrigen,
   personaDestino,
-  cantidad
+  cantidad,
+  ventasStore
 ) {
 
   const ventas =
     await obtenerVentasPreventa(
-      personaOrigen.id
+      personaOrigen.id,
+      ventasStore
     );
 
 
   const disponibles =
     ventas.reduce(
-      (total, item) =>
+      (
+        total,
+        item
+      ) =>
+
         total +
         obtenerCantidadVenta(
           item.venta
         ),
+
       0
     );
 
 
   if (
-    disponibles < cantidad
+    disponibles <
+    cantidad
   ) {
 
     throw new Error(
@@ -411,9 +484,15 @@ async function traspasarVentas(
     cantidad;
 
 
-  for (const item of ventas) {
+  for (
+    const item
+    of ventas
+  ) {
 
-    if (restante <= 0) {
+    if (
+      restante <= 0
+    ) {
+
       break;
     }
 
@@ -429,8 +508,10 @@ async function traspasarVentas(
 
 
     if (
-      cantidadVenta <= 0
+      cantidadVenta <=
+      0
     ) {
+
       continue;
     }
 
@@ -443,26 +524,31 @@ async function traspasarVentas(
 
 
     /*
-      Si trasladamos TODA esa venta,
-      simplemente cambiamos su dueño.
-      El dinero registrado no cambia.
+      Si movemos TODA esta venta,
+      solamente cambiamos el dueño.
     */
 
     if (
-      mover === cantidadVenta
+      mover ===
+      cantidadVenta
     ) {
 
       venta.clienteId =
         personaDestino.id;
 
+
       venta.nombre =
         personaDestino.nombre;
 
+
       venta.codigoPreventa =
-        personaDestino.codigoPreventa;
+        personaDestino
+          .codigoPreventa;
+
 
       venta.divididaDesde =
         personaOrigen.id;
+
 
       venta.divisionEn =
         new Date()
@@ -478,9 +564,7 @@ async function traspasarVentas(
     } else {
 
       /*
-        Si movemos solo una parte,
-        dejamos una parte en la
-        persona original...
+        Parte queda en la persona original.
       */
 
       const cantidadOriginal =
@@ -501,15 +585,8 @@ async function traspasarVentas(
 
 
       /*
-        ...y creamos otro registro
-        por la parte transferida.
-
-        $40.000 puede pasar a:
-        $20.000 original +
-        $20.000 nueva persona.
-
-        El total de Caja sigue siendo
-        exactamente $40.000.
+        Y la otra parte pasa
+        a una venta nueva.
       */
 
       const nuevaVentaId =
@@ -517,6 +594,7 @@ async function traspasarVentas(
 
 
       const nuevaVenta = {
+
         ...venta,
 
         id:
@@ -529,7 +607,8 @@ async function traspasarVentas(
           personaDestino.nombre,
 
         codigoPreventa:
-          personaDestino.codigoPreventa,
+          personaDestino
+            .codigoPreventa,
 
         derivadaDe:
           item.key,
@@ -540,6 +619,7 @@ async function traspasarVentas(
         divisionEn:
           new Date()
             .toISOString()
+
       };
 
 
@@ -562,35 +642,42 @@ async function traspasarVentas(
 }
 
 
-/* =========================
+/* =====================================================
    ELIMINAR PREVENTAS
-   Y DINERO DE CAJA
-========================= */
+===================================================== */
 
 async function descontarVentas(
   personaId,
-  cantidad
+  cantidad,
+  ventasStore
 ) {
 
   const ventas =
     await obtenerVentasPreventa(
-      personaId
+      personaId,
+      ventasStore
     );
 
 
   const disponibles =
     ventas.reduce(
-      (total, item) =>
+      (
+        total,
+        item
+      ) =>
+
         total +
         obtenerCantidadVenta(
           item.venta
         ),
+
       0
     );
 
 
   if (
-    disponibles < cantidad
+    disponibles <
+    cantidad
   ) {
 
     throw new Error(
@@ -603,9 +690,15 @@ async function descontarVentas(
     cantidad;
 
 
-  for (const item of ventas) {
+  for (
+    const item
+    of ventas
+  ) {
 
-    if (restante <= 0) {
+    if (
+      restante <= 0
+    ) {
+
       break;
     }
 
@@ -617,8 +710,10 @@ async function descontarVentas(
 
 
     if (
-      cantidadVenta <= 0
+      cantidadVenta <=
+      0
     ) {
+
       continue;
     }
 
@@ -636,7 +731,8 @@ async function descontarVentas(
 
 
     if (
-      nuevaCantidad === 0
+      nuevaCantidad ===
+      0
     ) {
 
       await ventasStore.delete(
@@ -665,18 +761,323 @@ async function descontarVentas(
 }
 
 
-/* =========================
+/* =====================================================
+   MOVER VENTAS Y PEDIDOS DE MESA
+===================================================== */
+
+async function moverRelacionadosDeMesa(
+  persona,
+  mesaAnterior,
+  nuevaMesa,
+  ventasStore,
+  pedidosStore
+) {
+
+  /* =========================
+     VENTAS
+  ========================= */
+
+  const listaVentas =
+    await ventasStore.list();
+
+
+  for (
+    const blob
+    of listaVentas.blobs
+  ) {
+
+    const venta =
+      await ventasStore.get(
+        blob.key,
+        {
+          type:
+            "json"
+        }
+      );
+
+
+    if (!venta) {
+      continue;
+    }
+
+
+    if (
+      venta.clienteId ===
+      persona.id
+    ) {
+
+      venta.mesa =
+        nuevaMesa;
+
+
+      await ventasStore.setJSON(
+        blob.key,
+        venta
+      );
+
+
+      continue;
+    }
+
+
+    /*
+      Compatibilidad con ventas antiguas
+      que todavía no tenían clienteId.
+    */
+
+    if (
+      !venta.clienteId &&
+      mesaAnterior &&
+      Number(
+        venta.mesa
+      ) ===
+      mesaAnterior &&
+      normalizar(
+        venta.nombre
+      ) ===
+      normalizar(
+        persona.nombre
+      )
+    ) {
+
+      venta.mesa =
+        nuevaMesa;
+
+
+      venta.clienteId =
+        persona.id;
+
+
+      await ventasStore.setJSON(
+        blob.key,
+        venta
+      );
+    }
+  }
+
+
+  /* =========================
+     PEDIDOS
+  ========================= */
+
+  const listaPedidos =
+    await pedidosStore.list();
+
+
+  for (
+    const blob
+    of listaPedidos.blobs
+  ) {
+
+    const pedido =
+      await pedidosStore.get(
+        blob.key,
+        {
+          type:
+            "json"
+        }
+      );
+
+
+    if (!pedido) {
+      continue;
+    }
+
+
+    if (
+      pedido.clienteId ===
+      persona.id
+    ) {
+
+      pedido.mesa =
+        nuevaMesa;
+
+
+      await pedidosStore.setJSON(
+        blob.key,
+        pedido
+      );
+
+
+      continue;
+    }
+
+
+    if (
+      !pedido.clienteId &&
+      mesaAnterior &&
+      Number(
+        pedido.mesa
+      ) ===
+      mesaAnterior &&
+      normalizar(
+        pedido.nombre
+      ) ===
+      normalizar(
+        persona.nombre
+      )
+    ) {
+
+      pedido.mesa =
+        nuevaMesa;
+
+
+      pedido.clienteId =
+        persona.id;
+
+
+      await pedidosStore.setJSON(
+        blob.key,
+        pedido
+      );
+    }
+  }
+}
+
+
+/* =====================================================
+   CAMBIAR NOMBRE EN VENTAS Y PEDIDOS
+===================================================== */
+
+async function actualizarNombreRelacionados(
+  personaId,
+  nuevoNombre,
+  ventasStore,
+  pedidosStore
+) {
+
+  const listaVentas =
+    await ventasStore.list();
+
+
+  for (
+    const blob
+    of listaVentas.blobs
+  ) {
+
+    const venta =
+      await ventasStore.get(
+        blob.key,
+        {
+          type:
+            "json"
+        }
+      );
+
+
+    if (
+      venta &&
+      venta.clienteId ===
+      personaId
+    ) {
+
+      venta.nombre =
+        nuevoNombre;
+
+
+      await ventasStore.setJSON(
+        blob.key,
+        venta
+      );
+    }
+  }
+
+
+  const listaPedidos =
+    await pedidosStore.list();
+
+
+  for (
+    const blob
+    of listaPedidos.blobs
+  ) {
+
+    const pedido =
+      await pedidosStore.get(
+        blob.key,
+        {
+          type:
+            "json"
+        }
+      );
+
+
+    if (
+      pedido &&
+      pedido.clienteId ===
+      personaId
+    ) {
+
+      pedido.nombre =
+        nuevoNombre;
+
+
+      await pedidosStore.setJSON(
+        blob.key,
+        pedido
+      );
+    }
+  }
+}
+
+
+/* =====================================================
    FUNCIÓN PRINCIPAL
-========================= */
+===================================================== */
 
 export default async (req) => {
 
   try {
 
+    /*
+      MUY IMPORTANTE:
 
-    /* =========================
+      Los stores se crean DENTRO de cada
+      ejecución de la Function.
+
+      Así evitamos reutilizar un token
+      expirado de Netlify Blobs.
+    */
+
+    const personasStore =
+      getStore({
+
+        name:
+          "personas-bingo",
+
+        consistency:
+          "strong"
+
+      });
+
+
+    const ventasStore =
+      getStore({
+
+        name:
+          "ventas-bingo",
+
+        consistency:
+          "strong"
+
+      });
+
+
+    const pedidosStore =
+      getStore({
+
+        name:
+          "pedidos-bingo",
+
+        consistency:
+          "strong"
+
+      });
+
+
+    /* =================================================
        POST
-    ========================= */
+    ================================================= */
 
     if (
       req.method ===
@@ -691,10 +1092,9 @@ export default async (req) => {
         datos.accion;
 
 
-
-      /* =========================
-         CREAR SIN PREVENTA
-      ========================= */
+      /* =================================================
+         CREAR PERSONA SIN PREVENTA
+      ================================================= */
 
       if (
         accion ===
@@ -709,25 +1109,32 @@ export default async (req) => {
 
         const nombre =
           String(
-            datos.nombre || ""
+            datos.nombre ||
+            ""
           ).trim();
 
 
         if (
-          !Number.isInteger(mesa) ||
+          !Number.isInteger(
+            mesa
+          ) ||
           mesa < 1 ||
           mesa > 50 ||
           !nombre
         ) {
 
           return Response.json(
+
             {
               error:
                 "Faltan datos."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -771,12 +1178,23 @@ export default async (req) => {
             ahora,
 
           historialMesas: [
+
             {
-              desde: null,
-              hacia: mesa,
-              fecha: ahora,
-              motivo: "Ingreso inicial"
+
+              desde:
+                null,
+
+              hacia:
+                mesa,
+
+              fecha:
+                ahora,
+
+              motivo:
+                "Ingreso inicial"
+
             }
+
           ],
 
           historialPreventas:
@@ -792,17 +1210,19 @@ export default async (req) => {
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
-      /* =========================
+      /* =================================================
          CREAR PREVENTA
-         COMPATIBILIDAD
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -811,7 +1231,8 @@ export default async (req) => {
 
         const nombre =
           String(
-            datos.nombre || ""
+            datos.nombre ||
+            ""
           ).trim();
 
 
@@ -827,17 +1248,22 @@ export default async (req) => {
           !Number.isInteger(
             cantidadPreventas
           ) ||
-          cantidadPreventas < 1
+          cantidadPreventas <
+          1
         ) {
 
           return Response.json(
+
             {
               error:
                 "Datos de preventa inválidos."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -847,7 +1273,9 @@ export default async (req) => {
 
 
         const codigoPreventa =
-          await crearCodigoUnico();
+          await crearCodigoUnico(
+            personasStore
+          );
 
 
         const ahora =
@@ -899,17 +1327,19 @@ export default async (req) => {
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
-      /* =========================
-         ASIGNAR PREVENTA
-         A MESA
-      ========================= */
+      /* =================================================
+         ASIGNAR PREVENTA A MESA
+      ================================================= */
 
       if (
         accion ===
@@ -930,64 +1360,82 @@ export default async (req) => {
 
         if (
           !codigo ||
-          !Number.isInteger(mesa) ||
+          !Number.isInteger(
+            mesa
+          ) ||
           mesa < 1 ||
           mesa > 50
         ) {
 
           return Response.json(
+
             {
               error:
                 "Código o mesa inválidos."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
 
         const persona =
           await buscarPorCodigo(
-            codigo
+            codigo,
+            personasStore
           );
 
 
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Código de preventa no encontrado."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
 
         const mesaAnterior =
           persona.mesa
+
             ? Number(
                 persona.mesa
               )
+
             : null;
 
 
         if (
           mesaAnterior &&
-          mesaAnterior !== mesa
+          mesaAnterior !==
+          mesa
         ) {
 
           return Response.json(
+
             {
               error:
                 "Esta preventa ya está asociada a otra mesa. Solicita el cambio a administración."
             },
+
             {
-              status: 409
+              status:
+                409
             }
+
           );
         }
 
@@ -1027,7 +1475,8 @@ export default async (req) => {
 
 
         if (
-          mesaAnterior !== mesa
+          mesaAnterior !==
+          mesa
         ) {
 
           persona.historialMesas.push({
@@ -1054,92 +1503,35 @@ export default async (req) => {
         );
 
 
-        /*
-          Mover ventas de la persona
-          a la mesa elegida.
-        */
+        await moverRelacionadosDeMesa(
 
-        const listaVentas =
-          await ventasStore.list();
+          persona,
 
+          mesaAnterior,
 
-        for (const blob of listaVentas.blobs) {
+          mesa,
 
-          const venta =
-            await ventasStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
+          ventasStore,
 
+          pedidosStore
 
-          if (
-            venta &&
-            venta.clienteId ===
-              persona.id
-          ) {
-
-            venta.mesa =
-              mesa;
-
-
-            await ventasStore.setJSON(
-              blob.key,
-              venta
-            );
-          }
-        }
-
-
-        /*
-          Mover pedidos.
-        */
-
-        const listaPedidos =
-          await pedidosStore.list();
-
-
-        for (const blob of listaPedidos.blobs) {
-
-          const pedido =
-            await pedidosStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
-
-
-          if (
-            pedido &&
-            pedido.clienteId ===
-              persona.id
-          ) {
-
-            pedido.mesa =
-              mesa;
-
-
-            await pedidosStore.setJSON(
-              blob.key,
-              pedido
-            );
-          }
-        }
+        );
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
-      /* =========================
+      /* =================================================
          ACTIVO / NO ACTIVO
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -1148,7 +1540,8 @@ export default async (req) => {
 
         const personaId =
           String(
-            datos.personaId || ""
+            datos.personaId ||
+            ""
           ).trim();
 
 
@@ -1156,7 +1549,8 @@ export default async (req) => {
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -1164,37 +1558,40 @@ export default async (req) => {
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
 
         const activo =
-          datos.activo === true;
+          datos.activo ===
+          true;
 
 
         persona.activo =
           activo;
 
 
-        if (activo) {
+        persona.llegadaEn =
+          activo
 
-          persona.llegadaEn =
-            persona.llegadaEn ||
-            new Date()
-              .toISOString();
+            ? (
+                persona.llegadaEn ||
+                new Date()
+                  .toISOString()
+              )
 
-        } else {
-
-          persona.llegadaEn =
-            null;
-        }
+            : null;
 
 
         await personasStore.setJSON(
@@ -1204,16 +1601,19 @@ export default async (req) => {
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
-      /* =========================
+      /* =================================================
          EDITAR NOMBRE
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -1222,13 +1622,15 @@ export default async (req) => {
 
         const personaId =
           String(
-            datos.personaId || ""
+            datos.personaId ||
+            ""
           ).trim();
 
 
         const nuevoNombre =
           String(
-            datos.nombre || ""
+            datos.nombre ||
+            ""
           ).trim();
 
 
@@ -1238,13 +1640,17 @@ export default async (req) => {
         ) {
 
           return Response.json(
+
             {
               error:
                 "Nombre inválido."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -1253,7 +1659,8 @@ export default async (req) => {
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -1261,13 +1668,17 @@ export default async (req) => {
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
@@ -1282,92 +1693,33 @@ export default async (req) => {
         );
 
 
-        /*
-          Corregimos también el nombre
-          de todas sus ventas.
-        */
+        await actualizarNombreRelacionados(
 
-        const listaVentas =
-          await ventasStore.list();
+          persona.id,
 
+          nuevoNombre,
 
-        for (const blob of listaVentas.blobs) {
+          ventasStore,
 
-          const venta =
-            await ventasStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
+          pedidosStore
 
-
-          if (
-            venta &&
-            venta.clienteId ===
-              persona.id
-          ) {
-
-            venta.nombre =
-              nuevoNombre;
-
-
-            await ventasStore.setJSON(
-              blob.key,
-              venta
-            );
-          }
-        }
-
-
-        /*
-          Y pedidos.
-        */
-
-        const listaPedidos =
-          await pedidosStore.list();
-
-
-        for (const blob of listaPedidos.blobs) {
-
-          const pedido =
-            await pedidosStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
-
-
-          if (
-            pedido &&
-            pedido.clienteId ===
-              persona.id
-          ) {
-
-            pedido.nombre =
-              nuevoNombre;
-
-
-            await pedidosStore.setJSON(
-              blob.key,
-              pedido
-            );
-          }
-        }
+        );
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
-      /* =========================
+      /* =================================================
          DIVIDIR PREVENTAS
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -1376,13 +1728,15 @@ export default async (req) => {
 
         const personaId =
           String(
-            datos.personaId || ""
+            datos.personaId ||
+            ""
           ).trim();
 
 
         const nuevoNombre =
           String(
-            datos.nuevoNombre || ""
+            datos.nuevoNombre ||
+            ""
           ).trim();
 
 
@@ -1395,18 +1749,24 @@ export default async (req) => {
         if (
           !personaId ||
           !nuevoNombre ||
-          !Number.isInteger(cantidad) ||
+          !Number.isInteger(
+            cantidad
+          ) ||
           cantidad < 1
         ) {
 
           return Response.json(
+
             {
               error:
                 "Datos inválidos."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -1415,21 +1775,28 @@ export default async (req) => {
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
 
-        if (!personaOrigen) {
+        if (
+          !personaOrigen
+        ) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
@@ -1448,41 +1815,48 @@ export default async (req) => {
         ) {
 
           return Response.json(
+
             {
               error:
                 "La persona no tiene suficientes preventas."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
 
-        /*
-          Comprobamos ANTES que las
-          preventas estén respaldadas
-          por las ventas.
-        */
-
         const cantidadVentas =
           await totalPreventasEnVentas(
-            personaOrigen.id
+
+            personaOrigen.id,
+
+            ventasStore
+
           );
 
 
         if (
-          cantidadVentas < cantidad
+          cantidadVentas <
+          cantidad
         ) {
 
           return Response.json(
+
             {
               error:
                 "No se pudo relacionar esa cantidad con las ventas registradas."
             },
+
             {
-              status: 409
+              status:
+                409
             }
+
           );
         }
 
@@ -1507,7 +1881,9 @@ export default async (req) => {
             "preventa",
 
           codigoPreventa:
-            await crearCodigoUnico(),
+            await crearCodigoUnico(
+              personasStore
+            ),
 
           cantidadPreventas:
             cantidad,
@@ -1528,7 +1904,9 @@ export default async (req) => {
             [],
 
           historialPreventas: [
+
             {
+
               tipo:
                 "recibidas-por-division",
 
@@ -1539,76 +1917,78 @@ export default async (req) => {
 
               fecha:
                 ahora
+
             }
+
           ]
 
         };
 
 
-        /*
-          Repartimos primero las ventas.
-          El dinero TOTAL no cambia.
-        */
-
         await traspasarVentas(
+
           personaOrigen,
+
           nuevaPersona,
-          cantidad
+
+          cantidad,
+
+          ventasStore
+
         );
 
 
-        /*
-          Restamos las preventas
-          a la persona original.
-        */
+        personaOrigen
+          .cantidadPreventas =
 
-        personaOrigen.cantidadPreventas =
           cantidadActual -
           cantidad;
 
 
         if (
           !Array.isArray(
-            personaOrigen.historialPreventas
+            personaOrigen
+              .historialPreventas
           )
         ) {
 
-          personaOrigen.historialPreventas =
+          personaOrigen
+            .historialPreventas =
             [];
         }
 
 
-        personaOrigen.historialPreventas.push({
+        personaOrigen
+          .historialPreventas
+          .push({
 
-          tipo:
-            "division",
+            tipo:
+              "division",
 
-          cantidad,
+            cantidad,
 
-          haciaPersonaId:
-            nuevaPersona.id,
+            haciaPersonaId:
+              nuevaPersona.id,
 
-          haciaNombre:
-            nuevaPersona.nombre,
+            haciaNombre:
+              nuevaPersona.nombre,
 
-          fecha:
-            ahora
+            fecha:
+              ahora
 
-        });
+          });
 
-
-        /*
-          Si entregó TODAS sus preventas,
-          su código deja de ser válido.
-        */
 
         if (
-          personaOrigen.cantidadPreventas ===
+          personaOrigen
+            .cantidadPreventas ===
           0
         ) {
 
-          personaOrigen.codigoPreventa =
+          personaOrigen
+            .codigoPreventa =
             null;
+
 
           personaOrigen.tipo =
             "sin-preventa";
@@ -1616,14 +1996,20 @@ export default async (req) => {
 
 
         await personasStore.setJSON(
+
           personaOrigen.id,
+
           personaOrigen
+
         );
 
 
         await personasStore.setJSON(
+
           nuevaPersona.id,
+
           nuevaPersona
+
         );
 
 
@@ -1640,11 +2026,9 @@ export default async (req) => {
       }
 
 
-
-      /* =========================
+      /* =================================================
          ELIMINAR PREVENTAS
-         VENDIDAS POR ERROR
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -1653,7 +2037,8 @@ export default async (req) => {
 
         const personaId =
           String(
-            datos.personaId || ""
+            datos.personaId ||
+            ""
           ).trim();
 
 
@@ -1665,18 +2050,24 @@ export default async (req) => {
 
         if (
           !personaId ||
-          !Number.isInteger(cantidad) ||
+          !Number.isInteger(
+            cantidad
+          ) ||
           cantidad < 1
         ) {
 
           return Response.json(
+
             {
               error:
                 "Cantidad inválida."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -1685,7 +2076,8 @@ export default async (req) => {
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -1693,20 +2085,25 @@ export default async (req) => {
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
 
         const cantidadActual =
           Number(
-            persona.cantidadPreventas ||
+            persona
+              .cantidadPreventas ||
             0
           );
 
@@ -1717,27 +2114,29 @@ export default async (req) => {
         ) {
 
           return Response.json(
+
             {
               error:
                 "No puedes eliminar más preventas de las que tiene."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
 
-        /*
-          Primero descontamos las ventas.
-          Ejemplo:
-          4 -> eliminar 1
-          $40.000 -> $30.000.
-        */
-
         await descontarVentas(
+
           persona.id,
-          cantidad
+
+          cantidad,
+
+          ventasStore
+
         );
 
 
@@ -1746,52 +2145,54 @@ export default async (req) => {
             .toISOString();
 
 
-        persona.cantidadPreventas =
+        persona
+          .cantidadPreventas =
+
           cantidadActual -
           cantidad;
 
 
         if (
           !Array.isArray(
-            persona.historialPreventas
+            persona
+              .historialPreventas
           )
         ) {
 
-          persona.historialPreventas =
+          persona
+            .historialPreventas =
             [];
         }
 
 
-        persona.historialPreventas.push({
+        persona
+          .historialPreventas
+          .push({
 
-          tipo:
-            "eliminacion-error",
+            tipo:
+              "eliminacion-error",
 
-          cantidad,
+            cantidad,
 
-          monto:
-            cantidad *
-            PRECIO_PREVENTA,
+            monto:
+              cantidad *
+              PRECIO_PREVENTA,
 
-          fecha:
-            ahora
+            fecha:
+              ahora
 
-        });
+          });
 
-
-        /*
-          Si queda en cero,
-          deja de aparecer como preventa
-          y el código deja de funcionar.
-        */
 
         if (
-          persona.cantidadPreventas ===
+          persona
+            .cantidadPreventas ===
           0
         ) {
 
           persona.codigoPreventa =
             null;
+
 
           persona.tipo =
             "sin-preventa";
@@ -1822,10 +2223,9 @@ export default async (req) => {
       }
 
 
-
-      /* =========================
+      /* =================================================
          CAMBIAR MESA
-      ========================= */
+      ================================================= */
 
       if (
         accion ===
@@ -1834,7 +2234,8 @@ export default async (req) => {
 
         const personaId =
           String(
-            datos.personaId || ""
+            datos.personaId ||
+            ""
           ).trim();
 
 
@@ -1854,13 +2255,17 @@ export default async (req) => {
         ) {
 
           return Response.json(
+
             {
               error:
                 "Datos inválidos."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -1869,7 +2274,8 @@ export default async (req) => {
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -1877,22 +2283,28 @@ export default async (req) => {
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
 
         const mesaAnterior =
           persona.mesa
+
             ? Number(
                 persona.mesa
               )
+
             : null;
 
 
@@ -1902,13 +2314,17 @@ export default async (req) => {
         ) {
 
           return Response.json(
+
             {
               error:
                 "La persona ya está en esa mesa."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -1960,172 +2376,51 @@ export default async (req) => {
         );
 
 
-        /*
-          Ventas.
-        */
+        await moverRelacionadosDeMesa(
 
-        const listaVentas =
-          await ventasStore.list();
+          persona,
 
+          mesaAnterior,
 
-        for (const blob of listaVentas.blobs) {
+          nuevaMesa,
 
-          const venta =
-            await ventasStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
+          ventasStore,
 
+          pedidosStore
 
-          if (!venta) {
-            continue;
-          }
-
-
-          if (
-            venta.clienteId ===
-            persona.id
-          ) {
-
-            venta.mesa =
-              nuevaMesa;
-
-
-            await ventasStore.setJSON(
-              blob.key,
-              venta
-            );
-
-            continue;
-          }
-
-
-          if (
-            !venta.clienteId &&
-            mesaAnterior &&
-            Number(venta.mesa) ===
-              mesaAnterior &&
-            normalizar(
-              venta.nombre
-            ) ===
-            normalizar(
-              persona.nombre
-            )
-          ) {
-
-            venta.mesa =
-              nuevaMesa;
-
-
-            venta.clienteId =
-              persona.id;
-
-
-            await ventasStore.setJSON(
-              blob.key,
-              venta
-            );
-          }
-        }
-
-
-        /*
-          Pedidos.
-        */
-
-        const listaPedidos =
-          await pedidosStore.list();
-
-
-        for (const blob of listaPedidos.blobs) {
-
-          const pedido =
-            await pedidosStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
-
-
-          if (!pedido) {
-            continue;
-          }
-
-
-          if (
-            pedido.clienteId ===
-            persona.id
-          ) {
-
-            pedido.mesa =
-              nuevaMesa;
-
-
-            await pedidosStore.setJSON(
-              blob.key,
-              pedido
-            );
-
-            continue;
-          }
-
-
-          if (
-            !pedido.clienteId &&
-            mesaAnterior &&
-            Number(pedido.mesa) ===
-              mesaAnterior &&
-            normalizar(
-              pedido.nombre
-            ) ===
-            normalizar(
-              persona.nombre
-            )
-          ) {
-
-            pedido.mesa =
-              nuevaMesa;
-
-
-            pedido.clienteId =
-              persona.id;
-
-
-            await pedidosStore.setJSON(
-              blob.key,
-              pedido
-            );
-          }
-        }
+        );
 
 
         return Response.json({
-          ok: true,
+
+          ok:
+            true,
+
           persona
+
         });
       }
 
 
-
       return Response.json(
+
         {
           error:
             "Acción inválida."
         },
+
         {
-          status: 400
+          status:
+            400
         }
+
       );
     }
 
 
-
-    /* =========================
+    /* =================================================
        GET
-    ========================= */
+    ================================================= */
 
     if (
       req.method ===
@@ -2156,8 +2451,9 @@ export default async (req) => {
         );
 
 
-
-      /* PERSONA POR ID */
+      /* =========================
+         PERSONA POR ID
+      ========================= */
 
       if (id) {
 
@@ -2165,7 +2461,8 @@ export default async (req) => {
           await personasStore.get(
             id,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -2173,13 +2470,17 @@ export default async (req) => {
         if (!persona) {
 
           return Response.json(
+
             {
               error:
                 "Persona no encontrada."
             },
+
             {
-              status: 404
+              status:
+                404
             }
+
           );
         }
 
@@ -2190,8 +2491,9 @@ export default async (req) => {
       }
 
 
-
-      /* TODAS LAS PREVENTAS */
+      /* =========================
+         PREVENTAS
+      ========================= */
 
       if (
         tipo ===
@@ -2206,13 +2508,17 @@ export default async (req) => {
           [];
 
 
-        for (const blob of lista.blobs) {
+        for (
+          const blob
+          of lista.blobs
+        ) {
 
           const persona =
             await personasStore.get(
               blob.key,
               {
-                type: "json"
+                type:
+                  "json"
               }
             );
 
@@ -2222,7 +2528,8 @@ export default async (req) => {
             persona.tipo ===
               "preventa" &&
             Number(
-              persona.cantidadPreventas ||
+              persona
+                .cantidadPreventas ||
               0
             ) > 0
           ) {
@@ -2256,6 +2563,7 @@ export default async (req) => {
 
         personas.sort(
           (a, b) =>
+
             String(
               a.nombre
             ).localeCompare(
@@ -2273,10 +2581,13 @@ export default async (req) => {
       }
 
 
+      /* =========================
+         PERSONAS DE UNA MESA
+      ========================= */
 
-      /* PERSONAS DE MESA */
-
-      if (mesaParametro) {
+      if (
+        mesaParametro
+      ) {
 
         const mesa =
           Number(
@@ -2285,19 +2596,25 @@ export default async (req) => {
 
 
         if (
-          !Number.isInteger(mesa) ||
+          !Number.isInteger(
+            mesa
+          ) ||
           mesa < 1 ||
           mesa > 50
         ) {
 
           return Response.json(
+
             {
               error:
                 "Mesa inválida."
             },
+
             {
-              status: 400
+              status:
+                400
             }
+
           );
         }
 
@@ -2310,13 +2627,17 @@ export default async (req) => {
           [];
 
 
-        for (const blob of lista.blobs) {
+        for (
+          const blob
+          of lista.blobs
+        ) {
 
           const persona =
             await personasStore.get(
               blob.key,
               {
-                type: "json"
+                type:
+                  "json"
               }
             );
 
@@ -2337,6 +2658,7 @@ export default async (req) => {
 
         personas.sort(
           (a, b) =>
+
             String(
               a.nombre
             ).localeCompare(
@@ -2354,28 +2676,38 @@ export default async (req) => {
       }
 
 
-
       return Response.json(
+
         {
           error:
             "Falta indicar ID, mesa o tipo."
         },
+
         {
-          status: 400
+          status:
+            400
         }
+
       );
     }
 
 
+    /* =================================================
+       OTROS MÉTODOS
+    ================================================= */
 
     return Response.json(
+
       {
         error:
           "Método no permitido."
       },
+
       {
-        status: 405
+        status:
+          405
       }
+
     );
 
 
@@ -2388,14 +2720,18 @@ export default async (req) => {
 
 
     return Response.json(
+
       {
         error:
           error.message ||
           "Error procesando la solicitud."
       },
+
       {
-        status: 500
+        status:
+          500
       }
+
     );
   }
 };
