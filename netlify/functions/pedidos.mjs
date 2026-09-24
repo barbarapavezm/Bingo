@@ -5,7 +5,10 @@ const store = getStore("pedidos-bingo");
 export default async (req) => {
   try {
 
+    // =========================
     // CREAR PEDIDO
+    // =========================
+
     if (req.method === "POST") {
 
       const pedido = await req.json();
@@ -23,6 +26,7 @@ export default async (req) => {
       }
 
       const id = crypto.randomUUID();
+      const ahora = new Date().toISOString();
 
       const pedidoCompleto = {
         id,
@@ -30,10 +34,24 @@ export default async (req) => {
         nombre: pedido.nombre.trim(),
         productos: pedido.productos,
         estado: "nuevo",
-        fecha: new Date().toISOString()
+        fecha: ahora,
+        actualizado: ahora,
+
+        prioridadPreparando: false,
+
+        historialEstados: [
+          {
+            desde: null,
+            hacia: "nuevo",
+            fecha: ahora
+          }
+        ]
       };
 
-      await store.setJSON(id, pedidoCompleto);
+      await store.setJSON(
+        id,
+        pedidoCompleto
+      );
 
       return Response.json({
         ok: true,
@@ -42,18 +60,26 @@ export default async (req) => {
     }
 
 
+    // =========================
     // OBTENER PEDIDOS
+    // =========================
+
     if (req.method === "GET") {
 
-      const lista = await store.list();
+      const lista =
+        await store.list();
+
       const pedidos = [];
 
       for (const blob of lista.blobs) {
 
-        const pedido = await store.get(
-          blob.key,
-          { type: "json" }
-        );
+        const pedido =
+          await store.get(
+            blob.key,
+            {
+              type: "json"
+            }
+          );
 
         if (pedido) {
           pedidos.push(pedido);
@@ -66,31 +92,53 @@ export default async (req) => {
           new Date(a.fecha)
       );
 
-      return Response.json(pedidos);
+      return Response.json(
+        pedidos
+      );
     }
 
 
+    // =========================
     // CAMBIAR ESTADO
+    // =========================
+
     if (req.method === "PUT") {
 
-      const datos = await req.json();
+      const datos =
+        await req.json();
 
-      if (!datos.id || !datos.estado) {
+      if (
+        !datos.id ||
+        !datos.estado
+      ) {
         return Response.json(
-          { error: "Faltan datos" },
-          { status: 400 }
+          {
+            error:
+              "Faltan datos"
+          },
+          {
+            status: 400
+          }
         );
       }
 
-      const pedido = await store.get(
-        datos.id,
-        { type: "json" }
-      );
+      const pedido =
+        await store.get(
+          datos.id,
+          {
+            type: "json"
+          }
+        );
 
       if (!pedido) {
         return Response.json(
-          { error: "Pedido no encontrado" },
-          { status: 404 }
+          {
+            error:
+              "Pedido no encontrado"
+          },
+          {
+            status: 404
+          }
         );
       }
 
@@ -101,15 +149,113 @@ export default async (req) => {
         "entregado"
       ];
 
-      if (!estadosPermitidos.includes(datos.estado)) {
+      if (
+        !estadosPermitidos.includes(
+          datos.estado
+        )
+      ) {
         return Response.json(
-          { error: "Estado inválido" },
-          { status: 400 }
+          {
+            error:
+              "Estado inválido"
+          },
+          {
+            status: 400
+          }
         );
       }
 
-      pedido.estado = datos.estado;
-      pedido.actualizado = new Date().toISOString();
+      const estadoAnterior =
+        pedido.estado;
+
+      const ahora =
+        new Date().toISOString();
+
+
+      // Historial de estados
+
+      if (
+        !Array.isArray(
+          pedido.historialEstados
+        )
+      ) {
+        pedido.historialEstados = [];
+      }
+
+      pedido.historialEstados.push({
+        desde:
+          estadoAnterior,
+
+        hacia:
+          datos.estado,
+
+        fecha:
+          ahora
+      });
+
+
+      pedido.estado =
+        datos.estado;
+
+      pedido.actualizado =
+        ahora;
+
+
+      // =========================
+      // MARCAR ENTREGADO
+      // =========================
+
+      if (
+        datos.estado ===
+        "entregado"
+      ) {
+
+        pedido.entregadoEn =
+          ahora;
+
+        pedido.prioridadPreparando =
+          false;
+      }
+
+
+      // =========================
+      // DEVOLVER ENTREGADO
+      // A PREPARANDO
+      // =========================
+
+      if (
+        estadoAnterior ===
+          "entregado" &&
+        datos.estado ===
+          "preparando"
+      ) {
+
+        pedido.reabiertoEn =
+          ahora;
+
+        /*
+          Esto hará que aparezca
+          primero en Preparando.
+        */
+
+        pedido.prioridadPreparando =
+          true;
+      }
+
+
+      // Si sale de preparando,
+      // pierde esa prioridad.
+
+      if (
+        datos.estado === "listo" ||
+        datos.estado === "nuevo" ||
+        datos.estado === "entregado"
+      ) {
+
+        pedido.prioridadPreparando =
+          false;
+      }
+
 
       await store.setJSON(
         pedido.id,
@@ -124,17 +270,30 @@ export default async (req) => {
 
 
     return Response.json(
-      { error: "Método no permitido" },
-      { status: 405 }
+      {
+        error:
+          "Método no permitido"
+      },
+      {
+        status: 405
+      }
     );
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Error en pedidos:",
+      error
+    );
 
     return Response.json(
-      { error: "Error procesando pedido" },
-      { status: 500 }
+      {
+        error:
+          "Error procesando pedido"
+      },
+      {
+        status: 500
+      }
     );
   }
 };
