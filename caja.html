@@ -44,7 +44,7 @@
 
     .fila {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
@@ -54,12 +54,15 @@
       font-weight: bold;
     }
 
-    select {
+    select,
+    input {
       width: 100%;
+      box-sizing: border-box;
       padding: 12px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      background: white;
     }
 
     .productos {
@@ -135,7 +138,7 @@
       font-size: 14px;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 800px) {
       .fila {
         grid-template-columns: 1fr;
       }
@@ -162,13 +165,26 @@
 
       <div>
         <label for="mesa">Mesa</label>
+
         <select id="mesa">
           <option value="">Seleccionar mesa</option>
         </select>
       </div>
 
       <div>
+        <label for="nombre">Nombre de la persona</label>
+
+        <input
+          type="text"
+          id="nombre"
+          placeholder="Ej: Juanito"
+          autocomplete="off"
+        >
+      </div>
+
+      <div>
         <label for="pago">Método de pago</label>
+
         <select id="pago">
           <option value="">Seleccionar</option>
           <option value="efectivo">Efectivo</option>
@@ -180,27 +196,38 @@
 
   </div>
 
+
   <div class="panel">
 
     <h2>Comida y bebidas</h2>
 
-    <div class="productos" id="productos-comida"></div>
+    <div
+      class="productos"
+      id="productos-comida">
+    </div>
 
   </div>
+
 
   <div class="panel">
 
     <h2>Juegos de bingo</h2>
 
-    <div class="productos" id="productos-bingo"></div>
+    <div
+      class="productos"
+      id="productos-bingo">
+    </div>
 
   </div>
+
 
   <div class="panel">
 
     <div>Total de la venta</div>
 
-    <div class="total" id="total">
+    <div
+      class="total"
+      id="total">
       $0
     </div>
 
@@ -213,75 +240,174 @@
     </button>
 
     <p class="nota">
-      Las ventas se guardan automáticamente al presionar Registrar venta.
+      La venta se guardará automáticamente con la mesa,
+      nombre de la persona, productos y método de pago.
     </p>
 
   </div>
 
 </main>
 
+
 <script>
 
 const productos = [
-  { id: 1, nombre: "Completo", precio: 1500, categoria: "comida" },
-  { id: 2, nombre: "Té", precio: 1000, categoria: "comida" },
-  { id: 3, nombre: "Café", precio: 1000, categoria: "comida" },
-  { id: 4, nombre: "Bebida", precio: 1000, categoria: "comida" },
-  { id: 5, nombre: "Agua", precio: 500, categoria: "comida" },
 
-  { id: 6, nombre: "Juego 1", precio: 1000, categoria: "bingo" },
-  { id: 7, nombre: "Juego 2", precio: 1000, categoria: "bingo" },
-  { id: 8, nombre: "Juego 3", precio: 1000, categoria: "bingo" },
-  { id: 9, nombre: "Juego 4", precio: 1000, categoria: "bingo" },
-  { id: 10, nombre: "Juego Mayor", precio: 2000, categoria: "bingo" },
-  { id: 11, nombre: "Pack de 11", precio: 5000, categoria: "bingo" },
-  { id: 12, nombre: "Preventa", precio: 4000, categoria: "bingo" }
+  {
+    id: 1,
+    nombre: "Completo",
+    precio: 1500,
+    categoria: "comida"
+  },
+
+  {
+    id: 2,
+    nombre: "Té",
+    precio: 1000,
+    categoria: "comida"
+  },
+
+  {
+    id: 3,
+    nombre: "Café",
+    precio: 1000,
+    categoria: "comida"
+  },
+
+  {
+    id: 4,
+    nombre: "Bebida",
+    precio: 1000,
+    categoria: "comida"
+  },
+
+  {
+    id: 5,
+    nombre: "Agua",
+    precio: 500,
+    categoria: "comida"
+  },
+
+
+  {
+    id: 6,
+    nombre: "Juego 1",
+    precio: 1000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 7,
+    nombre: "Juego 2",
+    precio: 1000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 8,
+    nombre: "Juego 3",
+    precio: 1000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 9,
+    nombre: "Juego 4",
+    precio: 1000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 10,
+    nombre: "Juego Mayor",
+    precio: 2000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 11,
+    nombre: "Pack de 11",
+    precio: 5000,
+    categoria: "bingo"
+  },
+
+  {
+    id: 12,
+    nombre: "Preventa",
+    precio: 4000,
+    categoria: "bingo"
+  }
+
 ];
+
 
 const cantidades = {};
 
+
 function formatoCLP(valor) {
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0
-  }).format(valor);
+
+  return new Intl.NumberFormat(
+    "es-CL",
+    {
+      style: "currency",
+      currency: "CLP",
+      maximumFractionDigits: 0
+    }
+  ).format(valor);
+
 }
+
 
 function cargarMesas() {
 
-  const select = document.getElementById("mesa");
+  const select =
+    document.getElementById("mesa");
 
   for (let i = 1; i <= 50; i++) {
 
-    const option = document.createElement("option");
+    const option =
+      document.createElement("option");
 
     option.value = i;
-    option.textContent = "Mesa " + i;
+
+    option.textContent =
+      "Mesa " + i;
 
     select.appendChild(option);
   }
 }
 
+
 function crearProductos() {
 
   const comida =
-    document.getElementById("productos-comida");
+    document.getElementById(
+      "productos-comida"
+    );
 
   const bingo =
-    document.getElementById("productos-bingo");
+    document.getElementById(
+      "productos-bingo"
+    );
+
 
   productos.forEach(producto => {
 
     cantidades[producto.id] = 0;
 
+
     const tarjeta =
       document.createElement("div");
 
-    tarjeta.className = "producto";
+    tarjeta.className =
+      "producto";
+
 
     tarjeta.innerHTML = `
-      <h3>${producto.nombre}</h3>
+
+      <h3>
+        ${producto.nombre}
+      </h3>
 
       <div>
         ${formatoCLP(producto.precio)}
@@ -291,10 +417,16 @@ function crearProductos() {
 
         <button
           class="cantidad-btn"
-          onclick="cambiarCantidad(${producto.id}, -1)"
+          onclick="
+            cambiarCantidad(
+              ${producto.id},
+              -1
+            )
+          "
         >
           −
         </button>
+
 
         <span
           class="cantidad"
@@ -303,9 +435,15 @@ function crearProductos() {
           0
         </span>
 
+
         <button
           class="cantidad-btn"
-          onclick="cambiarCantidad(${producto.id}, 1)"
+          onclick="
+            cambiarCantidad(
+              ${producto.id},
+              1
+            )
+          "
         >
           +
         </button>
@@ -313,69 +451,131 @@ function crearProductos() {
       </div>
     `;
 
-    if (producto.categoria === "comida") {
-      comida.appendChild(tarjeta);
+
+    if (
+      producto.categoria ===
+      "comida"
+    ) {
+
+      comida.appendChild(
+        tarjeta
+      );
+
     } else {
-      bingo.appendChild(tarjeta);
+
+      bingo.appendChild(
+        tarjeta
+      );
+
     }
 
   });
+
 }
 
-function cambiarCantidad(id, cambio) {
+
+function cambiarCantidad(
+  id,
+  cambio
+) {
 
   cantidades[id] += cambio;
 
-  if (cantidades[id] < 0) {
+
+  if (
+    cantidades[id] < 0
+  ) {
+
     cantidades[id] = 0;
+
   }
+
 
   document.getElementById(
     "cantidad-" + id
-  ).textContent = cantidades[id];
+  ).textContent =
+    cantidades[id];
+
 
   actualizarTotal();
 }
+
 
 function calcularTotal() {
 
   let total = 0;
 
-  productos.forEach(producto => {
 
-    total +=
-      producto.precio *
-      cantidades[producto.id];
+  productos.forEach(
+    producto => {
 
-  });
+      total +=
+        producto.precio *
+        cantidades[producto.id];
+
+    }
+  );
+
 
   return total;
 }
 
+
 function actualizarTotal() {
 
-  const total = calcularTotal();
+  const total =
+    calcularTotal();
+
 
   document.getElementById(
     "total"
-  ).textContent = formatoCLP(total);
+  ).textContent =
+    formatoCLP(total);
+
 }
+
 
 async function registrarVenta() {
 
   const mesa =
-    document.getElementById("mesa").value;
+    document.getElementById(
+      "mesa"
+    ).value;
+
+
+  const nombre =
+    document.getElementById(
+      "nombre"
+    ).value.trim();
+
 
   const pago =
-    document.getElementById("pago").value;
+    document.getElementById(
+      "pago"
+    ).value;
+
 
   const boton =
-    document.getElementById("boton-registrar");
+    document.getElementById(
+      "boton-registrar"
+    );
 
 
   if (!mesa) {
 
-    alert("Selecciona una mesa.");
+    alert(
+      "Selecciona una mesa."
+    );
+
+    return;
+  }
+
+
+  if (!nombre) {
+
+    alert(
+      "Escribe el nombre de la persona."
+    );
 
     return;
   }
@@ -383,7 +583,9 @@ async function registrarVenta() {
 
   if (!pago) {
 
-    alert("Selecciona un método de pago.");
+    alert(
+      "Selecciona un método de pago."
+    );
 
     return;
   }
@@ -391,34 +593,52 @@ async function registrarVenta() {
 
   const productosSeleccionados =
     productos
+
       .filter(
         producto =>
-          cantidades[producto.id] > 0
+          cantidades[
+            producto.id
+          ] > 0
       )
-      .map(producto => ({
 
-        id: producto.id,
+      .map(
+        producto => ({
 
-        nombre: producto.nombre,
+          id:
+            producto.id,
 
-        precio: producto.precio,
+          nombre:
+            producto.nombre,
 
-        cantidad:
-          cantidades[producto.id],
+          precio:
+            producto.precio,
 
-        subtotal:
-          producto.precio *
-          cantidades[producto.id],
+          cantidad:
+            cantidades[
+              producto.id
+            ],
 
-        categoria:
-          producto.categoria
+          subtotal:
+            producto.precio *
+            cantidades[
+              producto.id
+            ],
 
-      }));
+          categoria:
+            producto.categoria
+
+        })
+      );
 
 
-  if (productosSeleccionados.length === 0) {
+  if (
+    productosSeleccionados.length ===
+    0
+  ) {
 
-    alert("Agrega al menos un producto.");
+    alert(
+      "Agrega al menos un producto."
+    );
 
     return;
   }
@@ -426,115 +646,191 @@ async function registrarVenta() {
 
   const total =
     productosSeleccionados.reduce(
-      (suma, producto) =>
-        suma + producto.subtotal,
+
+      (
+        suma,
+        producto
+      ) =>
+
+        suma +
+        producto.subtotal,
+
       0
     );
 
 
   const venta = {
 
-    mesa: Number(mesa),
+    mesa:
+      Number(mesa),
 
-    metodoPago: pago,
+    nombre:
+      nombre,
 
-    productos: productosSeleccionados,
+    metodoPago:
+      pago,
 
-    total: total
+    productos:
+      productosSeleccionados,
+
+    total:
+      total
   };
 
 
   try {
 
     boton.disabled = true;
-    boton.textContent = "Guardando venta...";
+
+    boton.textContent =
+      "Guardando venta...";
 
 
-    const respuesta = await fetch(
-      "/.netlify/functions/ventas",
-      {
-        method: "POST",
+    const respuesta =
+      await fetch(
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+        "/.netlify/functions/ventas",
 
-        body:
-          JSON.stringify(venta)
-      }
-    );
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify(
+              venta
+            )
+
+        }
+      );
 
 
     const resultado =
       await respuesta.json();
 
 
-    if (!respuesta.ok) {
+    if (
+      !respuesta.ok
+    ) {
 
       throw new Error(
+
         resultado.error ||
         "No se pudo guardar la venta."
+
       );
 
     }
 
 
     alert(
+
       "✅ Venta registrada correctamente\n\n" +
-      "Mesa " + mesa +
-      "\n" +
-      "Total: " +
+
+      "Mesa " +
+      mesa +
+
+      " — " +
+      nombre +
+
+      "\nTotal: " +
       formatoCLP(total) +
-      "\n" +
-      "Pago: " +
+
+      "\nPago: " +
+
       (
-        pago === "efectivo"
+        pago ===
+        "efectivo"
+
           ? "Efectivo"
+
           : "Transferencia"
       )
+
     );
 
 
     limpiarVenta();
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     alert(
+
       "❌ No se pudo guardar la venta.\n\n" +
+
       "Revisa que la función de Netlify esté publicada."
+
     );
+
 
   } finally {
 
-    boton.disabled = false;
-    boton.textContent = "Registrar venta";
+    boton.disabled =
+      false;
+
+    boton.textContent =
+      "Registrar venta";
 
   }
+
 }
+
 
 function limpiarVenta() {
 
-  productos.forEach(producto => {
+  productos.forEach(
+    producto => {
 
-    cantidades[producto.id] = 0;
+      cantidades[
+        producto.id
+      ] = 0;
 
-    const elemento =
-      document.getElementById(
-        "cantidad-" + producto.id
-      );
 
-    if (elemento) {
-      elemento.textContent = "0";
+      const elemento =
+        document.getElementById(
+          "cantidad-" +
+          producto.id
+        );
+
+
+      if (elemento) {
+
+        elemento.textContent =
+          "0";
+
+      }
+
     }
+  );
 
-  });
+
+  document.getElementById(
+    "mesa"
+  ).value = "";
 
 
-  document.getElementById("mesa").value = "";
+  document.getElementById(
+    "nombre"
+  ).value = "";
 
-  document.getElementById("pago").value = "";
+
+  document.getElementById(
+    "pago"
+  ).value = "";
+
 
   actualizarTotal();
 }
