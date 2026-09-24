@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi mesa - Bingo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: white;
+      padding: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    main {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .panel {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .producto {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .producto h3 {
+      margin-top: 0;
+    }
+
+    .info {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .controles {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .cantidad-btn {
+      width: 38px;
+      height: 38px;
+      font-size: 20px;
+      background: #e5e7eb;
+    }
+
+    .cantidad {
+      font-weight: bold;
+      min-width: 25px;
+      text-align: center;
+    }
+
+    .enviar {
+      width: 100%;
+      padding: 16px;
+      background: #2563eb;
+      color: white;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    .pedido {
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .estado {
+      font-size: 13px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-top: 6px;
+    }
+
+    .aviso {
+      background: #fff7ed;
+      color: #9a3412;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1 id="titulo-mesa">Mesa</h1>
+  <p>Solicita los productos que ya compraste en caja.</p>
+</header>
+
+<main>
+
+  <div class="aviso">
+    Esta página no realiza pagos. Solo puedes pedir productos que ya hayan sido comprados previamente en caja.
+  </div>
+
+  <div class="panel">
+
+    <h2>Productos disponibles</h2>
+
+    <div id="lista-productos"></div>
+
+    <button class="enviar" onclick="enviarPedido()">
+      Enviar pedido a cocina
+    </button>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Pedidos recientes</h2>
+
+    <div id="lista-pedidos">
+      <p style="color:#6b7280;">Aún no hay pedidos.</p>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+
+const parametros = new URLSearchParams(window.location.search);
+const numeroMesa = parametros.get("numero") || "?";
+
+document.getElementById("titulo-mesa").textContent = "Mesa " + numeroMesa;
+
+/*
+  Datos de ejemplo.
+  Más adelante estos productos vendrán desde la base de datos
+  según lo que haya comprado realmente esta mesa.
+*/
+const productosDisponibles = [
+  {
+    id: 1,
+    nombre: "Completo",
+    comprados: 3,
+    pedidos: 0
+  },
+  {
+    id: 2,
+    nombre: "Té",
+    comprados: 2,
+    pedidos: 0
+  },
+  {
+    id: 3,
+    nombre: "Bebida",
+    comprados: 2,
+    pedidos: 0
+  }
+];
+
+const cantidadesPedido = {};
+
+function cargarProductos() {
+
+  const contenedor = document.getElementById("lista-productos");
+  contenedor.innerHTML = "";
+
+  productosDisponibles.forEach(producto => {
+
+    const disponibles = producto.comprados - producto.pedidos;
+
+    cantidadesPedido[producto.id] = 0;
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "producto";
+
+    tarjeta.innerHTML = `
+      <h3>${producto.nombre}</h3>
+
+      <div class="info">
+        Comprados: ${producto.comprados}
+      </div>
+
+      <div class="info">
+        Ya pedidos: ${producto.pedidos}
+      </div>
+
+      <div class="info">
+        <strong>Disponibles: ${disponibles}</strong>
+      </div>
+
+      <div class="controles">
+        <button class="cantidad-btn"
+          onclick="cambiarCantidad(${producto.id}, -1)">
+          −
+        </button>
+
+        <span class="cantidad"
+          id="cantidad-${producto.id}">
+          0
+        </span>
+
+        <button class="cantidad-btn"
+          onclick="cambiarCantidad(${producto.id}, 1)">
+          +
+        </button>
+      </div>
+    `;
+
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+function cambiarCantidad(id, cambio) {
+
+  const producto = productosDisponibles.find(p => p.id === id);
+
+  const disponibles = producto.comprados - producto.pedidos;
+
+  cantidadesPedido[id] += cambio;
+
+  if (cantidadesPedido[id] < 0) {
+    cantidadesPedido[id] = 0;
+  }
+
+  if (cantidadesPedido[id] > disponibles) {
+    cantidadesPedido[id] = disponibles;
+  }
+
+  document.getElementById("cantidad-" + id).textContent =
+    cantidadesPedido[id];
+}
+
+function enviarPedido() {
+
+  const seleccionados = productosDisponibles.filter(
+    producto => cantidadesPedido[producto.id] > 0
+  );
+
+  if (seleccionados.length === 0) {
+    alert("Selecciona al menos un producto.");
+    return;
+  }
+
+  let resumen = "Pedido enviado:\\n\\n";
+
+  seleccionados.forEach(producto => {
+
+    const cantidad = cantidadesPedido[producto.id];
+
+    resumen += cantidad + " x " + producto.nombre + "\\n";
+
+    producto.pedidos += cantidad;
+
+    cantidadesPedido[producto.id] = 0;
+  });
+
+  alert(resumen);
+
+  agregarPedidoAlHistorial(seleccionados);
+
+  cargarProductos();
+}
+
+function agregarPedidoAlHistorial(productos) {
+
+  const contenedor = document.getElementById("lista-pedidos");
+
+  if (contenedor.querySelector("p")) {
+    contenedor.innerHTML = "";
+  }
+
+  const pedido = document.createElement("div");
+  pedido.className = "pedido";
+
+  let contenido = "";
+
+  productos.forEach(producto => {
+    contenido += `
+      <div>
+        ${producto.nombre}
+      </div>
+    `;
+  });
+
+  pedido.innerHTML = `
+    <strong>Pedido enviado</strong>
+
+    ${contenido}
+
+    <div class="estado">
+      Nuevo
+    </div>
+  `;
+
+  contenedor.prepend(pedido);
+}
+
+cargarProductos();
+
+</script>
+
+</body>
+</html>
