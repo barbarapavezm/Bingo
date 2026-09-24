@@ -93,6 +93,11 @@
       margin: 2px 0;
     }
 
+    .persona {
+      color: #4b5563;
+      margin-top: 4px;
+    }
+
     .error {
       color: #b91c1c;
       font-weight: bold;
@@ -178,7 +183,7 @@
       <thead>
         <tr>
           <th>Fecha</th>
-          <th>Mesa</th>
+          <th>Mesa / Persona</th>
           <th>Productos</th>
           <th>Pago</th>
           <th>Total</th>
@@ -204,6 +209,7 @@ function formatoCLP(valor) {
 }
 
 function formatoFecha(fechaISO) {
+
   const fecha = new Date(fechaISO);
 
   return fecha.toLocaleString("es-CL", {
@@ -214,19 +220,24 @@ function formatoFecha(fechaISO) {
 
 async function cargarResumen() {
 
-  const estado = document.getElementById("estado");
+  const estado =
+    document.getElementById("estado");
 
   try {
 
-    const respuesta = await fetch(
-      "/.netlify/functions/ventas"
-    );
+    const respuesta =
+      await fetch(
+        "/.netlify/functions/ventas"
+      );
 
     if (!respuesta.ok) {
-      throw new Error("No se pudieron cargar las ventas.");
+      throw new Error(
+        "No se pudieron cargar las ventas."
+      );
     }
 
-    const ventas = await respuesta.json();
+    const ventas =
+      await respuesta.json();
 
     let totalVendido = 0;
     let totalEfectivo = 0;
@@ -236,75 +247,154 @@ async function cargarResumen() {
 
     ventas.forEach(venta => {
 
-      totalVendido += Number(venta.total || 0);
+      totalVendido +=
+        Number(
+          venta.total || 0
+        );
 
-      if (venta.metodoPago === "efectivo") {
-        totalEfectivo += Number(venta.total || 0);
+      if (
+        venta.metodoPago ===
+        "efectivo"
+      ) {
+
+        totalEfectivo +=
+          Number(
+            venta.total || 0
+          );
+
       }
 
-      if (venta.metodoPago === "transferencia") {
-        totalTransferencia += Number(venta.total || 0);
+      if (
+        venta.metodoPago ===
+        "transferencia"
+      ) {
+
+        totalTransferencia +=
+          Number(
+            venta.total || 0
+          );
+
       }
 
-      venta.productos.forEach(producto => {
+      const productosVenta =
+        Array.isArray(
+          venta.productos
+        )
+          ? venta.productos
+          : [];
 
-        if (!resumenProductos[producto.nombre]) {
-          resumenProductos[producto.nombre] = {
-            cantidad: 0,
-            dinero: 0
-          };
+      productosVenta.forEach(
+        producto => {
+
+          if (
+            !resumenProductos[
+              producto.nombre
+            ]
+          ) {
+
+            resumenProductos[
+              producto.nombre
+            ] = {
+              cantidad: 0,
+              dinero: 0
+            };
+
+          }
+
+          resumenProductos[
+            producto.nombre
+          ].cantidad +=
+            Number(
+              producto.cantidad || 0
+            );
+
+          resumenProductos[
+            producto.nombre
+          ].dinero +=
+            Number(
+              producto.subtotal || 0
+            );
+
         }
-
-        resumenProductos[producto.nombre].cantidad +=
-          Number(producto.cantidad || 0);
-
-        resumenProductos[producto.nombre].dinero +=
-          Number(producto.subtotal || 0);
-      });
+      );
 
     });
 
-    document.getElementById("total-vendido").textContent =
-      formatoCLP(totalVendido);
+    document.getElementById(
+      "total-vendido"
+    ).textContent =
+      formatoCLP(
+        totalVendido
+      );
 
-    document.getElementById("total-efectivo").textContent =
-      formatoCLP(totalEfectivo);
+    document.getElementById(
+      "total-efectivo"
+    ).textContent =
+      formatoCLP(
+        totalEfectivo
+      );
 
-    document.getElementById("total-transferencia").textContent =
-      formatoCLP(totalTransferencia);
+    document.getElementById(
+      "total-transferencia"
+    ).textContent =
+      formatoCLP(
+        totalTransferencia
+      );
 
-    document.getElementById("cantidad-ventas").textContent =
+    document.getElementById(
+      "cantidad-ventas"
+    ).textContent =
       ventas.length;
 
-    renderProductos(resumenProductos);
+    renderProductos(
+      resumenProductos
+    );
 
-    renderHistorial(ventas);
+    renderHistorial(
+      ventas
+    );
 
-    estado.style.display = "none";
+    estado.style.display =
+      "none";
 
-    document.getElementById("tabla-historial").style.display = "table";
+    document.getElementById(
+      "tabla-historial"
+    ).style.display =
+      "table";
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
-    estado.className = "error";
+    estado.className =
+      "error";
 
     estado.textContent =
       "No se pudo cargar el resumen de ventas.";
   }
 }
 
-function renderProductos(resumenProductos) {
+function renderProductos(
+  resumenProductos
+) {
 
   const tbody =
-    document.getElementById("tabla-productos");
+    document.getElementById(
+      "tabla-productos"
+    );
 
   tbody.innerHTML = "";
 
-  const nombres = Object.keys(resumenProductos);
+  const nombres =
+    Object.keys(
+      resumenProductos
+    );
 
-  if (nombres.length === 0) {
+  if (
+    nombres.length === 0
+  ) {
 
     tbody.innerHTML = `
       <tr>
@@ -322,29 +412,52 @@ function renderProductos(resumenProductos) {
     .forEach(nombre => {
 
       const datos =
-        resumenProductos[nombre];
+        resumenProductos[
+          nombre
+        ];
 
       const fila =
-        document.createElement("tr");
+        document.createElement(
+          "tr"
+        );
 
       fila.innerHTML = `
-        <td>${nombre}</td>
-        <td>${datos.cantidad}</td>
-        <td>${formatoCLP(datos.dinero)}</td>
+        <td>
+          ${nombre}
+        </td>
+
+        <td>
+          ${datos.cantidad}
+        </td>
+
+        <td>
+          ${formatoCLP(
+            datos.dinero
+          )}
+        </td>
       `;
 
-      tbody.appendChild(fila);
+      tbody.appendChild(
+        fila
+      );
+
     });
 }
 
-function renderHistorial(ventas) {
+function renderHistorial(
+  ventas
+) {
 
   const tbody =
-    document.getElementById("historial-ventas");
+    document.getElementById(
+      "historial-ventas"
+    );
 
   tbody.innerHTML = "";
 
-  if (ventas.length === 0) {
+  if (
+    ventas.length === 0
+  ) {
 
     tbody.innerHTML = `
       <tr>
@@ -357,48 +470,89 @@ function renderHistorial(ventas) {
     return;
   }
 
-  ventas.forEach(venta => {
+  ventas.forEach(
+    venta => {
 
-    const productosHTML =
-      venta.productos
-        .map(producto => `
-          <div class="producto-lista">
-            ${producto.cantidad} x ${producto.nombre}
+      const productosVenta =
+        Array.isArray(
+          venta.productos
+        )
+          ? venta.productos
+          : [];
+
+      const productosHTML =
+        productosVenta
+          .map(
+            producto => `
+              <div class="producto-lista">
+                ${producto.cantidad}
+                x
+                ${producto.nombre}
+              </div>
+            `
+          )
+          .join("");
+
+      const nombrePersona =
+        venta.nombre
+          ? venta.nombre
+          : "Sin nombre";
+
+      const metodoPago =
+        venta.metodoPago ===
+        "efectivo"
+          ? "Efectivo"
+          : "Transferencia";
+
+      const fila =
+        document.createElement(
+          "tr"
+        );
+
+      fila.innerHTML = `
+
+        <td>
+          ${formatoFecha(
+            venta.fecha
+          )}
+        </td>
+
+        <td>
+
+          <strong>
+            Mesa ${venta.mesa}
+          </strong>
+
+          <div class="persona">
+            ${nombrePersona}
           </div>
-        `)
-        .join("");
 
-    const fila =
-      document.createElement("tr");
+        </td>
 
-    fila.innerHTML = `
-      <td>${formatoFecha(venta.fecha)}</td>
+        <td>
+          ${productosHTML}
+        </td>
 
-      <td>
-        Mesa ${venta.mesa}
-      </td>
+        <td>
+          ${metodoPago}
+        </td>
 
-      <td>
-        ${productosHTML}
-      </td>
+        <td>
 
-      <td>
-        ${
-          venta.metodoPago === "efectivo"
-            ? "Efectivo"
-            : "Transferencia"
-        }
-      </td>
+          <strong>
+            ${formatoCLP(
+              venta.total
+            )}
+          </strong>
 
-      <td>
-        <strong>
-          ${formatoCLP(venta.total)}
-        </strong>
-      </td>
-    `;
+        </td>
+      `;
 
-    tbody.appendChild(fila);
-  });
+      tbody.appendChild(
+        fila
+      );
+
+    });
 }
 
 cargarResumen();
