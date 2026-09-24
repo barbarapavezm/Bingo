@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>Preventas - Bingo</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+header {
+  background: white;
+  border-bottom: 1px solid #ddd;
+  padding: 20px 28px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0 0 4px;
+}
+
+header span {
+  color: #6b7280;
+}
+
+header a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 25px;
+}
+
+.panel {
+  background: white;
+
+  border-radius: 14px;
+
+  padding: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.08);
+}
+
+
+/* =========================
+   RESUMEN
+========================= */
+
+.resumen {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 15px;
+}
+
+.resumen-box {
+  background: #faf5ff;
+
+  border:
+    1px solid #ddd6fe;
+
+  border-radius: 12px;
+
+  padding: 18px;
+}
+
+.resumen-numero {
+  font-size: 32px;
+  font-weight: bold;
+  color: #6d28d9;
+}
+
+.resumen-texto {
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+
+/* =========================
+   BUSCADOR
+========================= */
+
+.buscador label {
+  display: block;
+
+  font-weight: bold;
+
+  margin-bottom: 8px;
+}
+
+.buscador input {
+  width: 100%;
+
+  padding: 13px;
+
+  border-radius: 9px;
+
+  border:
+    1px solid #ccc;
+
+  font-size: 16px;
+}
+
+
+/* =========================
+   TABLA
+========================= */
+
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  min-width: 650px;
+}
+
+th {
+  background: #f9fafb;
+
+  text-align: left;
+
+  padding: 13px;
+
+  border-bottom:
+    2px solid #e5e7eb;
+
+  color: #374151;
+}
+
+td {
+  padding: 14px 13px;
+
+  border-bottom:
+    1px solid #e5e7eb;
+}
+
+.nombre {
+  font-weight: bold;
+}
+
+.cantidad {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.codigo {
+  font-family: monospace;
+
+  font-size: 18px;
+
+  letter-spacing: 2px;
+
+  font-weight: bold;
+
+  color: #6d28d9;
+}
+
+.copiar {
+  background: #ede9fe;
+  color: #6d28d9;
+
+  border: none;
+
+  border-radius: 7px;
+
+  padding: 7px 10px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+  margin-left: 8px;
+}
+
+.vacio {
+  text-align: center;
+
+  padding: 40px 20px;
+
+  color: #6b7280;
+}
+
+.actualizar {
+  border: none;
+
+  background: #2563eb;
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+}
+
+.encabezado-lista {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 15px;
+}
+
+.encabezado-lista h2 {
+  margin: 0;
+}
+
+
+@media (max-width: 700px) {
+
+  main {
+    padding: 15px;
+  }
+
+  header {
+    padding: 16px;
+
+    align-items:
+      flex-start;
+
+    gap: 12px;
+  }
+
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<div>
+
+<h1>
+  🎟️ Preventas
+</h1>
+
+<span>
+  Registro de preventas vendidas
+</span>
+
+</div>
+
+<a href="/index.html">
+  Volver al inicio
+</a>
+
+</header>
+
+
+<main>
+
+
+<!-- =========================
+     RESUMEN
+========================= -->
+
+<div class="resumen">
+
+<div class="resumen-box">
+
+<div
+  class="resumen-numero"
+  id="total-personas"
+>
+  0
+</div>
+
+<div class="resumen-texto">
+  Personas con preventa
+</div>
+
+</div>
+
+
+<div class="resumen-box">
+
+<div
+  class="resumen-numero"
+  id="total-preventas"
+>
+  0
+</div>
+
+<div class="resumen-texto">
+  Preventas vendidas
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     BUSCADOR
+========================= -->
+
+<div class="panel buscador">
+
+<label for="buscar">
+  Buscar preventa
+</label>
+
+<input
+  id="buscar"
+  type="text"
+  placeholder="Buscar por nombre o código..."
+  autocomplete="off"
+  oninput="mostrarPreventas()"
+>
+
+</div>
+
+
+
+<!-- =========================
+     LISTADO
+========================= -->
+
+<div class="panel">
+
+<div class="encabezado-lista">
+
+<h2>
+  Preventas registradas
+</h2>
+
+<button
+  class="actualizar"
+  onclick="cargarPreventas()"
+>
+  Actualizar
+</button>
+
+</div>
+
+
+<div class="tabla-contenedor">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+  Nombre
+</th>
+
+<th>
+  Cantidad
+</th>
+
+<th>
+  Código
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="lista-preventas">
+
+<tr>
+
+<td
+  colspan="3"
+  class="vacio"
+>
+  Cargando...
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+</main>
+
+
+
+<script>
+
+
+let preventas =
+  [];
+
+
+/* =========================
+   NORMALIZAR
+========================= */
+
+function normalizar(texto) {
+
+  return String(
+    texto || ""
+  )
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+}
+
+
+/* =========================
+   CARGAR VENTAS
+========================= */
+
+async function cargarPreventas() {
+
+  const tbody =
+    document.getElementById(
+      "lista-preventas"
+    );
+
+
+  tbody.innerHTML = `
+
+    <tr>
+
+      <td
+        colspan="3"
+        class="vacio"
+      >
+        Cargando preventas...
+      </td>
+
+    </tr>
+
+  `;
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+
+        "/.netlify/functions/ventas?t=" +
+        Date.now(),
+
+        {
+          cache:
+            "no-store"
+        }
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "No se pudieron cargar las ventas."
+      );
+    }
+
+
+    const ventas =
+      await respuesta.json();
+
+
+    const agrupadas =
+      new Map();
+
+
+    ventas
+
+      .filter(
+        venta => {
+
+          if (
+            venta.tipoVenta ===
+            "preventa"
+          ) {
+            return true;
+          }
+
+
+          /*
+            Compatibilidad con
+            preventas antiguas.
+          */
+
+          return Array.isArray(
+            venta.productos
+          ) &&
+          venta.productos.some(
+            producto =>
+              normalizar(
+                producto.nombre
+              ) ===
+              "preventa"
+          );
+
+        }
+      )
+
+      .forEach(
+        venta => {
+
+
+          const productoPreventa =
+            Array.isArray(
+              venta.productos
+            )
+
+              ? venta.productos.find(
+                  producto =>
+                    normalizar(
+                      producto.nombre
+                    ) ===
+                    "preventa"
+                )
+
+              : null;
+
+
+          const cantidad =
+            Number(
+              productoPreventa
+                ?.cantidad ||
+              venta.cantidadPreventas ||
+              1
+            );
+
+
+          /*
+            La clave principal es
+            clienteId.
+
+            Así una misma persona
+            puede tener varias
+            preventas manteniendo
+            un único código.
+          */
+
+          const clave =
+
+            venta.clienteId ||
+
+            venta.codigoPreventa ||
+
+            (
+              normalizar(
+                venta.nombre
+              ) +
+              "-" +
+              (
+                venta.codigoPreventa ||
+                "sin-codigo"
+              )
+            );
+
+
+          if (
+            !agrupadas.has(
+              clave
+            )
+          ) {
+
+            agrupadas.set(
+              clave,
+              {
+
+                clienteId:
+                  venta.clienteId ||
+                  null,
+
+                nombre:
+                  venta.nombre ||
+                  "Sin nombre",
+
+                codigo:
+                  venta.codigoPreventa ||
+                  "",
+
+                cantidad:
+                  0
+
+              }
+            );
+          }
+
+
+          const registro =
+            agrupadas.get(
+              clave
+            );
+
+
+          registro.cantidad +=
+            cantidad;
+
+
+          /*
+            Si alguna venta posterior
+            trae el código, lo usamos.
+          */
+
+          if (
+            !registro.codigo &&
+            venta.codigoPreventa
+          ) {
+
+            registro.codigo =
+              venta.codigoPreventa;
+          }
+
+        }
+      );
+
+
+    preventas =
+      Array.from(
+        agrupadas.values()
+      );
+
+
+    preventas.sort(
+      (a, b) =>
+        a.nombre.localeCompare(
+          b.nombre,
+          "es"
+        )
+    );
+
+
+    actualizarResumen();
+
+    mostrarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    tbody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="3"
+          class="vacio"
+        >
+          No se pudieron cargar
+          las preventas.
+        </td>
+
+      </tr>
+
+    `;
+  }
+}
+
+
+/* =========================
+   RESUMEN
+========================= */
+
+function actualizarResumen() {
+
+  const cantidadPersonas =
+    preventas.length;
+
+
+  const cantidadPreventas =
+    preventas.reduce(
+      (
+        suma,
+        persona
+      ) =>
+
+        suma +
+        Number(
+          persona.cantidad ||
+          0
+        ),
+
+      0
+    );
+
+
+  document.getElementById(
+    "total-personas"
+  ).textContent =
+    cantidadPersonas;
+
+
+  document.getElementById(
+    "total-preventas"
+  ).textContent =
+    cantidadPreventas;
+}
+
+
+/* =========================
+   MOSTRAR
+========================= */
+
+function mostrarPreventas() {
+
+  const tbody =
+    document.getElementById(
+      "lista-preventas"
+    );
+
+
+  const busqueda =
+    normalizar(
+      document.getElementById(
+        "buscar"
+      ).value
+    );
+
+
+  const filtradas =
+    preventas.filter(
+      persona => {
+
+        const nombre =
+          normalizar(
+            persona.nombre
+          );
+
+
+        const codigo =
+          normalizar(
+            persona.codigo
+          );
+
+
+        return (
+          !busqueda ||
+          nombre.includes(
+            busqueda
+          ) ||
+          codigo.includes(
+            busqueda
+          )
+        );
+      }
+    );
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if (
+    filtradas.length ===
+    0
+  ) {
+
+    const fila =
+      document.createElement(
+        "tr"
+      );
+
+
+    const celda =
+      document.createElement(
+        "td"
+      );
+
+
+    celda.colSpan =
+      3;
+
+
+    celda.className =
+      "vacio";
+
+
+    celda.textContent =
+      busqueda
+
+        ? "No encontré preventas con esa búsqueda."
+
+        : "Todavía no hay preventas registradas.";
+
+
+    fila.appendChild(
+      celda
+    );
+
+
+    tbody.appendChild(
+      fila
+    );
+
+
+    return;
+  }
+
+
+  filtradas.forEach(
+    persona => {
+
+
+      const fila =
+        document.createElement(
+          "tr"
+        );
+
+
+      /* NOMBRE */
+
+      const tdNombre =
+        document.createElement(
+          "td"
+        );
+
+
+      tdNombre.className =
+        "nombre";
+
+
+      tdNombre.textContent =
+        persona.nombre;
+
+
+      /* CANTIDAD */
+
+      const tdCantidad =
+        document.createElement(
+          "td"
+        );
+
+
+      tdCantidad.className =
+        "cantidad";
+
+
+      tdCantidad.textContent =
+        persona.cantidad;
+
+
+      /* CÓDIGO */
+
+      const tdCodigo =
+        document.createElement(
+          "td"
+        );
+
+
+      if (
+        persona.codigo
+      ) {
+
+        const codigo =
+          document.createElement(
+            "span"
+          );
+
+
+        codigo.className =
+          "codigo";
+
+
+        codigo.textContent =
+          persona.codigo;
+
+
+        const boton =
+          document.createElement(
+            "button"
+          );
+
+
+        boton.className =
+          "copiar";
+
+
+        boton.textContent =
+          "Copiar";
+
+
+        boton.onclick =
+          () =>
+            copiarCodigo(
+              persona.codigo
+            );
+
+
+        tdCodigo.appendChild(
+          codigo
+        );
+
+
+        tdCodigo.appendChild(
+          boton
+        );
+
+
+      } else {
+
+        tdCodigo.textContent =
+          "Sin código";
+
+      }
+
+
+      fila.appendChild(
+        tdNombre
+      );
+
+
+      fila.appendChild(
+        tdCantidad
+      );
+
+
+      fila.appendChild(
+        tdCodigo
+      );
+
+
+      tbody.appendChild(
+        fila
+      );
+
+    }
+  );
+}
+
+
+/* =========================
+   COPIAR
+========================= */
+
+async function copiarCodigo(
+  codigo
+) {
+
+  try {
+
+    await navigator.clipboard
+      .writeText(
+        codigo
+      );
+
+
+    alert(
+      "✅ Código " +
+      codigo +
+      " copiado."
+    );
+
+
+  } catch (error) {
+
+    alert(
+      "Código: " +
+      codigo
+    );
+  }
+}
+
+
+/* =========================
+   INICIO
+========================= */
+
+cargarPreventas();
+
+</script>
+
+
+</body>
+
+</html>
