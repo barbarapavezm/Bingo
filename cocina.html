@@ -344,9 +344,178 @@
     }
 
 
+    /* =======================
+       CHAT CAJA ↔ COCINA
+    ======================= */
+
+    .btn-chat {
+      position: relative;
+      border: 1px solid #d1d5db;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #1f2937;
+    }
+
+    .chat-badge {
+      display: none;
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #dc2626;
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .chat-badge.visible { display: flex; }
+
+    .chat-panel {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 370px;
+      max-width: calc(100vw - 36px);
+      height: 520px;
+      max-height: calc(100vh - 120px);
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      box-shadow: 0 12px 35px rgba(0,0,0,.22);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-panel.oculto { display: none; }
+
+    .chat-cabecera {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .chat-cerrar {
+      width: 32px;
+      height: 32px;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .chat-mensajes {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .chat-vacio {
+      color: #6b7280;
+      font-size: 13px;
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .chat-fila { display: flex; margin-bottom: 10px; }
+    .chat-fila.propia { justify-content: flex-end; }
+    .chat-fila.otra { justify-content: flex-start; }
+
+    .chat-burbuja {
+      max-width: 82%;
+      padding: 9px 11px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .chat-fila.propia .chat-burbuja {
+      background: #dbeafe;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-fila.otra .chat-burbuja {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-meta {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      margin-bottom: 3px;
+      color: #6b7280;
+      font-size: 10px;
+    }
+
+    .chat-meta strong { color: #374151; font-size: 11px; }
+    .chat-texto { white-space: pre-wrap; }
+
+    .chat-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    .chat-input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 11px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .chat-input:focus { border-color: #2563eb; }
+
+    .chat-enviar {
+      padding: 10px 14px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .chat-enviar:disabled { opacity: .55; cursor: not-allowed; }
+
     @media (
       max-width: 900px
     ) {
+
+      .chat-panel {
+        right: 10px;
+        bottom: 10px;
+        width: calc(100vw - 20px);
+        max-width: none;
+        height: 70vh;
+        max-height: 620px;
+      }
+
+      .acciones-header {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
 
       .columnas {
         grid-template-columns: 1fr;
@@ -390,6 +559,17 @@
       id="ultima-actualizacion"
     >
     </span>
+
+
+    <button
+      id="btn-chat"
+      class="btn-chat"
+      type="button"
+      onclick="alternarChat()"
+    >
+      💬 Chat
+      <span id="chat-badge" class="chat-badge">0</span>
+    </button>
 
 
     <button
@@ -597,10 +777,184 @@
 </main>
 
 
+<!-- =========================
+     CHAT CAJA ↔ COCINA
+========================== -->
+
+<section id="chat-panel" class="chat-panel oculto" aria-label="Chat entre Caja y Cocina">
+  <div class="chat-cabecera">
+    <strong>💬 Caja ↔ Cocina</strong>
+    <button class="chat-cerrar" type="button" onclick="cerrarChat()" aria-label="Cerrar chat">×</button>
+  </div>
+
+  <div id="chat-mensajes" class="chat-mensajes">
+    <div class="chat-vacio">Cargando mensajes...</div>
+  </div>
+
+  <form class="chat-form" onsubmit="enviarMensajeChat(event)">
+    <input id="chat-input" class="chat-input" type="text" maxlength="500" autocomplete="off" placeholder="Escribe un mensaje a Caja..." aria-label="Mensaje para Caja">
+    <button id="chat-enviar" class="chat-enviar" type="submit">Enviar</button>
+  </form>
+</section>
+
+
 <script>
 
 
 let actualizando = false;
+
+
+/* =========================
+   CHAT CAJA ↔ COCINA
+========================= */
+
+let chatAbierto = false;
+let mensajesChat = [];
+let enviandoChat = false;
+
+const CHAT_ORIGEN = "Cocina";
+const CHAT_OTRO = "Caja";
+const CHAT_ULTIMO_VISTO_KEY = "bingo-chat-cocina-ultimo-visto";
+
+function fechaChatValida(fecha) {
+  const valor = new Date(fecha || 0).getTime();
+  return Number.isFinite(valor) ? valor : 0;
+}
+
+function formatoHoraChat(fechaISO) {
+  if (!fechaISO) return "";
+  const fecha = new Date(fechaISO);
+  if (Number.isNaN(fecha.getTime())) return "";
+  return fecha.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+}
+
+function ultimoVistoChat() {
+  return localStorage.getItem(CHAT_ULTIMO_VISTO_KEY) || "";
+}
+
+function marcarChatComoVisto() {
+  if (mensajesChat.length > 0) {
+    const ultimo = mensajesChat[mensajesChat.length - 1];
+    if (ultimo?.fecha) localStorage.setItem(CHAT_ULTIMO_VISTO_KEY, ultimo.fecha);
+  }
+  actualizarBadgeChat();
+}
+
+function contarMensajesNuevos() {
+  const visto = fechaChatValida(ultimoVistoChat());
+  return mensajesChat.filter(m => m.origen === CHAT_OTRO && fechaChatValida(m.fecha) > visto).length;
+}
+
+function actualizarBadgeChat() {
+  const badge = document.getElementById("chat-badge");
+  if (!badge) return;
+  const nuevos = chatAbierto ? 0 : contarMensajesNuevos();
+  badge.textContent = String(nuevos);
+  badge.classList.toggle("visible", nuevos > 0);
+}
+
+function alternarChat() {
+  chatAbierto ? cerrarChat() : abrirChat();
+}
+
+function abrirChat() {
+  document.getElementById("chat-panel").classList.remove("oculto");
+  chatAbierto = true;
+  renderChat(true);
+  marcarChatComoVisto();
+  setTimeout(() => document.getElementById("chat-input")?.focus(), 50);
+  cargarMensajesChat(true);
+}
+
+function cerrarChat() {
+  document.getElementById("chat-panel").classList.add("oculto");
+  chatAbierto = false;
+  actualizarBadgeChat();
+}
+
+async function cargarMensajesChat(forzarScroll = false) {
+  try {
+    const respuesta = await fetch("/.netlify/functions/mensajes?t=" + Date.now(), { cache: "no-store" });
+    if (!respuesta.ok) throw new Error("No se pudieron cargar los mensajes.");
+    const datos = await respuesta.json();
+    mensajesChat = Array.isArray(datos) ? datos : [];
+    mensajesChat.sort((a,b) => fechaChatValida(a.fecha) - fechaChatValida(b.fecha));
+    renderChat(forzarScroll);
+    if (chatAbierto) marcarChatComoVisto(); else actualizarBadgeChat();
+  } catch (error) {
+    console.error("Error chat:", error);
+    if (chatAbierto) {
+      const c = document.getElementById("chat-mensajes");
+      if (c) c.innerHTML = '<div class="chat-vacio">No se pudo cargar el chat.</div>';
+    }
+  }
+}
+
+function renderChat(forzarScroll = false) {
+  const contenedor = document.getElementById("chat-mensajes");
+  if (!contenedor) return;
+  const estabaAbajo = contenedor.scrollHeight - contenedor.scrollTop - contenedor.clientHeight < 70;
+  contenedor.innerHTML = "";
+  if (mensajesChat.length === 0) {
+    contenedor.innerHTML = '<div class="chat-vacio">Todavía no hay mensajes.<br>Este chat es solo entre Caja y Cocina.</div>';
+    return;
+  }
+  mensajesChat.forEach(mensaje => {
+    const fila = document.createElement("div");
+    const propio = mensaje.origen === CHAT_ORIGEN;
+    fila.className = "chat-fila " + (propio ? "propia" : "otra");
+    const burbuja = document.createElement("div");
+    burbuja.className = "chat-burbuja";
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    const origen = document.createElement("strong");
+    origen.textContent = mensaje.origen || "—";
+    const hora = document.createElement("span");
+    hora.textContent = formatoHoraChat(mensaje.fecha);
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "chat-texto";
+    cuerpo.textContent = mensaje.texto || "";
+    meta.appendChild(origen);
+    meta.appendChild(hora);
+    burbuja.appendChild(meta);
+    burbuja.appendChild(cuerpo);
+    fila.appendChild(burbuja);
+    contenedor.appendChild(fila);
+  });
+  if (forzarScroll || estabaAbajo || chatAbierto) contenedor.scrollTop = contenedor.scrollHeight;
+}
+
+async function enviarMensajeChat(event) {
+  event.preventDefault();
+  if (enviandoChat) return;
+  const input = document.getElementById("chat-input");
+  const boton = document.getElementById("chat-enviar");
+  const texto = String(input.value || "").trim();
+  if (!texto) return;
+  if (texto.length > 500) { alert("El mensaje puede tener máximo 500 caracteres."); return; }
+  try {
+    enviandoChat = true;
+    boton.disabled = true;
+    boton.textContent = "Enviando...";
+    const respuesta = await fetch("/.netlify/functions/mensajes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ origen: CHAT_ORIGEN, texto })
+    });
+    const resultado = await respuesta.json();
+    if (!respuesta.ok) throw new Error(resultado.error || "No se pudo enviar el mensaje.");
+    input.value = "";
+    await cargarMensajesChat(true);
+  } catch (error) {
+    console.error("Error enviando mensaje:", error);
+    alert("❌ " + error.message);
+  } finally {
+    enviandoChat = false;
+    boton.disabled = false;
+    boton.textContent = "Enviar";
+    input.focus();
+  }
+}
 
 
 /* =========================
@@ -1522,10 +1876,18 @@ async function volverAPreparando(
 
 cargarPedidos();
 
+cargarMensajesChat();
+
 
 setInterval(
   cargarPedidos,
   5000
+);
+
+
+setInterval(
+  cargarMensajesChat,
+  3000
 );
 
 
