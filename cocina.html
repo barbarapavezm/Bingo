@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -11,6 +13,7 @@
   <title>Cocina - Bingo</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -43,17 +46,17 @@
       font-size: 13px;
     }
 
-    .acciones-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
     header a {
       text-decoration: none;
       color: #2563eb;
       font-weight: bold;
       font-size: 14px;
+    }
+
+    .acciones-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .btn-actualizar {
@@ -62,18 +65,24 @@
       padding: 8px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
     }
 
+
     main {
-      padding: 14px;
       max-width: 1700px;
       margin: auto;
+      padding: 14px;
     }
+
+
+    /* =======================
+       COLUMNAS COCINA
+    ======================= */
 
     .columnas {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns:
+        repeat(3, 1fr);
       gap: 12px;
     }
 
@@ -82,7 +91,8 @@
       border-radius: 12px;
       padding: 10px;
 
-      height: calc(100vh - 105px);
+      height:
+        calc(100vh - 105px);
 
       display: flex;
       flex-direction: column;
@@ -92,11 +102,15 @@
 
     .encabezado-columna {
       display: flex;
-      justify-content: space-between;
+      justify-content:
+        space-between;
       align-items: center;
 
       padding: 2px 4px 9px;
-      border-bottom: 1px solid #d1d5db;
+
+      border-bottom:
+        1px solid #d1d5db;
+
       margin-bottom: 9px;
     }
 
@@ -111,7 +125,6 @@
       padding: 3px 8px;
       font-weight: bold;
       font-size: 12px;
-      color: #4b5563;
     }
 
     .lista-pedidos {
@@ -120,32 +133,66 @@
       flex: 1;
     }
 
+
+    /* =======================
+       PEDIDOS
+    ======================= */
+
     .pedido {
       background: white;
       border-radius: 9px;
+
       padding: 10px 11px;
       margin-bottom: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+
+      box-shadow:
+        0 1px 4px
+        rgba(0,0,0,.08);
     }
 
     .pedido-nuevo {
-      border-left: 4px solid #f59e0b;
+      border-left:
+        4px solid #f59e0b;
     }
 
     .pedido-preparando {
-      border-left: 4px solid #2563eb;
+      border-left:
+        4px solid #2563eb;
     }
 
     .pedido-listo {
-      border-left: 4px solid #10b981;
+      border-left:
+        4px solid #10b981;
+    }
+
+    .pedido-prioritario {
+      background: #eff6ff;
+
+      border:
+        2px solid #2563eb;
+    }
+
+    .prioridad {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+
+      font-size: 10px;
+      font-weight: bold;
+
+      padding: 3px 6px;
+      border-radius: 999px;
+
+      margin-bottom: 5px;
     }
 
     .pedido-cabecera {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      justify-content:
+        space-between;
+      align-items:
+        flex-start;
       gap: 8px;
-      margin-bottom: 5px;
     }
 
     .pedido h3 {
@@ -156,21 +203,21 @@
     .persona {
       font-weight: bold;
       font-size: 14px;
-      color: #374151;
       margin-top: 2px;
     }
 
     .hora {
       color: #6b7280;
       font-size: 11px;
-      text-align: right;
       white-space: nowrap;
     }
 
     .productos {
       margin-top: 6px;
       padding-top: 6px;
-      border-top: 1px solid #eee;
+
+      border-top:
+        1px solid #eee;
     }
 
     .producto {
@@ -178,9 +225,6 @@
       padding: 2px 0;
     }
 
-    .producto strong {
-      font-size: 14px;
-    }
 
     button {
       border: none;
@@ -192,6 +236,7 @@
       width: 100%;
       padding: 7px 8px;
       margin-top: 8px;
+
       font-size: 12px;
       font-weight: bold;
     }
@@ -211,27 +256,97 @@
       color: white;
     }
 
+
+    /* =======================
+       ENTREGADOS
+    ======================= */
+
+    .entregados-panel {
+      margin-top: 22px;
+
+      background: white;
+
+      border-radius: 14px;
+
+      padding: 18px;
+
+      box-shadow:
+        0 2px 8px
+        rgba(0,0,0,.08);
+    }
+
+    .entregados-cabecera {
+      display: flex;
+      justify-content:
+        space-between;
+      align-items: center;
+
+      margin-bottom: 12px;
+    }
+
+    .entregados-cabecera h2 {
+      margin: 0;
+    }
+
+    .tabla-contenedor {
+      overflow-x: auto;
+
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      border-bottom:
+        1px solid #e5e7eb;
+
+      text-align: left;
+      vertical-align: top;
+
+      font-size: 13px;
+    }
+
+    th {
+      background: #f9fafb;
+
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .entregado-producto {
+      margin: 2px 0;
+    }
+
+    .btn-reabrir {
+      padding: 7px 10px;
+
+      background: #dbeafe;
+      color: #1d4ed8;
+
+      font-size: 12px;
+      font-weight: bold;
+
+      white-space: nowrap;
+    }
+
     .vacio {
+      color: #6b7280;
       text-align: center;
-      color: #6b7280;
-      font-size: 13px;
-      padding: 30px 8px;
-    }
-
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 30px;
       font-size: 13px;
     }
 
-    .actualizando {
-      font-size: 11px;
-      color: #6b7280;
-    }
 
-    @media (max-width: 900px) {
+    @media (
+      max-width: 900px
+    ) {
 
       .columnas {
         grid-template-columns: 1fr;
@@ -239,35 +354,43 @@
 
       .columna {
         height: auto;
+
         min-height: 300px;
         max-height: 600px;
       }
 
-      header {
-        align-items: flex-start;
-      }
     }
+
   </style>
+
 </head>
 
+
 <body>
+
 
 <header>
 
   <div>
-    <h1>Cocina</h1>
+
+    <h1>
+      Cocina
+    </h1>
+
     <span>
       Pedidos de las mesas
     </span>
+
   </div>
+
 
   <div class="acciones-header">
 
     <span
-      class="actualizando"
       id="ultima-actualizacion"
     >
     </span>
+
 
     <button
       class="btn-actualizar"
@@ -275,6 +398,7 @@
     >
       ↻ Actualizar
     </button>
+
 
     <a href="/index.html">
       Volver al inicio
@@ -287,13 +411,20 @@
 
 <main>
 
+
+  <!-- =========================
+       PEDIDOS ACTIVOS
+  ========================== -->
+
+
   <div class="columnas">
 
-    <!-- NUEVOS -->
 
     <section class="columna">
 
-      <div class="encabezado-columna">
+      <div
+        class="encabezado-columna"
+      >
 
         <h2>
           🟠 Nuevos
@@ -308,6 +439,7 @@
 
       </div>
 
+
       <div
         class="lista-pedidos"
         id="nuevos"
@@ -317,11 +449,12 @@
     </section>
 
 
-    <!-- PREPARANDO -->
 
     <section class="columna">
 
-      <div class="encabezado-columna">
+      <div
+        class="encabezado-columna"
+      >
 
         <h2>
           🔵 Preparando
@@ -336,6 +469,7 @@
 
       </div>
 
+
       <div
         class="lista-pedidos"
         id="preparando"
@@ -345,11 +479,12 @@
     </section>
 
 
-    <!-- LISTOS -->
 
     <section class="columna">
 
-      <div class="encabezado-columna">
+      <div
+        class="encabezado-columna"
+      >
 
         <h2>
           🟢 Listos
@@ -364,6 +499,7 @@
 
       </div>
 
+
       <div
         class="lista-pedidos"
         id="listos"
@@ -372,73 +508,204 @@
 
     </section>
 
+
   </div>
+
+
+  <!-- =========================
+       HISTORIAL ENTREGADOS
+  ========================== -->
+
+
+  <section
+    class="entregados-panel"
+  >
+
+    <div
+      class="entregados-cabecera"
+    >
+
+      <div>
+
+        <h2>
+          ✅ Pedidos entregados
+        </h2>
+
+        <small>
+          Historial para verificar
+          entregas realizadas.
+        </small>
+
+      </div>
+
+
+      <span
+        class="contador"
+        id="contador-entregados"
+      >
+        0
+      </span>
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Entregado
+            </th>
+
+            <th>
+              Mesa / Persona
+            </th>
+
+            <th>
+              Productos
+            </th>
+
+            <th>
+              Pedido originalmente
+            </th>
+
+            <th>
+              Acción
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody
+          id="tabla-entregados"
+        >
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
 
 </main>
 
 
 <script>
 
+
 let actualizando = false;
 
 
-/* ============================
-   SEGURIDAD PARA MOSTRAR TEXTO
-============================ */
+/* =========================
+   ESCAPAR TEXTO
+========================= */
+
 
 function escaparHTML(texto) {
 
-  return String(texto ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return String(
+    texto ?? ""
+  )
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
 
 
-/* ============================
-   FORMATO DE HORA
-============================ */
+/* =========================
+   FECHA / HORA
+========================= */
 
-function formatoHora(fechaISO) {
+
+function formatoHora(
+  fechaISO
+) {
 
   if (!fechaISO) {
     return "";
   }
 
-  const fecha =
-    new Date(fechaISO);
-
-  return fecha.toLocaleTimeString(
+  return new Date(
+    fechaISO
+  ).toLocaleTimeString(
     "es-CL",
     {
-      hour: "2-digit",
-      minute: "2-digit"
+      hour:
+        "2-digit",
+
+      minute:
+        "2-digit"
     }
   );
 }
 
 
-/* ============================
-   MOMENTO EN QUE ENTRÓ
-   A LA COLUMNA
-============================ */
+function formatoFechaHora(
+  fechaISO
+) {
 
-function fechaCola(pedido) {
+  if (!fechaISO) {
+    return "Sin registro";
+  }
 
-  /*
-    Para NUEVOS usamos la fecha
-    original del pedido.
+  return new Date(
+    fechaISO
+  ).toLocaleString(
+    "es-CL",
+    {
+      dateStyle:
+        "short",
 
-    Para PREPARANDO y LISTO usamos
-    "actualizado", porque representa
-    cuándo entró a esa nueva cola.
-  */
+      timeStyle:
+        "short"
+    }
+  );
+}
+
+
+/* =========================
+   FECHA PARA COLA
+========================= */
+
+
+function fechaCola(
+  pedido
+) {
 
   if (
-    pedido.estado === "nuevo"
+    pedido.estado ===
+    "nuevo"
   ) {
+
     return new Date(
       pedido.fecha || 0
     );
@@ -452,9 +719,10 @@ function fechaCola(pedido) {
 }
 
 
-/* ============================
-   CARGAR PEDIDOS REALES
-============================ */
+/* =========================
+   CARGAR
+========================= */
+
 
 async function cargarPedidos() {
 
@@ -462,7 +730,9 @@ async function cargarPedidos() {
     return;
   }
 
+
   actualizando = true;
+
 
   try {
 
@@ -470,7 +740,8 @@ async function cargarPedidos() {
       await fetch(
         "/.netlify/functions/pedidos",
         {
-          cache: "no-store"
+          cache:
+            "no-store"
         }
       );
 
@@ -480,7 +751,6 @@ async function cargarPedidos() {
       throw new Error(
         "No se pudieron cargar los pedidos."
       );
-
     }
 
 
@@ -489,7 +759,9 @@ async function cargarPedidos() {
 
 
     renderPedidos(
-      Array.isArray(pedidos)
+      Array.isArray(
+        pedidos
+      )
         ? pedidos
         : []
     );
@@ -505,8 +777,10 @@ async function cargarPedidos() {
           {
             hour:
               "2-digit",
+
             minute:
               "2-digit",
+
             second:
               "2-digit"
           }
@@ -515,31 +789,39 @@ async function cargarPedidos() {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
-    mostrarError();
 
   } finally {
 
-    actualizando = false;
+    actualizando =
+      false;
 
   }
 }
 
 
-/* ============================
-   RENDER
-============================ */
+/* =========================
+   RENDER GENERAL
+========================= */
 
-function renderPedidos(pedidos) {
+
+function renderPedidos(
+  pedidos
+) {
+
 
   const nuevos =
     pedidos
+
       .filter(
-        pedido =>
-          pedido.estado ===
+        p =>
+          p.estado ===
           "nuevo"
       )
+
       .sort(
         (a, b) =>
           fechaCola(a) -
@@ -549,11 +831,64 @@ function renderPedidos(pedidos) {
 
   const preparando =
     pedidos
+
       .filter(
-        pedido =>
-          pedido.estado ===
+        p =>
+          p.estado ===
           "preparando"
       )
+
+      .sort(
+        (
+          a,
+          b
+        ) => {
+
+          /*
+            Pedidos reabiertos van
+            primero.
+          */
+
+          const prioridadA =
+            a.prioridadPreparando
+              ? 0
+              : 1;
+
+          const prioridadB =
+            b.prioridadPreparando
+              ? 0
+              : 1;
+
+
+          if (
+            prioridadA !==
+            prioridadB
+          ) {
+
+            return (
+              prioridadA -
+              prioridadB
+            );
+          }
+
+
+          return (
+            fechaCola(a) -
+            fechaCola(b)
+          );
+        }
+      );
+
+
+  const listos =
+    pedidos
+
+      .filter(
+        p =>
+          p.estado ===
+          "listo"
+      )
+
       .sort(
         (a, b) =>
           fechaCola(a) -
@@ -561,17 +896,34 @@ function renderPedidos(pedidos) {
       );
 
 
-  const listos =
+  const entregados =
     pedidos
+
       .filter(
-        pedido =>
-          pedido.estado ===
-          "listo"
+        p =>
+          p.estado ===
+          "entregado"
       )
+
+      /*
+        Los últimos entregados
+        aparecen primero.
+      */
+
       .sort(
         (a, b) =>
-          fechaCola(a) -
-          fechaCola(b)
+
+          new Date(
+            b.entregadoEn ||
+            b.actualizado ||
+            b.fecha
+          ) -
+
+          new Date(
+            a.entregadoEn ||
+            a.actualizado ||
+            a.fecha
+          )
       );
 
 
@@ -580,14 +932,21 @@ function renderPedidos(pedidos) {
     nuevos
   );
 
+
   renderColumna(
     "preparando",
     preparando
   );
 
+
   renderColumna(
     "listos",
     listos
+  );
+
+
+  renderEntregados(
+    entregados
   );
 
 
@@ -607,25 +966,34 @@ function renderPedidos(pedidos) {
     "contador-listos"
   ).textContent =
     listos.length;
+
+
+  document.getElementById(
+    "contador-entregados"
+  ).textContent =
+    entregados.length;
+
 }
 
 
-/* ============================
-   RENDER DE CADA COLUMNA
-============================ */
+/* =========================
+   COLUMNAS
+========================= */
+
 
 function renderColumna(
-  idContenedor,
+  id,
   pedidos
 ) {
 
   const contenedor =
     document.getElementById(
-      idContenedor
+      id
     );
 
 
-  contenedor.innerHTML = "";
+  contenedor.innerHTML =
+    "";
 
 
   if (
@@ -645,23 +1013,10 @@ function renderColumna(
   pedidos.forEach(
     pedido => {
 
-      const tarjeta =
-        crearTarjetaPedido(
-          pedido
-        );
-
-
-      /*
-        appendChild agrega al final.
-
-        Como antes ordenamos del
-        más antiguo al más nuevo,
-        los antiguos quedan arriba
-        y los nuevos abajo.
-      */
-
       contenedor.appendChild(
-        tarjeta
+        crearTarjeta(
+          pedido
+        )
       );
 
     }
@@ -669,11 +1024,12 @@ function renderColumna(
 }
 
 
-/* ============================
-   CREAR TARJETA
-============================ */
+/* =========================
+   TARJETA
+========================= */
 
-function crearTarjetaPedido(
+
+function crearTarjeta(
   pedido
 ) {
 
@@ -688,6 +1044,16 @@ function crearTarjetaPedido(
     pedido.estado;
 
 
+  if (
+    pedido.prioridadPreparando
+  ) {
+
+    tarjeta.classList.add(
+      "pedido-prioritario"
+    );
+  }
+
+
   const productos =
     Array.isArray(
       pedido.productos
@@ -698,6 +1064,7 @@ function crearTarjetaPedido(
 
   const productosHTML =
     productos
+
       .map(
         producto => `
 
@@ -716,6 +1083,7 @@ function crearTarjetaPedido(
           </div>
         `
       )
+
       .join("");
 
 
@@ -785,9 +1153,8 @@ function crearTarjetaPedido(
           btn-entregado
         "
         onclick="
-          cambiarEstado(
-            '${pedido.id}',
-            'entregado'
+          entregarPedido(
+            '${pedido.id}'
           )
         "
       >
@@ -798,6 +1165,19 @@ function crearTarjetaPedido(
 
 
   tarjeta.innerHTML = `
+
+    ${
+      pedido.prioridadPreparando
+
+        ? `
+          <span class="prioridad">
+            DEVUELTO A COCINA
+          </span>
+        `
+
+        : ""
+    }
+
 
     <div class="pedido-cabecera">
 
@@ -811,10 +1191,12 @@ function crearTarjetaPedido(
         </h3>
 
         <div class="persona">
+
           ${escaparHTML(
             pedido.nombre ||
             "Sin nombre"
           )}
+
         </div>
 
       </div>
@@ -822,6 +1204,7 @@ function crearTarjetaPedido(
 
       <div class="hora">
 
+        Pedido
         ${formatoHora(
           pedido.fecha
         )}
@@ -846,13 +1229,176 @@ function crearTarjetaPedido(
 }
 
 
-/* ============================
+/* =========================
+   ENTREGADOS
+========================= */
+
+
+function renderEntregados(
+  pedidos
+) {
+
+  const tbody =
+    document.getElementById(
+      "tabla-entregados"
+    );
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if (
+    pedidos.length === 0
+  ) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="5"
+          class="vacio"
+        >
+          Todavía no hay pedidos entregados.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  pedidos.forEach(
+    pedido => {
+
+      const productos =
+        Array.isArray(
+          pedido.productos
+        )
+          ? pedido.productos
+          : [];
+
+
+      const productosHTML =
+        productos
+
+          .map(
+            producto => `
+
+              <div class="entregado-producto">
+
+                ${Number(
+                  producto.cantidad || 0
+                )}
+                ×
+                ${escaparHTML(
+                  producto.nombre
+                )}
+
+              </div>
+            `
+          )
+
+          .join("");
+
+
+      const entregadoEn =
+        pedido.entregadoEn ||
+        pedido.actualizado ||
+        pedido.fecha;
+
+
+      const fila =
+        document.createElement(
+          "tr"
+        );
+
+
+      fila.innerHTML = `
+
+        <td>
+
+          <strong>
+            ${formatoFechaHora(
+              entregadoEn
+            )}
+          </strong>
+
+        </td>
+
+
+        <td>
+
+          <strong>
+            Mesa
+            ${Number(
+              pedido.mesa
+            )}
+          </strong>
+
+          <br>
+
+          ${escaparHTML(
+            pedido.nombre ||
+            "Sin nombre"
+          )}
+
+        </td>
+
+
+        <td>
+
+          ${productosHTML}
+
+        </td>
+
+
+        <td>
+
+          ${formatoFechaHora(
+            pedido.fecha
+          )}
+
+        </td>
+
+
+        <td>
+
+          <button
+            class="btn-reabrir"
+            onclick="
+              volverAPreparando(
+                '${pedido.id}',
+                '${escaparHTML(
+                  pedido.nombre ||
+                  "Sin nombre"
+                )}'
+              )
+            "
+          >
+            ↩ Volver a preparando
+          </button>
+
+        </td>
+      `;
+
+
+      tbody.appendChild(
+        fila
+      );
+
+    }
+  );
+}
+
+
+/* =========================
    CAMBIAR ESTADO
-============================ */
+========================= */
+
 
 async function cambiarEstado(
   id,
-  nuevoEstado
+  estado
 ) {
 
   try {
@@ -861,7 +1407,9 @@ async function cambiarEstado(
       await fetch(
         "/.netlify/functions/pedidos",
         {
-          method: "PUT",
+
+          method:
+            "PUT",
 
           headers: {
             "Content-Type":
@@ -871,8 +1419,7 @@ async function cambiarEstado(
           body:
             JSON.stringify({
               id,
-              estado:
-                nuevoEstado
+              estado
             })
         }
       );
@@ -888,22 +1435,17 @@ async function cambiarEstado(
         resultado.error ||
         "No se pudo actualizar."
       );
-
     }
 
-
-    /*
-      Recargamos inmediatamente.
-      Así el pedido pasa a su nueva
-      columna sin esperar los 5 s.
-    */
 
     await cargarPedidos();
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     alert(
       "No se pudo actualizar el pedido."
@@ -913,41 +1455,83 @@ async function cambiarEstado(
 }
 
 
-/* ============================
-   ERROR
-============================ */
+/* =========================
+   ENTREGAR
+========================= */
 
-function mostrarError() {
 
-  document.getElementById(
-    "nuevos"
-  ).innerHTML = `
-    <div class="error">
-      No se pudieron cargar los pedidos.
-    </div>
-  `;
+async function entregarPedido(
+  id
+) {
 
+  const confirmar =
+    confirm(
+      "¿Confirmas que este pedido ya fue entregado a la persona?"
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  await cambiarEstado(
+    id,
+    "entregado"
+  );
 }
 
 
-/* ============================
-   INICIO + AUTOACTUALIZACIÓN
-============================ */
+/* =========================
+   VOLVER A PREPARANDO
+========================= */
+
+
+async function volverAPreparando(
+  id,
+  nombre
+) {
+
+  const confirmar =
+    confirm(
+      "¿Este pedido fue marcado como entregado por error?\n\n" +
+
+      "Se devolverá a PREPARANDO y aparecerá al inicio de la cola.\n\n" +
+
+      "Persona: " +
+      nombre
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  await cambiarEstado(
+    id,
+    "preparando"
+  );
+}
+
+
+/* =========================
+   INICIO
+========================= */
+
 
 cargarPedidos();
 
-
-/*
-  Cocina revisa pedidos nuevos
-  automáticamente cada 5 segundos.
-*/
 
 setInterval(
   cargarPedidos,
   5000
 );
 
+
 </script>
 
+
 </body>
+
 </html>
