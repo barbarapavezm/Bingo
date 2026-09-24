@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>Mi mesa - Bingo</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+header {
+  background: white;
+  padding: 25px 20px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+header h1 {
+  margin: 0 0 6px;
+}
+
+header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+main {
+  max-width: 650px;
+  margin: auto;
+  padding: 25px 18px;
+}
+
+.mesa {
+  background: #2563eb;
+  color: white;
+
+  border-radius: 14px;
+
+  padding: 20px;
+
+  text-align: center;
+
+  margin-bottom: 22px;
+}
+
+.mesa-numero {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.panel {
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.08);
+
+  margin-bottom: 18px;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.descripcion {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+input {
+  width: 100%;
+
+  padding: 13px;
+
+  font-size: 16px;
+
+  border:
+    1px solid #d1d5db;
+
+  border-radius: 8px;
+
+  margin-top: 8px;
+}
+
+button {
+  width: 100%;
+
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 13px;
+
+  font-size: 16px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  margin-top: 12px;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.btn-preventa {
+  background: #7c3aed;
+  color: white;
+}
+
+.btn-normal {
+  background: #2563eb;
+  color: white;
+}
+
+.separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  color: #9ca3af;
+
+  margin: 22px 0;
+}
+
+.separador::before,
+.separador::after {
+  content: "";
+  height: 1px;
+  background: #d1d5db;
+  flex: 1;
+}
+
+.error {
+  margin-top: 12px;
+
+  background: #fee2e2;
+
+  color: #991b1b;
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  display: none;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>
+  Bingo
+</h1>
+
+<p>
+  Ingresa a tu mesa
+</p>
+
+</header>
+
+
+<main>
+
+
+<div class="mesa">
+
+  <div>
+    Estás ingresando a
+  </div>
+
+  <div
+    class="mesa-numero"
+    id="numero-mesa">
+    Mesa
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     CON PREVENTA
+========================= -->
+
+<div class="panel">
+
+<h2>
+  🎟️ Tengo una preventa
+</h2>
+
+<p class="descripcion">
+
+  Ingresa el código que recibiste
+  con tu preventa.
+
+  Tus productos quedarán asociados
+  a esta mesa.
+
+</p>
+
+<label for="codigo">
+  Código de preventa
+</label>
+
+<input
+  id="codigo"
+  type="text"
+  placeholder="Ej: A4827"
+  maxlength="5"
+  autocomplete="off"
+>
+
+<button
+  id="btn-preventa"
+  class="btn-preventa"
+  onclick="ingresarPreventa()">
+  Ingresar con mi preventa
+</button>
+
+<div
+  id="error-preventa"
+  class="error">
+</div>
+
+</div>
+
+
+
+<div class="separador">
+  o
+</div>
+
+
+
+<!-- =========================
+     SIN PREVENTA
+========================= -->
+
+<div class="panel">
+
+<h2>
+  👋 No tengo preventa
+</h2>
+
+<p class="descripcion">
+
+  Escribe tu nombre para crear
+  tu cuenta en esta mesa.
+
+  Después podrás comprar en Caja
+  y tus productos aparecerán aquí.
+
+</p>
+
+<label for="nombre">
+  Tu nombre
+</label>
+
+<input
+  id="nombre"
+  type="text"
+  placeholder="Ej: Camila"
+  autocomplete="off"
+>
+
+<button
+  id="btn-normal"
+  class="btn-normal"
+  onclick="ingresarSinPreventa()">
+  Entrar a esta mesa
+</button>
+
+<div
+  id="error-normal"
+  class="error">
+</div>
+
+</div>
+
+
+</main>
+
+
+<script>
+
+
+/* =========================
+   MESA DEL QR
+========================= */
+
+const parametros =
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const mesa =
+  Number(
+    parametros.get(
+      "mesa"
+    )
+  );
+
+
+const numeroMesa =
+  document.getElementById(
+    "numero-mesa"
+  );
+
+
+if (
+  !Number.isInteger(mesa) ||
+  mesa < 1 ||
+  mesa > 50
+) {
+
+  numeroMesa.textContent =
+    "Mesa inválida";
+
+  document.querySelector(
+    "main"
+  ).innerHTML = `
+
+    <div class="panel">
+
+      <h2>
+        QR inválido
+      </h2>
+
+      <p>
+        Este código QR no tiene una
+        mesa válida asociada.
+      </p>
+
+    </div>
+  `;
+
+} else {
+
+  numeroMesa.textContent =
+    "Mesa " + mesa;
+
+}
+
+
+
+/* =========================
+   IR A CUENTA PERSONAL
+========================= */
+
+function abrirCuenta(
+  persona
+) {
+
+  /*
+    Incluimos ID + mesa + nombre.
+
+    Tu persona.html actual todavía
+    funciona con mesa + nombre.
+
+    Más adelante lo cambiaremos
+    completamente al ID único.
+  */
+
+  window.location.href =
+
+    "/persona.html?id=" +
+
+    encodeURIComponent(
+      persona.id
+    ) +
+
+    "&mesa=" +
+    encodeURIComponent(
+      persona.mesa
+    ) +
+
+    "&nombre=" +
+    encodeURIComponent(
+      persona.nombre
+    );
+
+}
+
+
+
+/* =========================
+   PREVENTA
+========================= */
+
+async function ingresarPreventa() {
+
+  const codigo =
+    document.getElementById(
+      "codigo"
+    )
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const boton =
+    document.getElementById(
+      "btn-preventa"
+    );
+
+
+  const error =
+    document.getElementById(
+      "error-preventa"
+    );
+
+
+  error.style.display =
+    "none";
+
+
+  if (!codigo) {
+
+    error.textContent =
+      "Ingresa tu código de preventa.";
+
+    error.style.display =
+      "block";
+
+    return;
+  }
+
+
+  try {
+
+    boton.disabled =
+      true;
+
+    boton.textContent =
+      "Ingresando...";
+
+
+    const respuesta =
+      await fetch(
+
+        "/.netlify/functions/personas",
+
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                "asignar-preventa",
+
+              codigo,
+
+              mesa
+
+            })
+
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+
+        resultado.error ||
+        "No se pudo usar esta preventa."
+
+      );
+    }
+
+
+    abrirCuenta(
+      resultado.persona
+    );
+
+
+  } catch (
+    err
+  ) {
+
+    console.error(
+      err
+    );
+
+
+    error.textContent =
+      err.message;
+
+
+    error.style.display =
+      "block";
+
+
+  } finally {
+
+    boton.disabled =
+      false;
+
+
+    boton.textContent =
+      "Ingresar con mi preventa";
+
+  }
+
+}
+
+
+
+/* =========================
+   SIN PREVENTA
+========================= */
+
+async function ingresarSinPreventa() {
+
+  const nombre =
+    document.getElementById(
+      "nombre"
+    )
+      .value
+      .trim();
+
+
+  const boton =
+    document.getElementById(
+      "btn-normal"
+    );
+
+
+  const error =
+    document.getElementById(
+      "error-normal"
+    );
+
+
+  error.style.display =
+    "none";
+
+
+  if (!nombre) {
+
+    error.textContent =
+      "Escribe tu nombre.";
+
+    error.style.display =
+      "block";
+
+    return;
+  }
+
+
+  try {
+
+    boton.disabled =
+      true;
+
+
+    boton.textContent =
+      "Creando tu cuenta...";
+
+
+    const respuesta =
+      await fetch(
+
+        "/.netlify/functions/personas",
+
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                "crear-sin-preventa",
+
+              nombre,
+
+              mesa
+
+            })
+
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+
+        resultado.error ||
+        "No se pudo crear la cuenta."
+
+      );
+    }
+
+
+    abrirCuenta(
+      resultado.persona
+    );
+
+
+  } catch (
+    err
+  ) {
+
+    console.error(
+      err
+    );
+
+
+    error.textContent =
+      err.message;
+
+
+    error.style.display =
+      "block";
+
+
+  } finally {
+
+    boton.disabled =
+      false;
+
+
+    boton.textContent =
+      "Entrar a esta mesa";
+
+  }
+
+}
+
+
+</script>
+
+</body>
+
+</html>
