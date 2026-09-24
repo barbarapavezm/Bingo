@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumen de caja - Bingo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    .grid-resumen {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card .titulo {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .card .valor {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .panel {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f9fafb;
+    }
+
+    .estado-cargando {
+      color: #6b7280;
+      margin-top: 10px;
+    }
+
+    .producto-lista {
+      margin: 2px 0;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    @media (max-width: 800px) {
+      main {
+        padding: 20px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Resumen de caja</h1>
+    <span>Ventas acumuladas del evento</span>
+  </div>
+
+  <a href="/index.html">Volver al inicio</a>
+</header>
+
+<main>
+
+  <div class="grid-resumen">
+
+    <div class="card">
+      <div class="titulo">Total vendido</div>
+      <div class="valor" id="total-vendido">$0</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Efectivo</div>
+      <div class="valor" id="total-efectivo">$0</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Transferencias</div>
+      <div class="valor" id="total-transferencia">$0</div>
+    </div>
+
+    <div class="card">
+      <div class="titulo">Cantidad de ventas</div>
+      <div class="valor" id="cantidad-ventas">0</div>
+    </div>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Productos vendidos</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad vendida</th>
+          <th>Dinero generado</th>
+        </tr>
+      </thead>
+
+      <tbody id="tabla-productos">
+      </tbody>
+    </table>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Historial de ventas</h2>
+
+    <div id="estado" class="estado-cargando">
+      Cargando ventas...
+    </div>
+
+    <table id="tabla-historial" style="display:none;">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Mesa</th>
+          <th>Productos</th>
+          <th>Pago</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+
+      <tbody id="historial-ventas">
+      </tbody>
+    </table>
+
+  </div>
+
+</main>
+
+<script>
+
+function formatoCLP(valor) {
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0
+  }).format(valor);
+}
+
+function formatoFecha(fechaISO) {
+  const fecha = new Date(fechaISO);
+
+  return fecha.toLocaleString("es-CL", {
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+}
+
+async function cargarResumen() {
+
+  const estado = document.getElementById("estado");
+
+  try {
+
+    const respuesta = await fetch(
+      "/.netlify/functions/ventas"
+    );
+
+    if (!respuesta.ok) {
+      throw new Error("No se pudieron cargar las ventas.");
+    }
+
+    const ventas = await respuesta.json();
+
+    let totalVendido = 0;
+    let totalEfectivo = 0;
+    let totalTransferencia = 0;
+
+    const resumenProductos = {};
+
+    ventas.forEach(venta => {
+
+      totalVendido += Number(venta.total || 0);
+
+      if (venta.metodoPago === "efectivo") {
+        totalEfectivo += Number(venta.total || 0);
+      }
+
+      if (venta.metodoPago === "transferencia") {
+        totalTransferencia += Number(venta.total || 0);
+      }
+
+      venta.productos.forEach(producto => {
+
+        if (!resumenProductos[producto.nombre]) {
+          resumenProductos[producto.nombre] = {
+            cantidad: 0,
+            dinero: 0
+          };
+        }
+
+        resumenProductos[producto.nombre].cantidad +=
+          Number(producto.cantidad || 0);
+
+        resumenProductos[producto.nombre].dinero +=
+          Number(producto.subtotal || 0);
+      });
+
+    });
+
+    document.getElementById("total-vendido").textContent =
+      formatoCLP(totalVendido);
+
+    document.getElementById("total-efectivo").textContent =
+      formatoCLP(totalEfectivo);
+
+    document.getElementById("total-transferencia").textContent =
+      formatoCLP(totalTransferencia);
+
+    document.getElementById("cantidad-ventas").textContent =
+      ventas.length;
+
+    renderProductos(resumenProductos);
+
+    renderHistorial(ventas);
+
+    estado.style.display = "none";
+
+    document.getElementById("tabla-historial").style.display = "table";
+
+  } catch (error) {
+
+    console.error(error);
+
+    estado.className = "error";
+
+    estado.textContent =
+      "No se pudo cargar el resumen de ventas.";
+  }
+}
+
+function renderProductos(resumenProductos) {
+
+  const tbody =
+    document.getElementById("tabla-productos");
+
+  tbody.innerHTML = "";
+
+  const nombres = Object.keys(resumenProductos);
+
+  if (nombres.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3">
+          Aún no hay productos vendidos.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  nombres
+    .sort()
+    .forEach(nombre => {
+
+      const datos =
+        resumenProductos[nombre];
+
+      const fila =
+        document.createElement("tr");
+
+      fila.innerHTML = `
+        <td>${nombre}</td>
+        <td>${datos.cantidad}</td>
+        <td>${formatoCLP(datos.dinero)}</td>
+      `;
+
+      tbody.appendChild(fila);
+    });
+}
+
+function renderHistorial(ventas) {
+
+  const tbody =
+    document.getElementById("historial-ventas");
+
+  tbody.innerHTML = "";
+
+  if (ventas.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          Aún no hay ventas registradas.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  ventas.forEach(venta => {
+
+    const productosHTML =
+      venta.productos
+        .map(producto => `
+          <div class="producto-lista">
+            ${producto.cantidad} x ${producto.nombre}
+          </div>
+        `)
+        .join("");
+
+    const fila =
+      document.createElement("tr");
+
+    fila.innerHTML = `
+      <td>${formatoFecha(venta.fecha)}</td>
+
+      <td>
+        Mesa ${venta.mesa}
+      </td>
+
+      <td>
+        ${productosHTML}
+      </td>
+
+      <td>
+        ${
+          venta.metodoPago === "efectivo"
+            ? "Efectivo"
+            : "Transferencia"
+        }
+      </td>
+
+      <td>
+        <strong>
+          ${formatoCLP(venta.total)}
+        </strong>
+      </td>
+    `;
+
+    tbody.appendChild(fila);
+  });
+}
+
+cargarResumen();
+
+</script>
+
+</body>
+</html>
