@@ -125,6 +125,11 @@
       background: #1d4ed8;
     }
 
+    .registrar:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
     .nota {
       color: #6b7280;
       font-size: 14px;
@@ -194,14 +199,21 @@
   <div class="panel">
 
     <div>Total de la venta</div>
-    <div class="total" id="total">$0</div>
 
-    <button class="registrar" onclick="registrarVenta()">
+    <div class="total" id="total">
+      $0
+    </div>
+
+    <button
+      class="registrar"
+      id="boton-registrar"
+      onclick="registrarVenta()"
+    >
       Registrar venta
     </button>
 
     <p class="nota">
-      Por ahora esta versión no guarda los datos. En el siguiente paso la conectaremos a la base de datos.
+      Las ventas se guardan automáticamente al presionar Registrar venta.
     </p>
 
   </div>
@@ -237,36 +249,67 @@ function formatoCLP(valor) {
 }
 
 function cargarMesas() {
+
   const select = document.getElementById("mesa");
 
   for (let i = 1; i <= 50; i++) {
+
     const option = document.createElement("option");
+
     option.value = i;
     option.textContent = "Mesa " + i;
+
     select.appendChild(option);
   }
 }
 
 function crearProductos() {
 
-  const comida = document.getElementById("productos-comida");
-  const bingo = document.getElementById("productos-bingo");
+  const comida =
+    document.getElementById("productos-comida");
+
+  const bingo =
+    document.getElementById("productos-bingo");
 
   productos.forEach(producto => {
 
     cantidades[producto.id] = 0;
 
-    const tarjeta = document.createElement("div");
+    const tarjeta =
+      document.createElement("div");
+
     tarjeta.className = "producto";
 
     tarjeta.innerHTML = `
       <h3>${producto.nombre}</h3>
-      <div>${formatoCLP(producto.precio)}</div>
+
+      <div>
+        ${formatoCLP(producto.precio)}
+      </div>
 
       <div class="controles">
-        <button class="cantidad-btn" onclick="cambiarCantidad(${producto.id}, -1)">−</button>
-        <span class="cantidad" id="cantidad-${producto.id}">0</span>
-        <button class="cantidad-btn" onclick="cambiarCantidad(${producto.id}, 1)">+</button>
+
+        <button
+          class="cantidad-btn"
+          onclick="cambiarCantidad(${producto.id}, -1)"
+        >
+          −
+        </button>
+
+        <span
+          class="cantidad"
+          id="cantidad-${producto.id}"
+        >
+          0
+        </span>
+
+        <button
+          class="cantidad-btn"
+          onclick="cambiarCantidad(${producto.id}, 1)"
+        >
+          +
+        </button>
+
       </div>
     `;
 
@@ -275,6 +318,7 @@ function crearProductos() {
     } else {
       bingo.appendChild(tarjeta);
     }
+
   });
 }
 
@@ -286,51 +330,221 @@ function cambiarCantidad(id, cambio) {
     cantidades[id] = 0;
   }
 
-  document.getElementById("cantidad-" + id).textContent = cantidades[id];
+  document.getElementById(
+    "cantidad-" + id
+  ).textContent = cantidades[id];
 
   actualizarTotal();
 }
 
-function actualizarTotal() {
+function calcularTotal() {
 
   let total = 0;
 
   productos.forEach(producto => {
-    total += producto.precio * cantidades[producto.id];
+
+    total +=
+      producto.precio *
+      cantidades[producto.id];
+
   });
 
-  document.getElementById("total").textContent = formatoCLP(total);
+  return total;
 }
 
-function registrarVenta() {
+function actualizarTotal() {
 
-  const mesa = document.getElementById("mesa").value;
-  const pago = document.getElementById("pago").value;
+  const total = calcularTotal();
+
+  document.getElementById(
+    "total"
+  ).textContent = formatoCLP(total);
+}
+
+async function registrarVenta() {
+
+  const mesa =
+    document.getElementById("mesa").value;
+
+  const pago =
+    document.getElementById("pago").value;
+
+  const boton =
+    document.getElementById("boton-registrar");
+
 
   if (!mesa) {
+
     alert("Selecciona una mesa.");
+
     return;
   }
+
 
   if (!pago) {
+
     alert("Selecciona un método de pago.");
+
     return;
   }
 
-  const productosSeleccionados = productos.filter(
-    producto => cantidades[producto.id] > 0
-  );
+
+  const productosSeleccionados =
+    productos
+      .filter(
+        producto =>
+          cantidades[producto.id] > 0
+      )
+      .map(producto => ({
+
+        id: producto.id,
+
+        nombre: producto.nombre,
+
+        precio: producto.precio,
+
+        cantidad:
+          cantidades[producto.id],
+
+        subtotal:
+          producto.precio *
+          cantidades[producto.id],
+
+        categoria:
+          producto.categoria
+
+      }));
+
 
   if (productosSeleccionados.length === 0) {
+
     alert("Agrega al menos un producto.");
+
     return;
   }
 
-  alert("Venta lista para registrar. En el próximo paso la conectaremos a la base de datos.");
+
+  const total =
+    productosSeleccionados.reduce(
+      (suma, producto) =>
+        suma + producto.subtotal,
+      0
+    );
+
+
+  const venta = {
+
+    mesa: Number(mesa),
+
+    metodoPago: pago,
+
+    productos: productosSeleccionados,
+
+    total: total
+  };
+
+
+  try {
+
+    boton.disabled = true;
+    boton.textContent = "Guardando venta...";
+
+
+    const respuesta = await fetch(
+      "/.netlify/functions/ventas",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body:
+          JSON.stringify(venta)
+      }
+    );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        resultado.error ||
+        "No se pudo guardar la venta."
+      );
+
+    }
+
+
+    alert(
+      "✅ Venta registrada correctamente\n\n" +
+      "Mesa " + mesa +
+      "\n" +
+      "Total: " +
+      formatoCLP(total) +
+      "\n" +
+      "Pago: " +
+      (
+        pago === "efectivo"
+          ? "Efectivo"
+          : "Transferencia"
+      )
+    );
+
+
+    limpiarVenta();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ No se pudo guardar la venta.\n\n" +
+      "Revisa que la función de Netlify esté publicada."
+    );
+
+  } finally {
+
+    boton.disabled = false;
+    boton.textContent = "Registrar venta";
+
+  }
 }
 
+function limpiarVenta() {
+
+  productos.forEach(producto => {
+
+    cantidades[producto.id] = 0;
+
+    const elemento =
+      document.getElementById(
+        "cantidad-" + producto.id
+      );
+
+    if (elemento) {
+      elemento.textContent = "0";
+    }
+
+  });
+
+
+  document.getElementById("mesa").value = "";
+
+  document.getElementById("pago").value = "";
+
+  actualizarTotal();
+}
+
+
 cargarMesas();
+
 crearProductos();
+
+actualizarTotal();
 
 </script>
 
