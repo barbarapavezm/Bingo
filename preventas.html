@@ -147,7 +147,8 @@ label {
   font-weight: bold;
 }
 
-input {
+input,
+select {
   width: 100%;
 
   padding: 12px;
@@ -158,6 +159,8 @@ input {
     1px solid #ccc;
 
   border-radius: 9px;
+
+  background: white;
 }
 
 .actualizar {
@@ -840,6 +843,43 @@ Mesa:
   onclick="guardarNombre()"
 >
   Guardar nombre
+</button>
+
+</div>
+
+
+
+<!-- ASIGNAR / CAMBIAR MESA -->
+
+<div class="seccion-edicion">
+
+<h3>
+  Asignar / cambiar mesa
+</h3>
+
+<p class="descripcion">
+  Úsalo si la persona todavía no tiene mesa
+  o si necesitas cambiarla por alguna complicación.
+  Esto no cambia su estado de llegada.
+</p>
+
+<label for="editar-mesa">
+  Mesa
+</label>
+
+<select
+  id="editar-mesa"
+>
+  <option value="">
+    Seleccionar mesa
+  </option>
+</select>
+
+<button
+  class="btn-guardar accion-edicion"
+  onclick="guardarMesa()"
+>
+  Guardar mesa
 </button>
 
 </div>
@@ -1845,6 +1885,60 @@ function abrirEditor(
     persona.nombre;
 
 
+  /*
+    Preparar selector de mesa.
+  */
+
+  const selectMesa =
+    document.getElementById(
+      "editar-mesa"
+    );
+
+
+  selectMesa.innerHTML =
+    '<option value="">Seleccionar mesa</option>';
+
+
+  for (
+    let numeroMesa = 1;
+    numeroMesa <= 50;
+    numeroMesa++
+  ) {
+
+    const opcion =
+      document.createElement(
+        "option"
+      );
+
+
+    opcion.value =
+      String(
+        numeroMesa
+      );
+
+
+    opcion.textContent =
+      "Mesa " +
+      numeroMesa;
+
+
+    selectMesa.appendChild(
+      opcion
+    );
+  }
+
+
+  if (
+    persona.mesa
+  ) {
+
+    selectMesa.value =
+      String(
+        persona.mesa
+      );
+  }
+
+
   document.getElementById(
     "cantidad-dividir"
   ).value =
@@ -2045,6 +2139,171 @@ async function guardarNombre() {
 
     alert(
       "✅ Nombre actualizado."
+    );
+
+
+    cerrarEditorForzado();
+
+    await cargarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+  } finally {
+
+    bloquearEditor(
+      false
+    );
+  }
+}
+
+
+/* =========================
+   ASIGNAR / CAMBIAR MESA
+========================= */
+
+async function guardarMesa() {
+
+  if (
+    !personaEditandoId ||
+    procesandoEdicion
+  ) {
+    return;
+  }
+
+
+  const persona =
+    preventas.find(
+      p =>
+        p.id ===
+        personaEditandoId
+    );
+
+
+  if (!persona) {
+    return;
+  }
+
+
+  const nuevaMesa =
+    Number(
+      document.getElementById(
+        "editar-mesa"
+      ).value
+    );
+
+
+  if (
+    !Number.isInteger(
+      nuevaMesa
+    ) ||
+    nuevaMesa < 1 ||
+    nuevaMesa > 50
+  ) {
+
+    alert(
+      "Selecciona una mesa entre 1 y 50."
+    );
+
+    return;
+  }
+
+
+  const mesaAnterior =
+    persona.mesa
+
+      ? Number(
+          persona.mesa
+        )
+
+      : null;
+
+
+  if (
+    mesaAnterior ===
+    nuevaMesa
+  ) {
+
+    alert(
+      persona.nombre +
+      " ya está en la Mesa " +
+      nuevaMesa +
+      "."
+    );
+
+    return;
+  }
+
+
+  const mensaje =
+
+    mesaAnterior
+
+      ? (
+          "¿Cambiar a " +
+          persona.nombre +
+          " de la Mesa " +
+          mesaAnterior +
+          " a la Mesa " +
+          nuevaMesa +
+          "?\n\n" +
+          "Sus ventas y pedidos asociados también se actualizarán."
+        )
+
+      : (
+          "¿Asignar a " +
+          persona.nombre +
+          " a la Mesa " +
+          nuevaMesa +
+          "?\n\n" +
+          "Esto no la marcará automáticamente como llegada."
+        );
+
+
+  const confirmar =
+    confirm(
+      mensaje
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  try {
+
+    bloquearEditor(
+      true
+    );
+
+
+    await enviarAccion({
+
+      accion:
+        "cambiar-mesa",
+
+      personaId:
+        personaEditandoId,
+
+      nuevaMesa
+
+    });
+
+
+    alert(
+      "✅ Mesa actualizada correctamente."
     );
 
 
