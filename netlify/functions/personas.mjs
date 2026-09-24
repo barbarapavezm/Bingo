@@ -1,13 +1,22 @@
 import { getStore } from "@netlify/blobs";
 
 const personasStore =
-  getStore("personas-bingo");
+  getStore({
+    name: "personas-bingo",
+    consistency: "strong"
+  });
 
 const ventasStore =
-  getStore("ventas-bingo");
+  getStore({
+    name: "ventas-bingo",
+    consistency: "strong"
+  });
 
 const pedidosStore =
-  getStore("pedidos-bingo");
+  getStore({
+    name: "pedidos-bingo",
+    consistency: "strong"
+  });
 
 
 function normalizar(texto) {
