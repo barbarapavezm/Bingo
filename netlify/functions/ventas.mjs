@@ -11,6 +11,7 @@ export default async (req) => {
 
       if (
         !venta.mesa ||
+        !venta.nombre ||
         !venta.metodoPago ||
         !venta.productos ||
         !venta.total
@@ -26,6 +27,7 @@ export default async (req) => {
       const ventaCompleta = {
         id,
         mesa: venta.mesa,
+        nombre: venta.nombre,
         metodoPago: venta.metodoPago,
         productos: venta.productos,
         total: venta.total,
@@ -48,15 +50,23 @@ export default async (req) => {
       const ventas = [];
 
       for (const blob of lista.blobs) {
-        const venta = await store.get(blob.key, {
-          type: "json"
-        });
 
-        ventas.push(venta);
+        const venta = await store.get(
+          blob.key,
+          {
+            type: "json"
+          }
+        );
+
+        if (venta) {
+          ventas.push(venta);
+        }
       }
 
       ventas.sort(
-        (a, b) => new Date(b.fecha) - new Date(a.fecha)
+        (a, b) =>
+          new Date(b.fecha) -
+          new Date(a.fecha)
       );
 
       return Response.json(ventas);
@@ -70,11 +80,18 @@ export default async (req) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Error en función ventas:",
+      error
+    );
 
     return Response.json(
-      { error: "Error guardando la venta" },
-      { status: 500 }
+      {
+        error: "Error procesando la venta"
+      },
+      {
+        status: 500
+      }
     );
   }
 };
