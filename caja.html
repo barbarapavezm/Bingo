@@ -172,6 +172,20 @@ input {
 }
 
 
+.nueva-persona-box {
+  margin-top: 12px;
+
+  padding: 14px;
+
+  border-radius: 10px;
+
+  background: #f9fafb;
+
+  border:
+    1px solid #e5e7eb;
+}
+
+
 /* =========================
    PRODUCTOS
 ========================= */
@@ -600,13 +614,40 @@ button {
   Persona
 </label>
 
-<select id="persona">
+<select
+  id="persona"
+  onchange="cambiarPersonaCaja()"
+>
 
 <option value="">
   Primero selecciona una mesa
 </option>
 
 </select>
+
+
+<div
+  id="nueva-persona-caja"
+  class="nueva-persona-box oculto"
+>
+
+<label for="nombre-nueva-persona">
+  Nombre de la nueva persona
+</label>
+
+<input
+  id="nombre-nueva-persona"
+  type="text"
+  placeholder="Ej: Camila"
+  autocomplete="off"
+>
+
+<p class="nota">
+  Se creará automáticamente en la mesa
+  seleccionada al registrar esta venta.
+</p>
+
+</div>
 
 </div>
 
@@ -659,9 +700,9 @@ button {
 
 <p class="nota">
 
-Si la persona no aparece,
-primero debe registrarse mediante
-el QR de su mesa.
+Puedes elegir una persona que ya exista
+o usar “+ Agregar persona nueva” para
+registrarla directamente desde Caja.
 
 </p>
 
@@ -1260,6 +1301,19 @@ async function cargarPersonasMesa() {
     [];
 
 
+  document.getElementById(
+    "nueva-persona-caja"
+  ).classList.add(
+    "oculto"
+  );
+
+
+  document.getElementById(
+    "nombre-nueva-persona"
+  ).value =
+    "";
+
+
   if (!mesa) {
 
     select.innerHTML =
@@ -1312,18 +1366,6 @@ async function cargarPersonasMesa() {
       '<option value="">Seleccionar persona</option>';
 
 
-    if (
-      personasMesa.length ===
-      0
-    ) {
-
-      select.innerHTML =
-        '<option value="">No hay personas registradas</option>';
-
-      return;
-    }
-
-
     personasMesa.forEach(
       persona => {
 
@@ -1348,6 +1390,25 @@ async function cargarPersonasMesa() {
     );
 
 
+    const nueva =
+      document.createElement(
+        "option"
+      );
+
+
+    nueva.value =
+      "__nueva__";
+
+
+    nueva.textContent =
+      "+ Agregar persona nueva";
+
+
+    select.appendChild(
+      nueva
+    );
+
+
   } catch (error) {
 
     console.error(
@@ -1355,8 +1416,52 @@ async function cargarPersonasMesa() {
     );
 
 
-    select.innerHTML =
-      '<option value="">Error cargando personas</option>';
+    select.innerHTML = `
+
+      <option value="">
+        Seleccionar persona
+      </option>
+
+      <option value="__nueva__">
+        + Agregar persona nueva
+      </option>
+
+    `;
+  }
+}
+
+
+/* =========================
+   PERSONA NUEVA DESDE CAJA
+========================= */
+
+function cambiarPersonaCaja() {
+
+  const valor =
+    document.getElementById(
+      "persona"
+    ).value;
+
+
+  const nueva =
+    valor ===
+    "__nueva__";
+
+
+  document.getElementById(
+    "nueva-persona-caja"
+  ).classList.toggle(
+    "oculto",
+    !nueva
+  );
+
+
+  if (!nueva) {
+
+    document.getElementById(
+      "nombre-nueva-persona"
+    ).value =
+      "";
   }
 }
 
@@ -2291,7 +2396,7 @@ async function registrarVentaNormal() {
   if (!personaId) {
 
     alert(
-      "Selecciona una persona."
+      "Selecciona una persona o agrega una nueva."
     );
 
     return;
@@ -2308,21 +2413,29 @@ async function registrarVentaNormal() {
   }
 
 
-  const persona =
-    personasMesa.find(
-      p =>
-        p.id ===
-        personaId
-    );
+  let nombreNuevaPersona =
+    "";
 
 
-  if (!persona) {
+  if (
+    personaId ===
+    "__nueva__"
+  ) {
 
-    alert(
-      "No se encontró la cuenta de la persona."
-    );
+    nombreNuevaPersona =
+      document.getElementById(
+        "nombre-nueva-persona"
+      ).value.trim();
 
-    return;
+
+    if (!nombreNuevaPersona) {
+
+      alert(
+        "Escribe el nombre de la nueva persona."
+      );
+
+      return;
+    }
   }
 
 
@@ -2393,36 +2506,14 @@ async function registrarVentaNormal() {
     );
 
 
-  const venta = {
-
-    tipoVenta:
-      "normal",
-
-    mesa:
-      Number(
-        mesa
-      ),
-
-    clienteId:
-      persona.id,
-
-    nombre:
-      persona.nombre,
-
-    metodoPago:
-      pago,
-
-    productos:
-      seleccionados,
-
-    total
-  };
-
-
   const boton =
     document.getElementById(
       "boton-registrar"
     );
+
+
+  let persona =
+    null;
 
 
   try {
@@ -2433,6 +2524,123 @@ async function registrarVentaNormal() {
 
     boton.disabled =
       true;
+
+
+    /*
+      Si se eligió agregar una persona
+      nueva, primero la creamos en la mesa.
+    */
+
+    if (
+      personaId ===
+      "__nueva__"
+    ) {
+
+      boton.textContent =
+        "Creando persona...";
+
+
+      const respuestaPersona =
+        await fetch(
+
+          "/.netlify/functions/personas",
+
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+
+                accion:
+                  "crear-sin-preventa",
+
+                mesa:
+                  Number(
+                    mesa
+                  ),
+
+                nombre:
+                  nombreNuevaPersona
+
+              })
+          }
+        );
+
+
+      const resultadoPersona =
+        await respuestaPersona.json();
+
+
+      if (!respuestaPersona.ok) {
+
+        throw new Error(
+          resultadoPersona.error ||
+          "No se pudo crear la persona."
+        );
+      }
+
+
+      persona =
+        resultadoPersona.persona;
+
+
+      if (!persona) {
+
+        throw new Error(
+          "La persona se creó, pero no se recibieron sus datos."
+        );
+      }
+
+
+  } else {
+
+      persona =
+        personasMesa.find(
+          p =>
+            p.id ===
+            personaId
+        );
+
+
+      if (!persona) {
+
+        throw new Error(
+          "No se encontró la cuenta de la persona."
+        );
+      }
+    }
+
+
+    const venta = {
+
+      tipoVenta:
+        "normal",
+
+      mesa:
+        Number(
+          mesa
+        ),
+
+      clienteId:
+        persona.id,
+
+      nombre:
+        persona.nombre,
+
+      metodoPago:
+        pago,
+
+      productos:
+        seleccionados,
+
+      total
+    };
 
 
     boton.textContent =
@@ -2555,6 +2763,8 @@ async function registrarVentaNormal() {
 
         limpiarNormal();
 
+        await cargarPersonasMesa();
+
         return;
       }
     }
@@ -2574,6 +2784,16 @@ async function registrarVentaNormal() {
       formatoCLP(
         total
       );
+
+
+    if (
+      personaId ===
+      "__nueva__"
+    ) {
+
+      mensaje +=
+        "\n\n👤 Persona agregada a la mesa.";
+    }
 
 
     if (
@@ -2597,6 +2817,15 @@ async function registrarVentaNormal() {
 
 
     limpiarNormal();
+
+
+    /*
+      Recargamos la lista para que la
+      persona recién creada quede disponible
+      para futuras compras.
+    */
+
+    await cargarPersonasMesa();
 
 
   } catch (error) {
@@ -2675,6 +2904,19 @@ function limpiarNormal() {
     "entrega"
   ).value =
     "mesa";
+
+
+  document.getElementById(
+    "nueva-persona-caja"
+  ).classList.add(
+    "oculto"
+  );
+
+
+  document.getElementById(
+    "nombre-nueva-persona"
+  ).value =
+    "";
 
 
   actualizarTotal();
