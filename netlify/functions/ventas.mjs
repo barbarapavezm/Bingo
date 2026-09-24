@@ -1,21 +1,34 @@
 import { getStore } from "@netlify/blobs";
 
-const ventasStore =
-  getStore({
-    name: "ventas-bingo",
-    consistency: "strong"
-  });
 
-const personasStore =
-  getStore({
-    name: "personas-bingo",
-    consistency: "strong"
-  });
+const ventasStore = getStore({
+  name: "ventas-bingo",
+  consistency: "strong"
+});
+
+const personasStore = getStore({
+  name: "personas-bingo",
+  consistency: "strong"
+});
+
+
+const PRECIO_PREVENTA =
+  10000;
 
 
 /* =========================
-   CÓDIGO PREVENTA
+   CÓDIGOS
 ========================= */
+
+function normalizarCodigo(codigo) {
+
+  return String(
+    codigo || ""
+  )
+    .trim()
+    .toUpperCase();
+}
+
 
 function generarCodigo() {
 
@@ -24,7 +37,12 @@ function generarCodigo() {
 
   let codigo = "";
 
-  for (let i = 0; i < 5; i++) {
+
+  for (
+    let i = 0;
+    i < 5;
+    i++
+  ) {
 
     codigo +=
       caracteres[
@@ -35,6 +53,7 @@ function generarCodigo() {
       ];
   }
 
+
   return codigo;
 }
 
@@ -43,6 +62,7 @@ async function codigoExiste(codigo) {
 
   const lista =
     await personasStore.list();
+
 
   for (const blob of lista.blobs) {
 
@@ -54,13 +74,19 @@ async function codigoExiste(codigo) {
         }
       );
 
+
     if (
       persona &&
-      persona.codigoPreventa === codigo
+      normalizarCodigo(
+        persona.codigoPreventa
+      ) ===
+        normalizarCodigo(codigo)
     ) {
+
       return true;
     }
   }
+
 
   return false;
 }
@@ -77,16 +103,142 @@ async function crearCodigoUnico() {
     const codigo =
       generarCodigo();
 
+
     if (
       !(await codigoExiste(codigo))
     ) {
+
       return codigo;
     }
   }
 
+
   throw new Error(
     "No se pudo generar código de preventa."
   );
+}
+
+
+/* =========================
+   BENEFICIOS PREVENTA
+========================= */
+
+function crearBeneficios(
+  cantidad
+) {
+
+  return {
+
+    juegos: [
+
+      {
+        nombre:
+          "Juego 1",
+
+        cantidad
+      },
+
+      {
+        nombre:
+          "Juego 2",
+
+        cantidad
+      },
+
+      {
+        nombre:
+          "Juego 3",
+
+        cantidad
+      },
+
+      {
+        nombre:
+          "Juego 4",
+
+        cantidad
+      },
+
+      {
+        nombre:
+          "Juego Mayor",
+
+        cantidad
+      }
+
+    ],
+
+    once: {
+
+      cantidad,
+
+      estado:
+        "pendiente"
+    }
+
+  };
+}
+
+
+/* =========================
+   CANTIDAD DE PREVENTAS
+   DE UNA VENTA
+========================= */
+
+function obtenerCantidadPreventa(
+  venta
+) {
+
+  if (
+    Number.isInteger(
+      Number(
+        venta?.cantidadPreventas
+      )
+    ) &&
+    Number(
+      venta.cantidadPreventas
+    ) > 0
+  ) {
+
+    return Number(
+      venta.cantidadPreventas
+    );
+  }
+
+
+  if (
+    Array.isArray(
+      venta?.productos
+    )
+  ) {
+
+    const producto =
+      venta.productos.find(
+        p =>
+          String(
+            p.nombre || ""
+          )
+            .trim()
+            .toLowerCase() ===
+          "preventa"
+      );
+
+
+    if (
+      producto &&
+      Number(
+        producto.cantidad
+      ) > 0
+    ) {
+
+      return Number(
+        producto.cantidad
+      );
+    }
+  }
+
+
+  return 1;
 }
 
 
@@ -98,42 +250,28 @@ export default async (req) => {
 
   try {
 
+
     /* =========================
-       CREAR VENTA
+       POST
     ========================= */
 
-    if (req.method === "POST") {
+    if (
+      req.method ===
+      "POST"
+    ) {
 
-      const venta =
+      const datos =
         await req.json();
 
 
       const tipoVenta =
-        venta.tipoVenta === "preventa"
+        datos.tipoVenta ===
+          "preventa"
+
           ? "preventa"
+
           : "normal";
 
-
-      if (
-        !venta.nombre ||
-        !venta.metodoPago ||
-        !Array.isArray(
-          venta.productos
-        ) ||
-        venta.productos.length === 0 ||
-        !venta.total
-      ) {
-
-        return Response.json(
-          {
-            error:
-              "Faltan datos de la venta."
-          },
-          {
-            status: 400
-          }
-        );
-      }
 
 
       /* =========================
@@ -147,20 +285,40 @@ export default async (req) => {
 
         const mesa =
           Number(
-            venta.mesa
+            datos.mesa
+          );
+
+
+        const nombre =
+          String(
+            datos.nombre || ""
+          ).trim();
+
+
+        const total =
+          Number(
+            datos.total
           );
 
 
         if (
           !Number.isInteger(mesa) ||
           mesa < 1 ||
-          mesa > 50
+          mesa > 50 ||
+          !nombre ||
+          !datos.metodoPago ||
+          !Array.isArray(
+            datos.productos
+          ) ||
+          datos.productos.length ===
+            0 ||
+          total <= 0
         ) {
 
           return Response.json(
             {
               error:
-                "Mesa inválida."
+                "Faltan datos de la venta."
             },
             {
               status: 400
@@ -173,7 +331,7 @@ export default async (req) => {
           crypto.randomUUID();
 
 
-        const ventaCompleta = {
+        const venta = {
 
           id,
 
@@ -183,22 +341,18 @@ export default async (req) => {
           mesa,
 
           clienteId:
-            venta.clienteId ||
+            datos.clienteId ||
             null,
 
-          nombre:
-            venta.nombre.trim(),
+          nombre,
 
           metodoPago:
-            venta.metodoPago,
+            datos.metodoPago,
 
           productos:
-            venta.productos,
+            datos.productos,
 
-          total:
-            Number(
-              venta.total
-            ),
+          total,
 
           fecha:
             new Date()
@@ -209,14 +363,13 @@ export default async (req) => {
 
         await ventasStore.setJSON(
           id,
-          ventaCompleta
+          venta
         );
 
 
         return Response.json({
           ok: true,
-          venta:
-            ventaCompleta
+          venta
         });
       }
 
@@ -226,54 +379,202 @@ export default async (req) => {
          PREVENTA
       ========================= */
 
-      const personaId =
-        crypto.randomUUID();
-
-      const codigoPreventa =
-        await crearCodigoUnico();
-
-      const ahora =
-        new Date()
-          .toISOString();
+      const nombre =
+        String(
+          datos.nombre || ""
+        ).trim();
 
 
-      const persona = {
-
-        id:
-          personaId,
-
-        nombre:
-          venta.nombre.trim(),
-
-        mesa:
-          null,
-
-        tipo:
-          "preventa",
-
-        codigoPreventa,
-
-        fechaCreacion:
-          ahora,
-
-        asignadoEn:
-          null,
-
-        historialMesas:
-          []
-
-      };
+      const cantidadPreventas =
+        Number(
+          datos.cantidadPreventas ||
+          obtenerCantidadPreventa(
+            datos
+          ) ||
+          1
+        );
 
 
-      /*
-        Primero creamos la persona.
-      */
+      if (
+        !nombre ||
+        !datos.metodoPago ||
+        !Number.isInteger(
+          cantidadPreventas
+        ) ||
+        cantidadPreventas < 1
+      ) {
 
-      await personasStore.setJSON(
-        personaId,
-        persona
-      );
+        return Response.json(
+          {
+            error:
+              "Datos de preventa inválidos."
+          },
+          {
+            status: 400
+          }
+        );
+      }
 
+
+
+      let persona =
+        null;
+
+
+      let personaNueva =
+        false;
+
+
+
+      /* =========================
+         AGREGAR A UNA CUENTA
+         EXISTENTE
+      ========================= */
+
+      if (
+        datos.clienteId
+      ) {
+
+        persona =
+          await personasStore.get(
+            datos.clienteId,
+            {
+              type: "json"
+            }
+          );
+
+
+        if (!persona) {
+
+          return Response.json(
+            {
+              error:
+                "No se encontró la persona seleccionada."
+            },
+            {
+              status: 404
+            }
+          );
+        }
+
+
+        if (
+          !persona.codigoPreventa
+        ) {
+
+          persona.codigoPreventa =
+            await crearCodigoUnico();
+        }
+
+
+        persona.tipo =
+          "preventa";
+
+
+        persona.cantidadPreventas =
+          Number(
+            persona.cantidadPreventas ||
+            0
+          ) +
+          cantidadPreventas;
+
+
+        if (
+          persona.activo ===
+          undefined
+        ) {
+
+          persona.activo =
+            false;
+        }
+
+
+        if (
+          persona.llegadaEn ===
+          undefined
+        ) {
+
+          persona.llegadaEn =
+            null;
+        }
+
+
+        await personasStore.setJSON(
+          persona.id,
+          persona
+        );
+
+
+
+      /* =========================
+         NUEVA PERSONA
+      ========================= */
+
+      } else {
+
+        const ahora =
+          new Date()
+            .toISOString();
+
+
+        const personaId =
+          crypto.randomUUID();
+
+
+        const codigoPreventa =
+          await crearCodigoUnico();
+
+
+        persona = {
+
+          id:
+            personaId,
+
+          nombre,
+
+          mesa:
+            null,
+
+          tipo:
+            "preventa",
+
+          codigoPreventa,
+
+          cantidadPreventas,
+
+          activo:
+            false,
+
+          llegadaEn:
+            null,
+
+          fechaCreacion:
+            ahora,
+
+          asignadoEn:
+            null,
+
+          historialMesas:
+            []
+
+        };
+
+
+        await personasStore.setJSON(
+          persona.id,
+          persona
+        );
+
+
+        personaNueva =
+          true;
+      }
+
+
+
+      /* =========================
+         GUARDAR VENTA
+      ========================= */
 
       try {
 
@@ -281,7 +582,12 @@ export default async (req) => {
           crypto.randomUUID();
 
 
-        const ventaCompleta = {
+        const total =
+          PRECIO_PREVENTA *
+          cantidadPreventas;
+
+
+        const venta = {
 
           id:
             ventaId,
@@ -290,63 +596,73 @@ export default async (req) => {
             "preventa",
 
           mesa:
+            persona.mesa ||
             null,
 
           clienteId:
-            personaId,
+            persona.id,
 
-          codigoPreventa,
+          codigoPreventa:
+            persona.codigoPreventa,
 
           nombre:
-            venta.nombre.trim(),
+            persona.nombre,
 
           metodoPago:
-            venta.metodoPago,
+            datos.metodoPago,
 
-          productos:
-            venta.productos,
+          cantidadPreventas,
 
-          /*
-            Aquí guardamos los
-            beneficios incluidos.
+          productos: [
 
-            La ONCE todavía NO es
-            comida concreta.
-          */
+            {
+              id:
+                12,
+
+              nombre:
+                "Preventa",
+
+              precio:
+                PRECIO_PREVENTA,
+
+              cantidad:
+                cantidadPreventas,
+
+              subtotal:
+                total,
+
+              categoria:
+                "preventa"
+            }
+
+          ],
 
           beneficiosPreventa:
-            venta.beneficiosPreventa ||
-            {
-              juegos: [],
-              once: {
-                cantidad: 1,
-                estado: "pendiente"
-              }
-            },
-
-          total:
-            Number(
-              venta.total
+            crearBeneficios(
+              cantidadPreventas
             ),
 
+          total,
+
           fecha:
-            ahora
+            new Date()
+              .toISOString()
 
         };
 
 
         await ventasStore.setJSON(
           ventaId,
-          ventaCompleta
+          venta
         );
 
 
         return Response.json({
 
-          ok: true,
+          ok:
+            true,
 
-          venta:
-            ventaCompleta,
+          venta,
 
           persona
 
@@ -355,34 +671,70 @@ export default async (req) => {
 
       } catch (errorVenta) {
 
+
         /*
-          Si fallara al guardar la venta,
-          borramos la cuenta para no dejar
-          una preventa fantasma.
+          Si era una persona nueva
+          y la venta falla, eliminamos
+          la cuenta para evitar una
+          preventa fantasma.
         */
 
-        await personasStore.delete(
-          personaId
-        );
+        if (personaNueva) {
+
+          await personasStore.delete(
+            persona.id
+          );
+
+
+        } else {
+
+
+          /*
+            Si la persona ya existía,
+            deshacemos el aumento de
+            preventas.
+          */
+
+          persona.cantidadPreventas =
+            Math.max(
+              0,
+
+              Number(
+                persona.cantidadPreventas ||
+                0
+              ) -
+              cantidadPreventas
+            );
+
+
+          await personasStore.setJSON(
+            persona.id,
+            persona
+          );
+        }
 
 
         throw errorVenta;
       }
-
     }
 
 
 
     /* =========================
-       OBTENER VENTAS
+       GET
     ========================= */
 
-    if (req.method === "GET") {
+    if (
+      req.method ===
+      "GET"
+    ) {
 
       const lista =
         await ventasStore.list();
 
-      const ventas = [];
+
+      const ventas =
+        [];
 
 
       for (
@@ -400,6 +752,7 @@ export default async (req) => {
 
 
         if (venta) {
+
           ventas.push(
             venta
           );
@@ -409,9 +762,11 @@ export default async (req) => {
 
       ventas.sort(
         (a, b) =>
+
           new Date(
             b.fecha
           ) -
+
           new Date(
             a.fecha
           )
@@ -426,10 +781,14 @@ export default async (req) => {
 
 
     /* =========================
+       PUT
        EDITAR VENTA
     ========================= */
 
-    if (req.method === "PUT") {
+    if (
+      req.method ===
+      "PUT"
+    ) {
 
       const datos =
         await req.json();
@@ -472,6 +831,179 @@ export default async (req) => {
       }
 
 
+
+      /* =========================
+         EDITAR PREVENTA
+      ========================= */
+
+      if (
+        anterior.tipoVenta ===
+        "preventa"
+      ) {
+
+        const cantidadAnterior =
+          obtenerCantidadPreventa(
+            anterior
+          );
+
+
+        const cantidadNueva =
+          Number(
+            datos.cantidadPreventas ||
+            obtenerCantidadPreventa(
+              datos
+            )
+          );
+
+
+        if (
+          !Number.isInteger(
+            cantidadNueva
+          ) ||
+          cantidadNueva < 1
+        ) {
+
+          return Response.json(
+            {
+              error:
+                "Cantidad de preventas inválida."
+            },
+            {
+              status: 400
+            }
+          );
+        }
+
+
+        const diferencia =
+          cantidadNueva -
+          cantidadAnterior;
+
+
+        const persona =
+          anterior.clienteId
+
+            ? await personasStore.get(
+                anterior.clienteId,
+                {
+                  type: "json"
+                }
+              )
+
+            : null;
+
+
+        if (persona) {
+
+          persona.cantidadPreventas =
+            Math.max(
+              0,
+
+              Number(
+                persona.cantidadPreventas ||
+                0
+              ) +
+              diferencia
+            );
+
+
+          if (
+            datos.nombre !==
+            undefined
+          ) {
+
+            persona.nombre =
+              String(
+                datos.nombre
+              ).trim();
+          }
+
+
+          await personasStore.setJSON(
+            persona.id,
+            persona
+          );
+        }
+
+
+        const total =
+          PRECIO_PREVENTA *
+          cantidadNueva;
+
+
+        const actualizada = {
+
+          ...anterior,
+
+          nombre:
+            datos.nombre !==
+            undefined
+
+              ? String(
+                  datos.nombre
+                ).trim()
+
+              : anterior.nombre,
+
+          metodoPago:
+            datos.metodoPago ||
+            anterior.metodoPago,
+
+          cantidadPreventas:
+            cantidadNueva,
+
+          productos: [
+
+            {
+              id:
+                12,
+
+              nombre:
+                "Preventa",
+
+              precio:
+                PRECIO_PREVENTA,
+
+              cantidad:
+                cantidadNueva,
+
+              subtotal:
+                total,
+
+              categoria:
+                "preventa"
+            }
+
+          ],
+
+          beneficiosPreventa:
+            crearBeneficios(
+              cantidadNueva
+            ),
+
+          total
+
+        };
+
+
+        await ventasStore.setJSON(
+          anterior.id,
+          actualizada
+        );
+
+
+        return Response.json({
+          ok: true,
+          venta: actualizada
+        });
+      }
+
+
+
+      /* =========================
+         EDITAR VENTA NORMAL
+      ========================= */
+
       const productos =
         Array.isArray(
           datos.productos
@@ -490,10 +1022,12 @@ export default async (req) => {
             suma +
             (
               Number(
-                producto.precio || 0
+                producto.precio ||
+                0
               ) *
               Number(
-                producto.cantidad || 0
+                producto.cantidad ||
+                0
               )
             ),
 
@@ -506,9 +1040,8 @@ export default async (req) => {
 
 
       if (
-        anterior.tipoVenta !==
-          "preventa" &&
-        datos.mesa !== undefined
+        datos.mesa !==
+        undefined
       ) {
 
         mesa =
@@ -518,17 +1051,20 @@ export default async (req) => {
       }
 
 
-      const ventaActualizada = {
+      const actualizada = {
 
         ...anterior,
 
         mesa,
 
         nombre:
-          datos.nombre !== undefined
+          datos.nombre !==
+          undefined
+
             ? String(
                 datos.nombre
               ).trim()
+
             : anterior.nombre,
 
         metodoPago:
@@ -548,10 +1084,12 @@ export default async (req) => {
 
               subtotal:
                 Number(
-                  producto.precio || 0
+                  producto.precio ||
+                  0
                 ) *
                 Number(
-                  producto.cantidad || 0
+                  producto.cantidad ||
+                  0
                 )
 
             })
@@ -564,24 +1102,26 @@ export default async (req) => {
 
       await ventasStore.setJSON(
         anterior.id,
-        ventaActualizada
+        actualizada
       );
 
 
       return Response.json({
         ok: true,
-        venta:
-          ventaActualizada
+        venta: actualizada
       });
     }
 
 
 
     /* =========================
-       ELIMINAR
+       DELETE
     ========================= */
 
-    if (req.method === "DELETE") {
+    if (
+      req.method ===
+      "DELETE"
+    ) {
 
       const url =
         new URL(
@@ -618,22 +1158,85 @@ export default async (req) => {
         );
 
 
-      /*
-        Si eliminamos una preventa,
-        también eliminamos su cuenta
-        y su código.
-      */
+      if (!venta) {
+
+        return Response.json(
+          {
+            error:
+              "Venta no encontrada."
+          },
+          {
+            status: 404
+          }
+        );
+      }
+
+
+
+      /* =========================
+         SI ES PREVENTA
+      ========================= */
 
       if (
-        venta &&
         venta.tipoVenta ===
           "preventa" &&
         venta.clienteId
       ) {
 
-        await personasStore.delete(
-          venta.clienteId
-        );
+        const persona =
+          await personasStore.get(
+            venta.clienteId,
+            {
+              type: "json"
+            }
+          );
+
+
+        if (persona) {
+
+          const cantidad =
+            obtenerCantidadPreventa(
+              venta
+            );
+
+
+          persona.cantidadPreventas =
+            Math.max(
+              0,
+
+              Number(
+                persona.cantidadPreventas ||
+                0
+              ) -
+              cantidad
+            );
+
+
+          /*
+            Si ya no tiene ninguna
+            preventa, dejamos su cuenta,
+            pero deja de ser preventa.
+          */
+
+          if (
+            persona.cantidadPreventas ===
+            0
+          ) {
+
+            persona.tipo =
+              "sin-preventa";
+
+
+            persona.codigoPreventa =
+              null;
+          }
+
+
+          await personasStore.setJSON(
+            persona.id,
+            persona
+          );
+        }
       }
 
 
