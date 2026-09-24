@@ -7,7 +7,8 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0">
+  content="width=device-width, initial-scale=1.0"
+>
 
 <title>Caja - Bingo</title>
 
@@ -26,12 +27,20 @@ body {
 
 header {
   background: white;
-  padding: 20px 30px;
+  padding: 18px 28px;
   border-bottom: 1px solid #ddd;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+header h1 {
+  margin: 0 0 4px;
+}
+
+header span {
+  color: #6b7280;
 }
 
 header a {
@@ -43,64 +52,106 @@ header a {
 main {
   max-width: 1100px;
   margin: auto;
-  padding: 30px;
+  padding: 25px;
 }
 
 .panel {
   background: white;
-
-  padding: 25px;
-
+  padding: 22px;
   border-radius: 14px;
 
   box-shadow:
     0 2px 8px
     rgba(0,0,0,.08);
 
-  margin-bottom: 25px;
-}
-
-.fila {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 20px;
-}
-
-label {
-  display: block;
-
-  margin-bottom: 8px;
-
-  font-weight: bold;
-}
-
-select,
-input {
-  width: 100%;
-
-  padding: 12px;
-
-  font-size: 16px;
-
-  border-radius: 8px;
-
-  border:
-    1px solid #ccc;
-
-  background: white;
+  margin-bottom: 20px;
 }
 
 .oculto {
   display: none !important;
 }
 
-.tipo-venta {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+
+/* =========================
+   TIPO DE VENTA
+========================= */
+
+.tipos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
+
+.tipo-btn {
+  padding: 18px;
+
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+
+  background: white;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.tipo-btn strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.tipo-btn span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.tipo-btn.activo-normal {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.tipo-btn.activo-preventa {
+  border-color: #7c3aed;
+  background: #faf5ff;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.fila {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 18px;
+}
+
+label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
+
+select,
+input {
+  width: 100%;
+  padding: 12px;
+
+  font-size: 16px;
+
+  border-radius: 8px;
+  border: 1px solid #ccc;
+
+  background: white;
+}
+
+
+/* =========================
+   PRODUCTOS
+========================= */
 
 .productos {
   display: grid;
@@ -108,12 +159,12 @@ input {
   grid-template-columns:
     repeat(
       auto-fit,
-      minmax(220px, 1fr)
+      minmax(210px, 1fr)
     );
 
-  gap: 15px;
+  gap: 12px;
 
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .producto {
@@ -121,20 +172,22 @@ input {
 
   border-radius: 12px;
 
-  padding: 18px;
+  padding: 16px;
 
   background: #fafafa;
 }
 
 .producto h3 {
-  margin-top: 0;
+  margin: 0 0 7px;
+}
+
+.precio {
+  color: #4b5563;
 }
 
 .controles {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
 
   margin-top: 12px;
@@ -156,35 +209,16 @@ button {
 }
 
 .cantidad {
-  min-width: 25px;
+  min-width: 30px;
+
   text-align: center;
   font-weight: bold;
 }
 
-.total {
-  font-size: 30px;
-  font-weight: bold;
 
-  margin-top: 10px;
-}
-
-.registrar {
-  width: 100%;
-
-  padding: 16px;
-
-  font-size: 18px;
-
-  background: #2563eb;
-  color: white;
-
-  margin-top: 20px;
-}
-
-.registrar:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
+/* =========================
+   ENTREGA
+========================= */
 
 .entrega-box {
   margin-top: 20px;
@@ -194,13 +228,19 @@ button {
   border-radius: 10px;
 
   background: #eff6ff;
+  border: 1px solid #bfdbfe;
 }
 
 .nota {
   color: #6b7280;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
+
+
+/* =========================
+   PREVENTA
+========================= */
 
 .preventa {
   background: #faf5ff;
@@ -208,16 +248,16 @@ button {
 }
 
 .preventa-precio {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: bold;
 
   color: #6d28d9;
 
-  margin: 15px 0;
+  margin: 12px 0 18px;
 }
 
 .lista-preventa {
-  line-height: 1.8;
+  line-height: 1.9;
 }
 
 .once-pendiente {
@@ -225,41 +265,104 @@ button {
 
   background: #fef3c7;
 
-  border-radius: 8px;
+  border-radius: 9px;
 
-  padding: 10px;
+  padding: 12px;
 
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
-.codigo-box {
-  font-size: 30px;
 
-  letter-spacing: 5px;
+/* =========================
+   CÓDIGO PREVENTA
+========================= */
 
-  font-weight: bold;
-
-  text-align: center;
-
-  padding: 20px;
-
+.resultado-preventa {
   background: #ecfdf5;
 
-  color: #047857;
+  border: 2px solid #10b981;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
-  margin-top: 15px;
+  padding: 22px;
+
+  margin-bottom: 20px;
+
+  text-align: center;
 }
 
+.resultado-preventa h2 {
+  margin-top: 0;
+  color: #047857;
+}
+
+.codigo {
+  font-size: 36px;
+  font-weight: bold;
+
+  letter-spacing: 6px;
+
+  color: #065f46;
+
+  margin: 15px 0;
+}
+
+.copiar {
+  background: #10b981;
+  color: white;
+
+  padding: 10px 16px;
+
+  font-weight: bold;
+}
+
+
+/* =========================
+   TOTAL
+========================= */
+
+.total {
+  font-size: 30px;
+  font-weight: bold;
+
+  margin-top: 7px;
+}
+
+.registrar {
+  width: 100%;
+
+  padding: 15px;
+
+  font-size: 17px;
+
+  background: #2563eb;
+  color: white;
+
+  margin-top: 18px;
+}
+
+.registrar.preventa-btn {
+  background: #7c3aed;
+}
+
+.registrar:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+
 @media (max-width: 800px) {
+
+  main {
+    padding: 16px;
+  }
 
   .fila {
     grid-template-columns: 1fr;
   }
 
-  main {
-    padding: 20px;
+  .tipos {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -296,28 +399,86 @@ button {
 
 
 <!-- =========================
+     RESULTADO PREVENTA
+========================= -->
+
+<div
+  id="resultado-preventa"
+  class="resultado-preventa oculto"
+>
+
+<h2>
+  ✅ Preventa registrada
+</h2>
+
+<div id="resultado-nombre"></div>
+
+<div class="codigo" id="resultado-codigo">
+</div>
+
+<p>
+  Este es el código que debe guardar
+  la persona para asociarse después
+  a la mesa que elija.
+</p>
+
+<button
+  class="copiar"
+  onclick="copiarCodigo()"
+>
+  Copiar código
+</button>
+
+</div>
+
+
+
+<!-- =========================
      TIPO VENTA
 ========================= -->
 
-<div class="panel tipo-venta">
+<div class="panel">
 
-<label for="tipo-venta">
-  Tipo de venta
-</label>
+<h2>
+  ¿Qué quieres registrar?
+</h2>
 
-<select
-  id="tipo-venta"
-  onchange="cambiarTipoVenta()">
+<div class="tipos">
 
-  <option value="normal">
-    Venta normal - persona ya sentada
-  </option>
+<button
+  id="btn-tipo-normal"
+  class="tipo-btn activo-normal"
+  onclick="seleccionarTipo('normal')"
+>
 
-  <option value="preventa">
-    Preventa - todavía sin mesa
-  </option>
+<strong>
+  🧾 Venta normal
+</strong>
 
-</select>
+<span>
+  La persona ya está sentada en una mesa.
+</span>
+
+</button>
+
+
+<button
+  id="btn-tipo-preventa"
+  class="tipo-btn"
+  onclick="seleccionarTipo('preventa')"
+>
+
+<strong>
+  🎟️ Preventa $10.000
+</strong>
+
+<span>
+  La persona todavía no tiene mesa.
+</span>
+
+</button>
+
+</div>
 
 </div>
 
@@ -328,10 +489,14 @@ button {
 ========================= -->
 
 <div
-  id="datos-normal"
-  class="panel">
+  id="zona-normal"
+>
+
+
+<div class="panel">
 
 <div class="fila">
+
 
 <div>
 
@@ -341,7 +506,8 @@ button {
 
 <select
   id="mesa"
-  onchange="cargarPersonasMesa()">
+  onchange="cargarPersonasMesa()"
+>
 
 <option value="">
   Seleccionar mesa
@@ -393,19 +559,20 @@ button {
 
 </div>
 
+
 </div>
 
 
 <div class="entrega-box">
 
 <label for="entrega">
-  Comida y bebidas
+  ¿Qué hacemos con la comida y bebidas?
 </label>
 
 <select id="entrega">
 
 <option value="mesa">
-  Dejar disponibles para pedir desde la mesa
+  Dejar disponibles para que la persona las pida después
 </option>
 
 <option value="cocina">
@@ -415,9 +582,11 @@ button {
 </select>
 
 <p class="nota">
-  Si la persona no aparece en la lista,
-  primero debe escanear el QR de su mesa
-  y elegir “No tengo preventa”.
+
+Si la persona todavía no aparece aquí,
+debe escanear primero el QR de su mesa
+y elegir “No tengo preventa”.
+
 </p>
 
 </div>
@@ -426,27 +595,68 @@ button {
 
 
 
+<div class="panel">
+
+<h2>
+  Comida y bebidas
+</h2>
+
+<div
+  class="productos"
+  id="productos-comida"
+>
+</div>
+
+</div>
+
+
+
+<div class="panel">
+
+<h2>
+  Juegos de bingo
+</h2>
+
+<div
+  class="productos"
+  id="productos-bingo"
+>
+</div>
+
+</div>
+
+
+</div>
+
+
+
 <!-- =========================
-     DATOS PREVENTA
+     PREVENTA
 ========================= -->
 
 <div
-  id="datos-preventa"
-  class="panel oculto">
+  id="zona-preventa"
+  class="oculto"
+>
+
+
+<div class="panel">
 
 <div class="fila">
+
 
 <div>
 
 <label for="nombre-preventa">
-  Nombre
+  Nombre de la persona
 </label>
 
 <input
   id="nombre-preventa"
   type="text"
   placeholder="Ej: Camila"
-  autocomplete="off">
+  autocomplete="off"
+>
 
 </div>
 
@@ -475,14 +685,17 @@ button {
 
 </div>
 
+
 </div>
+
 
 <p class="nota">
 
-  La preventa se registra sin mesa.
-  El sistema generará un código que
-  la persona usará cuando llegue y
-  escanee el QR de la mesa donde decidió sentarse.
+La preventa no necesita mesa.
+
+Se generará un código que la persona
+usará cuando llegue y escanee el QR
+de la mesa donde decidió sentarse.
 
 </p>
 
@@ -490,88 +703,60 @@ button {
 
 
 
-<!-- =========================
-     PRODUCTOS NORMALES
-========================= -->
-
-<div id="productos-normal">
-
-
-<div class="panel">
+<div class="panel preventa">
 
 <h2>
-  Comida y bebidas
+  🎟️ Preventa
 </h2>
 
-<div
-  class="productos"
-  id="productos-comida">
+<div class="preventa-precio">
+  $10.000
 </div>
 
-</div>
+<strong>
+  Incluye:
+</strong>
 
+<div class="lista-preventa">
 
-<div class="panel">
-
-<h2>
-  Juegos de bingo
-</h2>
-
-<div
-  class="productos"
-  id="productos-bingo">
-</div>
-
-</div>
-
+✓ 1 × Juego 1<br>
+✓ 1 × Juego 2<br>
+✓ 1 × Juego 3<br>
+✓ 1 × Juego 4<br>
+✓ 1 × Juego Mayor<br>
+✓ 1 × Once
 
 </div>
 
 
-<!-- =========================
-     PREVENTA
-========================= -->
+<div class="once-pendiente">
 
-<div
-  id="panel-preventa"
-  class="panel preventa oculto">
+<strong>
+  Once pendiente de definir
+</strong>
 
-  <h2>
-    Preventa
-  </h2>
+<br><br>
 
-  <div class="preventa-precio">
-    $10.000
-  </div>
+Más adelante podremos cambiar este
+beneficio por los productos reales,
+por ejemplo:
 
-  <div>
-    Incluye:
-  </div>
+<br>
 
-  <div class="lista-preventa">
+<strong>
+  1 Completo + 1 Té
+</strong>
 
-    ✓ 1 × Juego 1<br>
-    ✓ 1 × Juego 2<br>
-    ✓ 1 × Juego 3<br>
-    ✓ 1 × Juego 4<br>
-    ✓ 1 × Juego Mayor<br>
-    ✓ 1 × Once
+<br><br>
 
-  </div>
+Esos productos quedarán disponibles
+en la cuenta de la persona cuando
+se asocie a su mesa.
 
-  <div class="once-pendiente">
+</div>
 
-    <strong>
-      Once pendiente de definir
-    </strong>
+</div>
 
-    <br>
-
-    Más adelante podrás indicar qué
-    productos reales incluye, por ejemplo
-    1 Completo + 1 Té.
-
-  </div>
 
 </div>
 
@@ -589,18 +774,17 @@ button {
 
 <div
   class="total"
-  id="total">
+  id="total"
+>
   $0
 </div>
-
 
 <button
   class="registrar"
   id="boton-registrar"
-  onclick="registrarVenta()">
-
+  onclick="registrarVenta()"
+>
   Registrar venta
-
 </button>
 
 </div>
@@ -609,12 +793,35 @@ button {
 </main>
 
 
-
 <script>
 
 
 /* =========================
-   PRODUCTOS NORMALES
+   CONFIGURACIÓN
+========================= */
+
+const PRECIO_PREVENTA =
+  10000;
+
+
+let tipoVentaActual =
+  "normal";
+
+
+let personasMesa =
+  [];
+
+
+let guardando =
+  false;
+
+
+let ultimoCodigoPreventa =
+  "";
+
+
+/* =========================
+   PRODUCTOS
 ========================= */
 
 const productos = [
@@ -699,10 +906,6 @@ const productos = [
 ];
 
 
-const PRECIO_PREVENTA =
-  10000;
-
-
 const beneficiosPreventa = {
 
   juegos: [
@@ -748,14 +951,9 @@ const beneficiosPreventa = {
 
 const cantidades = {};
 
-let personasMesa = [];
-
-let guardando =
-  false;
-
 
 /* =========================
-   FORMATO
+   FORMATO CLP
 ========================= */
 
 function formatoCLP(valor) {
@@ -772,6 +970,88 @@ function formatoCLP(valor) {
 
 
 /* =========================
+   TIPO VENTA
+========================= */
+
+function seleccionarTipo(tipo) {
+
+  tipoVentaActual =
+    tipo;
+
+
+  const normal =
+    tipo === "normal";
+
+
+  document.getElementById(
+    "zona-normal"
+  ).classList.toggle(
+    "oculto",
+    !normal
+  );
+
+
+  document.getElementById(
+    "zona-preventa"
+  ).classList.toggle(
+    "oculto",
+    normal
+  );
+
+
+  const btnNormal =
+    document.getElementById(
+      "btn-tipo-normal"
+    );
+
+
+  const btnPreventa =
+    document.getElementById(
+      "btn-tipo-preventa"
+    );
+
+
+  btnNormal.className =
+    "tipo-btn" +
+    (
+      normal
+        ? " activo-normal"
+        : ""
+    );
+
+
+  btnPreventa.className =
+    "tipo-btn" +
+    (
+      !normal
+        ? " activo-preventa"
+        : ""
+    );
+
+
+  const boton =
+    document.getElementById(
+      "boton-registrar"
+    );
+
+
+  boton.classList.toggle(
+    "preventa-btn",
+    !normal
+  );
+
+
+  boton.textContent =
+    normal
+      ? "Registrar venta"
+      : "Registrar preventa";
+
+
+  actualizarTotal();
+}
+
+
+/* =========================
    MESAS
 ========================= */
 
@@ -781,6 +1061,7 @@ function cargarMesas() {
     document.getElementById(
       "mesa"
     );
+
 
   for (
     let i = 1;
@@ -793,11 +1074,14 @@ function cargarMesas() {
         "option"
       );
 
+
     option.value =
       i;
 
+
     option.textContent =
       "Mesa " + i;
+
 
     select.appendChild(
       option
@@ -807,7 +1091,7 @@ function cargarMesas() {
 
 
 /* =========================
-   PERSONAS DE LA MESA
+   PERSONAS DE MESA
 ========================= */
 
 async function cargarPersonasMesa() {
@@ -817,16 +1101,15 @@ async function cargarPersonasMesa() {
       "mesa"
     ).value;
 
+
   const select =
     document.getElementById(
       "persona"
     );
 
 
-  personasMesa = [];
-
-  select.innerHTML =
-    '<option value="">Cargando...</option>';
+  personasMesa =
+    [];
 
 
   if (!mesa) {
@@ -838,16 +1121,23 @@ async function cargarPersonasMesa() {
   }
 
 
+  select.innerHTML =
+    '<option value="">Cargando personas...</option>';
+
+
   try {
 
     const respuesta =
       await fetch(
+
         "/.netlify/functions/personas?mesa=" +
         mesa +
         "&t=" +
         Date.now(),
+
         {
-          cache: "no-store"
+          cache:
+            "no-store"
         }
       );
 
@@ -860,8 +1150,14 @@ async function cargarPersonasMesa() {
     }
 
 
-    personasMesa =
+    const datos =
       await respuesta.json();
+
+
+    personasMesa =
+      Array.isArray(datos)
+        ? datos
+        : [];
 
 
     select.innerHTML =
@@ -869,11 +1165,12 @@ async function cargarPersonasMesa() {
 
 
     if (
-      personasMesa.length === 0
+      personasMesa.length ===
+      0
     ) {
 
       select.innerHTML =
-        '<option value="">No hay personas registradas en esta mesa</option>';
+        '<option value="">No hay personas registradas</option>';
 
       return;
     }
@@ -882,21 +1179,23 @@ async function cargarPersonasMesa() {
     personasMesa.forEach(
       persona => {
 
-        const option =
+        const opcion =
           document.createElement(
             "option"
           );
 
-        option.value =
+
+        opcion.value =
           persona.id;
 
-        option.textContent =
+
+        opcion.textContent =
           persona.nombre;
 
-        select.appendChild(
-          option
-        );
 
+        select.appendChild(
+          opcion
+        );
       }
     );
 
@@ -907,15 +1206,15 @@ async function cargarPersonasMesa() {
       error
     );
 
+
     select.innerHTML =
       '<option value="">Error cargando personas</option>';
-
   }
 }
 
 
 /* =========================
-   PRODUCTOS
+   CREAR PRODUCTOS
 ========================= */
 
 function crearProductos() {
@@ -924,6 +1223,7 @@ function crearProductos() {
     document.getElementById(
       "productos-comida"
     );
+
 
   const bingo =
     document.getElementById(
@@ -944,6 +1244,7 @@ function crearProductos() {
           "div"
         );
 
+
       tarjeta.className =
         "producto";
 
@@ -954,29 +1255,35 @@ function crearProductos() {
           ${producto.nombre}
         </h3>
 
-        <div>
+        <div class="precio">
           ${formatoCLP(
             producto.precio
           )}
         </div>
 
+
         <div class="controles">
 
           <button
+            type="button"
             class="cantidad-btn"
-            onclick="cambiarCantidad(${producto.id}, -1)">
+            onclick="cambiarCantidad(${producto.id}, -1)"
+          >
             −
           </button>
 
           <span
             class="cantidad"
-            id="cantidad-${producto.id}">
+            id="cantidad-${producto.id}"
+          >
             0
           </span>
 
           <button
+            type="button"
             class="cantidad-btn"
-            onclick="cambiarCantidad(${producto.id}, 1)">
+            onclick="cambiarCantidad(${producto.id}, 1)"
+          >
             +
           </button>
 
@@ -1003,6 +1310,10 @@ function crearProductos() {
   );
 }
 
+
+/* =========================
+   CANTIDAD
+========================= */
 
 function cambiarCantidad(
   id,
@@ -1040,58 +1351,6 @@ function cambiarCantidad(
 
 
 /* =========================
-   TIPO DE VENTA
-========================= */
-
-function cambiarTipoVenta() {
-
-  const tipo =
-    document.getElementById(
-      "tipo-venta"
-    ).value;
-
-
-  const normal =
-    tipo === "normal";
-
-
-  document.getElementById(
-    "datos-normal"
-  ).classList.toggle(
-    "oculto",
-    !normal
-  );
-
-
-  document.getElementById(
-    "productos-normal"
-  ).classList.toggle(
-    "oculto",
-    !normal
-  );
-
-
-  document.getElementById(
-    "datos-preventa"
-  ).classList.toggle(
-    "oculto",
-    normal
-  );
-
-
-  document.getElementById(
-    "panel-preventa"
-  ).classList.toggle(
-    "oculto",
-    normal
-  );
-
-
-  actualizarTotal();
-}
-
-
-/* =========================
    TOTAL
 ========================= */
 
@@ -1118,15 +1377,13 @@ function calcularTotalNormal() {
 
 function actualizarTotal() {
 
-  const tipo =
-    document.getElementById(
-      "tipo-venta"
-    ).value;
-
-
   const total =
-    tipo === "preventa"
+
+    tipoVentaActual ===
+      "preventa"
+
       ? PRECIO_PREVENTA
+
       : calcularTotalNormal();
 
 
@@ -1150,14 +1407,9 @@ async function registrarVenta() {
   }
 
 
-  const tipo =
-    document.getElementById(
-      "tipo-venta"
-    ).value;
-
-
   if (
-    tipo === "preventa"
+    tipoVentaActual ===
+    "preventa"
   ) {
 
     await registrarPreventa();
@@ -1165,13 +1417,12 @@ async function registrarVenta() {
   } else {
 
     await registrarVentaNormal();
-
   }
 }
 
 
 /* =========================
-   PREVENTA
+   REGISTRAR PREVENTA
 ========================= */
 
 async function registrarPreventa() {
@@ -1222,21 +1473,33 @@ async function registrarPreventa() {
       pago,
 
     productos: [
+
       {
         id: 12,
-        nombre: "Preventa",
-        precio: PRECIO_PREVENTA,
-        cantidad: 1,
-        subtotal: PRECIO_PREVENTA,
-        categoria: "preventa"
+
+        nombre:
+          "Preventa",
+
+        precio:
+          PRECIO_PREVENTA,
+
+        cantidad:
+          1,
+
+        subtotal:
+          PRECIO_PREVENTA,
+
+        categoria:
+          "preventa"
       }
+
     ],
 
-    beneficiosPreventa,
+    beneficiosPreventa:
+      beneficiosPreventa,
 
     total:
       PRECIO_PREVENTA
-
   };
 
 
@@ -1251,8 +1514,10 @@ async function registrarPreventa() {
     guardando =
       true;
 
+
     boton.disabled =
       true;
+
 
     boton.textContent =
       "Creando preventa...";
@@ -1260,9 +1525,10 @@ async function registrarPreventa() {
 
     const respuesta =
       await fetch(
-        "/.netlify/functions/ventas",
-        {
 
+        "/.netlify/functions/ventas",
+
+        {
           method:
             "POST",
 
@@ -1275,7 +1541,6 @@ async function registrarPreventa() {
             JSON.stringify(
               venta
             )
-
         }
       );
 
@@ -1288,7 +1553,18 @@ async function registrarPreventa() {
 
       throw new Error(
         resultado.error ||
-        "No se pudo crear la preventa."
+        "No se pudo registrar la preventa."
+      );
+    }
+
+
+    if (
+      !resultado.persona ||
+      !resultado.persona.codigoPreventa
+    ) {
+
+      throw new Error(
+        "La preventa se guardó, pero no se recibió el código."
       );
     }
 
@@ -1298,23 +1574,45 @@ async function registrarPreventa() {
         .codigoPreventa;
 
 
-    alert(
+    ultimoCodigoPreventa =
+      codigo;
 
-      "✅ PREVENTA REGISTRADA\n\n" +
 
+    document.getElementById(
+      "resultado-codigo"
+    ).textContent =
+      codigo;
+
+
+    document.getElementById(
+      "resultado-nombre"
+    ).textContent =
       nombre +
-
-      "\nTotal: " +
+      " — " +
       formatoCLP(
         PRECIO_PREVENTA
-      ) +
+      );
 
-      "\n\nCÓDIGO DE PREVENTA:\n\n" +
 
-      codigo +
+    document.getElementById(
+      "resultado-preventa"
+    ).classList.remove(
+      "oculto"
+    );
 
-      "\n\nGuarda o entrega este código a la persona."
 
+    document.getElementById(
+      "resultado-preventa"
+    ).scrollIntoView({
+      behavior:
+        "smooth"
+    });
+
+
+    alert(
+      "✅ Preventa registrada.\n\n" +
+      "Código: " +
+      codigo
     );
 
 
@@ -1348,12 +1646,46 @@ async function registrarPreventa() {
     guardando =
       false;
 
+
     boton.disabled =
       false;
 
-    boton.textContent =
-      "Registrar venta";
 
+    boton.textContent =
+      "Registrar preventa";
+  }
+}
+
+
+/* =========================
+   COPIAR CÓDIGO
+========================= */
+
+async function copiarCodigo() {
+
+  if (!ultimoCodigoPreventa) {
+    return;
+  }
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      ultimoCodigoPreventa
+    );
+
+
+    alert(
+      "✅ Código copiado."
+    );
+
+
+  } catch (error) {
+
+    alert(
+      "Código: " +
+      ultimoCodigoPreventa
+    );
   }
 }
 
@@ -1420,8 +1752,8 @@ async function registrarVentaNormal() {
 
   const persona =
     personasMesa.find(
-      persona =>
-        persona.id ===
+      p =>
+        p.id ===
         personaId
     );
 
@@ -1436,7 +1768,8 @@ async function registrarVentaNormal() {
   }
 
 
-  const productosSeleccionados =
+  const seleccionados =
+
     productos
 
       .filter(
@@ -1477,7 +1810,7 @@ async function registrarVentaNormal() {
 
 
   if (
-    productosSeleccionados.length ===
+    seleccionados.length ===
     0
   ) {
 
@@ -1490,13 +1823,14 @@ async function registrarVentaNormal() {
 
 
   const total =
-    productosSeleccionados.reduce(
+    seleccionados.reduce(
       (
         suma,
         producto
       ) =>
         suma +
         producto.subtotal,
+
       0
     );
 
@@ -1521,10 +1855,9 @@ async function registrarVentaNormal() {
       pago,
 
     productos:
-      productosSeleccionados,
+      seleccionados,
 
     total
-
   };
 
 
@@ -1539,18 +1872,21 @@ async function registrarVentaNormal() {
     guardando =
       true;
 
+
     boton.disabled =
       true;
+
 
     boton.textContent =
       "Guardando venta...";
 
 
-    const respuestaVenta =
+    const respuesta =
       await fetch(
-        "/.netlify/functions/ventas",
-        {
 
+        "/.netlify/functions/ventas",
+
+        {
           method:
             "POST",
 
@@ -1563,44 +1899,34 @@ async function registrarVentaNormal() {
             JSON.stringify(
               venta
             )
-
         }
       );
 
 
-    const resultadoVenta =
-      await respuestaVenta.json();
+    const resultado =
+      await respuesta.json();
 
 
-    if (!respuestaVenta.ok) {
+    if (!respuesta.ok) {
 
       throw new Error(
-        resultadoVenta.error ||
+        resultado.error ||
         "No se pudo registrar la venta."
       );
     }
 
 
     const comida =
-      productosSeleccionados
-        .filter(
-          producto =>
-            producto.categoria ===
-            "comida"
-        );
+      seleccionados.filter(
+        producto =>
+          producto.categoria ===
+          "comida"
+      );
 
-
-    /*
-      Si Caja elige enviar ahora,
-      creamos el pedido.
-
-      Si elige "mesa", queda
-      disponible para que la
-      persona lo pida después.
-    */
 
     if (
-      entrega === "cocina" &&
+      entrega ===
+        "cocina" &&
       comida.length > 0
     ) {
 
@@ -1610,9 +1936,10 @@ async function registrarVentaNormal() {
 
       const respuestaPedido =
         await fetch(
-          "/.netlify/functions/pedidos",
-          {
 
+          "/.netlify/functions/pedidos",
+
+          {
             method:
               "POST",
 
@@ -1641,31 +1968,30 @@ async function registrarVentaNormal() {
                 productos:
                   comida.map(
                     producto => ({
+
                       nombre:
                         producto.nombre,
 
                       cantidad:
                         producto.cantidad
+
                     })
                   )
-
               })
-
           }
         );
 
 
-      if (
-        !respuestaPedido.ok
-      ) {
+      if (!respuestaPedido.ok) {
 
         alert(
 
           "⚠️ La venta quedó registrada, " +
-          "pero no se pudo enviar la comida a cocina.\n\n" +
+          "pero la comida no pudo enviarse a cocina.\n\n" +
           "No registres nuevamente la venta."
 
         );
+
 
         limpiarNormal();
 
@@ -1700,8 +2026,7 @@ async function registrarVentaNormal() {
 
           ? "\n\n🍽️ Comida enviada a cocina."
 
-          : "\n\n📱 Comida disponible en su cuenta.";
-
+          : "\n\n📱 Comida disponible para pedir desde su cuenta.";
     }
 
 
@@ -1731,12 +2056,13 @@ async function registrarVentaNormal() {
     guardando =
       false;
 
+
     boton.disabled =
       false;
 
+
     boton.textContent =
       "Registrar venta";
-
   }
 }
 
@@ -1752,7 +2078,8 @@ function limpiarNormal() {
 
       cantidades[
         producto.id
-      ] = 0;
+      ] =
+        0;
 
 
       const elemento =
@@ -1763,6 +2090,7 @@ function limpiarNormal() {
 
 
       if (elemento) {
+
         elemento.textContent =
           "0";
       }
@@ -1800,11 +2128,12 @@ cargarMesas();
 
 crearProductos();
 
-cambiarTipoVenta();
-
-actualizarTotal();
+seleccionarTipo(
+  "normal"
+);
 
 </script>
+
 
 </body>
 
