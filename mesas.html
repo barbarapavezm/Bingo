@@ -6,6 +6,10 @@
   <title>Mesas - Bingo</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -29,7 +33,7 @@
     }
 
     main {
-      max-width: 1200px;
+      max-width: 1500px;
       margin: auto;
       padding: 30px;
     }
@@ -44,7 +48,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
       gap: 15px;
     }
 
@@ -53,7 +57,11 @@
       border-radius: 14px;
       padding: 18px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 2px solid transparent;
+      border: 2px solid #e5e7eb;
+    }
+
+    .mesa.activa {
+      border-color: #f59e0b;
     }
 
     .mesa h3 {
@@ -63,7 +71,7 @@
 
     .dato {
       font-size: 14px;
-      margin: 5px 0;
+      margin: 6px 0;
       color: #4b5563;
     }
 
@@ -77,6 +85,11 @@
       background: #e5e7eb;
     }
 
+    .estado.activo {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
     .btn {
       display: inline-block;
       margin-top: 14px;
@@ -88,20 +101,12 @@
       font-size: 14px;
     }
 
-    .sin-actividad {
-      border-color: #e5e7eb;
+    .cargando {
+      color: #6b7280;
     }
 
-    .con-productos {
-      border-color: #f59e0b;
-    }
-
-    .con-pedido {
-      border-color: #3b82f6;
-    }
-
-    .listo {
-      border-color: #10b981;
+    .error {
+      color: #b91c1c;
     }
   </style>
 </head>
@@ -122,8 +127,9 @@
   <div class="resumen">
     <strong>Total de mesas:</strong> 50
     <br>
-    <span style="color:#6b7280;">
-      Más adelante esta pantalla mostrará datos reales desde la base de datos.
+
+    <span id="estado-carga" class="cargando">
+      Cargando información...
     </span>
   </div>
 
@@ -133,42 +139,374 @@
 
 <script>
 
-function crearMesas() {
+const productosEntregables = [
+  "completo",
+  "té",
+  "te",
+  "café",
+  "cafe",
+  "bebida",
+  "agua"
+];
 
-  const grid = document.getElementById("grid-mesas");
+function normalizar(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase();
+}
 
-  for (let i = 1; i <= 50; i++) {
+function esEntregable(producto) {
 
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "mesa sin-actividad";
+  if (producto.categoria === "comida") {
+    return true;
+  }
 
-    tarjeta.innerHTML = `
-      <h3>Mesa ${i}</h3>
+  return productosEntregables.includes(
+    normalizar(producto.nombre)
+  );
+}
 
-      <div class="dato">
-        Productos disponibles: 0
-      </div>
+async function obtenerDatos() {
 
-      <div class="dato">
-        Pedidos activos: 0
-      </div>
+  const marcaTiempo = Date.now();
 
-      <div class="estado">
-        Sin actividad
-      </div>
+  const [respuestaVentas, respuestaPedidos] =
+    await Promise.all([
 
-      <br>
+      fetch(
+        "/.netlify/functions/ventas?t=" + marcaTiempo,
+        {
+          cache: "no-store"
+        }
+      ),
 
-      <a class="btn" href="/mesa.html?numero=${i}">
-        Ver detalle
-      </a>
-    `;
+      fetch(
+        "/.netlify/functions/pedidos?t=" + marcaTiempo,
+        {
+          cache: "no-store"
+        }
+      )
 
-    grid.appendChild(tarjeta);
+    ]);
+
+  if (!respuestaVentas.ok) {
+    throw new Error(
+      "No se pudieron cargar las ventas."
+    );
+  }
+
+  const ventas =
+    await respuestaVentas.json();
+
+  let pedidos = [];
+
+  if (respuestaPedidos.ok) {
+    pedidos =
+      await respuestaPedidos.json();
+  }
+
+  return {
+    ventas:
+      Array.isArray(ventas)
+        ? ventas
+        : [],
+
+    pedidos:
+      Array.isArray(pedidos)
+        ? pedidos
+        : []
+  };
+}
+
+async function crearMesas() {
+
+  const grid =
+    document.getElementById(
+      "grid-mesas"
+    );
+
+  const estadoCarga =
+    document.getElementById(
+      "estado-carga"
+    );
+
+  try {
+
+    const {
+      ventas,
+      pedidos
+    } = await obtenerDatos();
+
+    grid.innerHTML = "";
+
+    for (
+      let numeroMesa = 1;
+      numeroMesa <= 50;
+      numeroMesa++
+    ) {
+
+      /* ========================
+         VENTAS DE ESTA MESA
+      ======================== */
+
+      const ventasMesa =
+        ventas.filter(
+          venta =>
+            Number(venta.mesa) ===
+            numeroMesa
+        );
+
+
+      /* ========================
+         PEDIDOS DE ESTA MESA
+      ======================== */
+
+      const pedidosMesa =
+        pedidos.filter(
+          pedido =>
+            Number(pedido.mesa) ===
+            numeroMesa
+        );
+
+
+      /* ========================
+         PRODUCTOS COMPRADOS
+      ======================== */
+
+      let productosComprados = 0;
+
+      const personas =
+        new Set();
+
+
+      ventasMesa.forEach(
+        venta => {
+
+          if (venta.nombre) {
+            personas.add(
+              normalizar(
+                venta.nombre
+              )
+            );
+          }
+
+          const productos =
+            Array.isArray(
+              venta.productos
+            )
+              ? venta.productos
+              : [];
+
+          productos.forEach(
+            producto => {
+
+              if (
+                esEntregable(
+                  producto
+                )
+              ) {
+
+                productosComprados +=
+                  Number(
+                    producto.cantidad || 0
+                  );
+              }
+
+            }
+          );
+
+        }
+      );
+
+
+      /* ========================
+         PRODUCTOS YA PEDIDOS
+      ======================== */
+
+      let productosPedidos = 0;
+
+
+      pedidosMesa.forEach(
+        pedido => {
+
+          const productos =
+            Array.isArray(
+              pedido.productos
+            )
+              ? pedido.productos
+              : [];
+
+          productos.forEach(
+            producto => {
+
+              productosPedidos +=
+                Number(
+                  producto.cantidad || 0
+                );
+
+            }
+          );
+
+        }
+      );
+
+
+      /* ========================
+         DISPONIBLES
+      ======================== */
+
+      const productosDisponibles =
+        Math.max(
+          0,
+          productosComprados -
+          productosPedidos
+        );
+
+
+      /* ========================
+         PEDIDOS ACTIVOS
+      ======================== */
+
+      const pedidosActivos =
+        pedidosMesa.filter(
+          pedido =>
+            pedido.estado !==
+            "entregado"
+        ).length;
+
+
+      /* ========================
+         ACTIVIDAD
+      ======================== */
+
+      const tieneActividad =
+        ventasMesa.length > 0 ||
+        pedidosMesa.length > 0;
+
+
+      /* ========================
+         TARJETA
+      ======================== */
+
+      const tarjeta =
+        document.createElement(
+          "div"
+        );
+
+      tarjeta.className =
+        "mesa" +
+        (
+          tieneActividad
+            ? " activa"
+            : ""
+        );
+
+
+      tarjeta.innerHTML = `
+
+        <h3>
+          Mesa ${numeroMesa}
+        </h3>
+
+        <div class="dato">
+
+          Productos comprados:
+          <strong>
+            ${productosComprados}
+          </strong>
+
+        </div>
+
+        <div class="dato">
+
+          Productos disponibles:
+          <strong>
+            ${productosDisponibles}
+          </strong>
+
+        </div>
+
+        <div class="dato">
+
+          Personas con compra:
+          <strong>
+            ${personas.size}
+          </strong>
+
+        </div>
+
+        <div class="dato">
+
+          Pedidos activos:
+          <strong>
+            ${pedidosActivos}
+          </strong>
+
+        </div>
+
+        <div
+          class="
+            estado
+            ${
+              tieneActividad
+                ? "activo"
+                : ""
+            }
+          "
+        >
+
+          ${
+            tieneActividad
+              ? "Con actividad"
+              : "Sin actividad"
+          }
+
+        </div>
+
+        <br>
+
+        <a
+          class="btn"
+          href="/mesa.html?numero=${numeroMesa}"
+        >
+          Ver detalle
+        </a>
+      `;
+
+      grid.appendChild(
+        tarjeta
+      );
+    }
+
+
+    estadoCarga.textContent =
+      "Información actualizada con compras y pedidos.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    estadoCarga.className =
+      "error";
+
+    estadoCarga.textContent =
+      "No se pudo cargar la información.";
+
   }
 }
 
 crearMesas();
+
+/*
+  También refrescamos automáticamente,
+  porque caja y cocina pueden cambiar
+  los datos desde otros dispositivos.
+*/
+
+setInterval(
+  crearMesas,
+  5000
+);
 
 </script>
 
