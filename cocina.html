@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cocina - Bingo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 25px;
+    }
+
+    .columnas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .columna {
+      background: #eef1f5;
+      border-radius: 14px;
+      padding: 15px;
+      min-height: 500px;
+    }
+
+    .columna h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .pedido {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .pedido h3 {
+      margin-top: 0;
+    }
+
+    .hora {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .producto {
+      margin: 6px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 11px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .btn-preparar {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-listo {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-entregado {
+      background: #10b981;
+      color: white;
+    }
+
+    @media (max-width: 900px) {
+      .columnas {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Cocina</h1>
+    <span>Pedidos de las mesas</span>
+  </div>
+
+  <a href="/index.html">Volver al inicio</a>
+</header>
+
+<main>
+
+  <div class="columnas">
+
+    <section class="columna">
+      <h2>Nuevos</h2>
+      <div id="nuevos"></div>
+    </section>
+
+    <section class="columna">
+      <h2>Preparando</h2>
+      <div id="preparando"></div>
+    </section>
+
+    <section class="columna">
+      <h2>Listos</h2>
+      <div id="listos"></div>
+    </section>
+
+  </div>
+
+</main>
+
+<script>
+
+const pedidos = [
+  {
+    id: 1,
+    mesa: 3,
+    hora: "20:14",
+    estado: "nuevo",
+    productos: [
+      { nombre: "Completo", cantidad: 2 },
+      { nombre: "Té", cantidad: 1 }
+    ]
+  },
+  {
+    id: 2,
+    mesa: 8,
+    hora: "20:18",
+    estado: "preparando",
+    productos: [
+      { nombre: "Bebida", cantidad: 2 }
+    ]
+  },
+  {
+    id: 3,
+    mesa: 12,
+    hora: "20:20",
+    estado: "listo",
+    productos: [
+      { nombre: "Café", cantidad: 1 },
+      { nombre: "Completo", cantidad: 1 }
+    ]
+  }
+];
+
+function renderPedidos() {
+
+  document.getElementById("nuevos").innerHTML = "";
+  document.getElementById("preparando").innerHTML = "";
+  document.getElementById("listos").innerHTML = "";
+
+  pedidos.forEach(pedido => {
+
+    if (pedido.estado === "entregado") {
+      return;
+    }
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "pedido";
+
+    let productosHTML = "";
+
+    pedido.productos.forEach(producto => {
+      productosHTML += `
+        <div class="producto">
+          ${producto.cantidad} x ${producto.nombre}
+        </div>
+      `;
+    });
+
+    let boton = "";
+
+    if (pedido.estado === "nuevo") {
+      boton = `
+        <button class="btn-preparar"
+          onclick="cambiarEstado(${pedido.id}, 'preparando')">
+          Empezar a preparar
+        </button>
+      `;
+    }
+
+    if (pedido.estado === "preparando") {
+      boton = `
+        <button class="btn-listo"
+          onclick="cambiarEstado(${pedido.id}, 'listo')">
+          Marcar como listo
+        </button>
+      `;
+    }
+
+    if (pedido.estado === "listo") {
+      boton = `
+        <button class="btn-entregado"
+          onclick="cambiarEstado(${pedido.id}, 'entregado')">
+          Marcar como entregado
+        </button>
+      `;
+    }
+
+    tarjeta.innerHTML = `
+      <h3>Mesa ${pedido.mesa}</h3>
+
+      <div class="hora">
+        ${pedido.hora}
+      </div>
+
+      ${productosHTML}
+
+      ${boton}
+    `;
+
+    document.getElementById(pedido.estado + "s")?.appendChild(tarjeta);
+
+    if (pedido.estado === "nuevo") {
+      document.getElementById("nuevos").appendChild(tarjeta);
+    }
+
+    if (pedido.estado === "preparando") {
+      document.getElementById("preparando").appendChild(tarjeta);
+    }
+
+    if (pedido.estado === "listo") {
+      document.getElementById("listos").appendChild(tarjeta);
+    }
+
+  });
+
+}
+
+function cambiarEstado(id, nuevoEstado) {
+
+  const pedido = pedidos.find(p => p.id === id);
+
+  if (!pedido) {
+    return;
+  }
+
+  pedido.estado = nuevoEstado;
+
+  renderPedidos();
+}
+
+renderPedidos();
+
+</script>
+
+</body>
+</html>
