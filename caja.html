@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caja - Bingo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    .panel {
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+
+    .fila {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .producto {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 18px;
+      background: #fafafa;
+    }
+
+    .producto h3 {
+      margin-top: 0;
+    }
+
+    .controles {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .cantidad-btn {
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+      background: #e5e7eb;
+    }
+
+    .cantidad {
+      min-width: 25px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .total {
+      font-size: 30px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .registrar {
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      background: #2563eb;
+      color: white;
+      margin-top: 20px;
+    }
+
+    .registrar:hover {
+      background: #1d4ed8;
+    }
+
+    .nota {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .fila {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Caja</h1>
+    <span>Registrar venta</span>
+  </div>
+
+  <a href="/index.html">Volver al inicio</a>
+</header>
+
+<main>
+
+  <div class="panel">
+
+    <div class="fila">
+
+      <div>
+        <label for="mesa">Mesa</label>
+        <select id="mesa">
+          <option value="">Seleccionar mesa</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="pago">Método de pago</label>
+        <select id="pago">
+          <option value="">Seleccionar</option>
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia">Transferencia</option>
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Comida y bebidas</h2>
+
+    <div class="productos" id="productos-comida"></div>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Juegos de bingo</h2>
+
+    <div class="productos" id="productos-bingo"></div>
+
+  </div>
+
+  <div class="panel">
+
+    <div>Total de la venta</div>
+    <div class="total" id="total">$0</div>
+
+    <button class="registrar" onclick="registrarVenta()">
+      Registrar venta
+    </button>
+
+    <p class="nota">
+      Por ahora esta versión no guarda los datos. En el siguiente paso la conectaremos a la base de datos.
+    </p>
+
+  </div>
+
+</main>
+
+<script>
+
+const productos = [
+  { id: 1, nombre: "Completo", precio: 1500, categoria: "comida" },
+  { id: 2, nombre: "Té", precio: 1000, categoria: "comida" },
+  { id: 3, nombre: "Café", precio: 1000, categoria: "comida" },
+  { id: 4, nombre: "Bebida", precio: 1000, categoria: "comida" },
+  { id: 5, nombre: "Agua", precio: 500, categoria: "comida" },
+
+  { id: 6, nombre: "Juego 1", precio: 1000, categoria: "bingo" },
+  { id: 7, nombre: "Juego 2", precio: 1000, categoria: "bingo" },
+  { id: 8, nombre: "Juego 3", precio: 1000, categoria: "bingo" },
+  { id: 9, nombre: "Juego 4", precio: 1000, categoria: "bingo" },
+  { id: 10, nombre: "Juego Mayor", precio: 2000, categoria: "bingo" },
+  { id: 11, nombre: "Pack de 11", precio: 5000, categoria: "bingo" },
+  { id: 12, nombre: "Preventa", precio: 4000, categoria: "bingo" }
+];
+
+const cantidades = {};
+
+function formatoCLP(valor) {
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0
+  }).format(valor);
+}
+
+function cargarMesas() {
+  const select = document.getElementById("mesa");
+
+  for (let i = 1; i <= 50; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = "Mesa " + i;
+    select.appendChild(option);
+  }
+}
+
+function crearProductos() {
+
+  const comida = document.getElementById("productos-comida");
+  const bingo = document.getElementById("productos-bingo");
+
+  productos.forEach(producto => {
+
+    cantidades[producto.id] = 0;
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "producto";
+
+    tarjeta.innerHTML = `
+      <h3>${producto.nombre}</h3>
+      <div>${formatoCLP(producto.precio)}</div>
+
+      <div class="controles">
+        <button class="cantidad-btn" onclick="cambiarCantidad(${producto.id}, -1)">−</button>
+        <span class="cantidad" id="cantidad-${producto.id}">0</span>
+        <button class="cantidad-btn" onclick="cambiarCantidad(${producto.id}, 1)">+</button>
+      </div>
+    `;
+
+    if (producto.categoria === "comida") {
+      comida.appendChild(tarjeta);
+    } else {
+      bingo.appendChild(tarjeta);
+    }
+  });
+}
+
+function cambiarCantidad(id, cambio) {
+
+  cantidades[id] += cambio;
+
+  if (cantidades[id] < 0) {
+    cantidades[id] = 0;
+  }
+
+  document.getElementById("cantidad-" + id).textContent = cantidades[id];
+
+  actualizarTotal();
+}
+
+function actualizarTotal() {
+
+  let total = 0;
+
+  productos.forEach(producto => {
+    total += producto.precio * cantidades[producto.id];
+  });
+
+  document.getElementById("total").textContent = formatoCLP(total);
+}
+
+function registrarVenta() {
+
+  const mesa = document.getElementById("mesa").value;
+  const pago = document.getElementById("pago").value;
+
+  if (!mesa) {
+    alert("Selecciona una mesa.");
+    return;
+  }
+
+  if (!pago) {
+    alert("Selecciona un método de pago.");
+    return;
+  }
+
+  const productosSeleccionados = productos.filter(
+    producto => cantidades[producto.id] > 0
+  );
+
+  if (productosSeleccionados.length === 0) {
+    alert("Agrega al menos un producto.");
+    return;
+  }
+
+  alert("Venta lista para registrar. En el próximo paso la conectaremos a la base de datos.");
+}
+
+cargarMesas();
+crearProductos();
+
+</script>
+
+</body>
+</html>
