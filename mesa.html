@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mesas - Bingo</title>
+
+  <title>Mesa - Bingo</title>
 
   <style>
     body {
@@ -17,88 +18,56 @@
       background: white;
       padding: 20px 30px;
       border-bottom: 1px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header a {
-      text-decoration: none;
-      color: #2563eb;
-      font-weight: bold;
     }
 
     main {
-      max-width: 1200px;
+      max-width: 850px;
       margin: auto;
-      padding: 30px;
+      padding: 25px;
     }
 
-    .resumen {
+    .persona {
       background: white;
+      border-radius: 14px;
       padding: 20px;
-      border-radius: 14px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-    }
-
-    .mesa {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 2px solid #e5e7eb;
-    }
-
-    .mesa.activa {
-      border-color: #f59e0b;
-    }
-
-    .mesa h3 {
+    .persona h2 {
       margin-top: 0;
-      margin-bottom: 12px;
     }
 
-    .dato {
-      font-size: 14px;
-      margin: 5px 0;
-      color: #4b5563;
-    }
-
-    .estado {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: bold;
-      background: #e5e7eb;
-    }
-
-    .estado.activo {
-      background: #fef3c7;
-      color: #92400e;
+    .producto {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 15px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
     }
 
     .btn {
       display: inline-block;
-      margin-top: 14px;
-      text-decoration: none;
+      margin-top: 15px;
+      padding: 11px 15px;
       background: #2563eb;
       color: white;
-      padding: 9px 12px;
+      text-decoration: none;
       border-radius: 8px;
-      font-size: 14px;
+      font-weight: bold;
     }
 
-    .cargando {
+    .vacio {
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      text-align: center;
       color: #6b7280;
+    }
+
+    .volver {
+      color: #2563eb;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -106,164 +75,331 @@
 <body>
 
 <header>
-  <div>
-    <h1>Mesas</h1>
-    <span>Vista general de las 50 mesas</span>
-  </div>
 
-  <a href="/index.html">Volver al inicio</a>
+  <h1 id="titulo">
+    Mesa
+  </h1>
+
+  <a
+    class="volver"
+    href="/mesas.html">
+    ← Volver a mesas
+  </a>
+
 </header>
 
 <main>
 
-  <div class="resumen">
-    <strong>Total de mesas:</strong> 50
-    <br>
-    <span id="estado-carga" class="cargando">
-      Cargando información real...
-    </span>
+  <div id="contenido">
+    Cargando...
   </div>
-
-  <div class="grid" id="grid-mesas"></div>
 
 </main>
 
+
 <script>
 
-async function obtenerVentas() {
-
-  const respuesta = await fetch(
-    "/.netlify/functions/ventas"
+const params =
+  new URLSearchParams(
+    window.location.search
   );
 
-  if (!respuesta.ok) {
-    throw new Error("No se pudieron cargar las ventas.");
-  }
+const mesa =
+  Number(
+    params.get("numero")
+  );
 
-  return await respuesta.json();
+document.getElementById(
+  "titulo"
+).textContent =
+  "Mesa " + mesa;
+
+
+function normalizar(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase();
 }
 
 
-async function crearMesas() {
+async function cargar() {
 
-  const grid =
-    document.getElementById("grid-mesas");
-
-  const estadoCarga =
-    document.getElementById("estado-carga");
+  const contenido =
+    document.getElementById(
+      "contenido"
+    );
 
   try {
 
+    const [
+      respuestaVentas,
+      respuestaPedidos
+    ] = await Promise.all([
+
+      fetch(
+        "/.netlify/functions/ventas"
+      ),
+
+      fetch(
+        "/.netlify/functions/pedidos"
+      )
+
+    ]);
+
+
     const ventas =
-      await obtenerVentas();
+      await respuestaVentas.json();
 
-    for (let numeroMesa = 1; numeroMesa <= 50; numeroMesa++) {
+    const pedidos =
+      respuestaPedidos.ok
+        ? await respuestaPedidos.json()
+        : [];
 
-      const ventasMesa =
-        ventas.filter(
-          venta =>
-            Number(venta.mesa) === numeroMesa
-        );
 
-      let productosDisponibles = 0;
+    const ventasMesa =
+      ventas.filter(
+        venta =>
+          Number(venta.mesa) === mesa
+      );
 
-      const personas = new Set();
 
-      ventasMesa.forEach(venta => {
+    if (ventasMesa.length === 0) {
 
-        if (venta.nombre) {
-          personas.add(venta.nombre);
+      contenido.innerHTML = `
+        <div class="vacio">
+          Esta mesa todavía no tiene compras.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    const personas = {};
+
+
+    ventasMesa.forEach(
+      venta => {
+
+        const nombre =
+          venta.nombre ||
+          "Sin nombre";
+
+        const clave =
+          normalizar(nombre);
+
+
+        if (!personas[clave]) {
+
+          personas[clave] = {
+            nombre,
+            productos: {}
+          };
+
         }
 
+
         const productos =
-          Array.isArray(venta.productos)
+          Array.isArray(
+            venta.productos
+          )
             ? venta.productos
             : [];
 
-        productos.forEach(producto => {
 
-          // Solo comida/bebida se considera
-          // disponible para pedir a la mesa.
-          if (producto.categoria === "comida") {
+        productos.forEach(
+          producto => {
 
-            productosDisponibles +=
-              Number(producto.cantidad || 0);
+            if (
+              producto.categoria !==
+              "comida"
+            ) {
+              return;
+            }
+
+
+            if (
+              !personas[clave]
+                .productos[
+                  producto.nombre
+                ]
+            ) {
+
+              personas[clave]
+                .productos[
+                  producto.nombre
+                ] = {
+                  comprados: 0,
+                  pedidos: 0
+                };
+
+            }
+
+
+            personas[clave]
+              .productos[
+                producto.nombre
+              ].comprados +=
+                Number(
+                  producto.cantidad || 0
+                );
+
+          }
+        );
+
+      }
+    );
+
+
+    // Sumar productos ya pedidos
+    pedidos
+      .filter(
+        pedido =>
+          Number(pedido.mesa) === mesa
+      )
+      .forEach(
+        pedido => {
+
+          const clave =
+            normalizar(
+              pedido.nombre
+            );
+
+          if (!personas[clave]) {
+            return;
           }
 
-        });
-      });
+          pedido.productos.forEach(
+            producto => {
+
+              if (
+                personas[clave]
+                  .productos[
+                    producto.nombre
+                  ]
+              ) {
+
+                personas[clave]
+                  .productos[
+                    producto.nombre
+                  ].pedidos +=
+                    Number(
+                      producto.cantidad || 0
+                    );
+
+              }
+
+            }
+          );
+
+        }
+      );
 
 
-      const tieneActividad =
-        ventasMesa.length > 0;
+    contenido.innerHTML = "";
 
-      const tarjeta =
-        document.createElement("div");
 
-      tarjeta.className =
-        "mesa" +
-        (tieneActividad ? " activa" : "");
+    Object.values(
+      personas
+    ).forEach(
+      persona => {
 
-      tarjeta.innerHTML = `
+        const tarjeta =
+          document.createElement(
+            "div"
+          );
 
-        <h3>
-          Mesa ${numeroMesa}
-        </h3>
+        tarjeta.className =
+          "persona";
 
-        <div class="dato">
-          Productos disponibles:
-          <strong>
-            ${productosDisponibles}
-          </strong>
-        </div>
 
-        <div class="dato">
-          Personas con compra:
-          <strong>
-            ${personas.size}
-          </strong>
-        </div>
+        let productosHTML = "";
 
-        <div class="dato">
-          Pedidos activos:
-          <strong>0</strong>
-        </div>
 
-        <div class="estado ${tieneActividad ? "activo" : ""}">
+        Object.entries(
+          persona.productos
+        ).forEach(
+          ([nombre, datos]) => {
+
+            const disponibles =
+              Math.max(
+                0,
+                datos.comprados -
+                datos.pedidos
+              );
+
+
+            productosHTML += `
+
+              <div class="producto">
+
+                <span>
+                  ${nombre}
+                </span>
+
+                <span>
+                  Comprados:
+                  ${datos.comprados}
+                </span>
+
+                <span>
+                  Disponibles:
+                  <strong>
+                    ${disponibles}
+                  </strong>
+                </span>
+
+              </div>
+            `;
+
+          }
+        );
+
+
+        tarjeta.innerHTML = `
+
+          <h2>
+            ${persona.nombre}
+          </h2>
+
           ${
-            tieneActividad
-              ? "Con compras"
-              : "Sin actividad"
+            productosHTML ||
+            "<p>Solo tiene compras de bingo.</p>"
           }
-        </div>
 
-        <br>
+          <a
+            class="btn"
+            href="/persona.html?mesa=${mesa}&nombre=${encodeURIComponent(persona.nombre)}"
+          >
+            Entrar a la cuenta de
+            ${persona.nombre}
+          </a>
+        `;
 
-        <a
-          class="btn"
-          href="/mesa.html?numero=${numeroMesa}"
-        >
-          Ver detalle
-        </a>
-      `;
 
-      grid.appendChild(tarjeta);
-    }
+        contenido.appendChild(
+          tarjeta
+        );
 
-    estadoCarga.textContent =
-      "Información actualizada con las ventas registradas.";
+      }
+    );
+
 
   } catch (error) {
 
     console.error(error);
 
-    estadoCarga.textContent =
-      "No se pudo cargar la información.";
+    contenido.innerHTML = `
+      <div class="vacio">
+        No se pudo cargar esta mesa.
+      </div>
+    `;
 
   }
 }
 
-crearMesas();
+
+cargar();
 
 </script>
 
