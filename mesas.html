@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesas - Bingo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    .resumen {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .mesa {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+    }
+
+    .mesa h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    .dato {
+      font-size: 14px;
+      margin: 5px 0;
+      color: #4b5563;
+    }
+
+    .estado {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: bold;
+      background: #e5e7eb;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 14px;
+      text-decoration: none;
+      background: #2563eb;
+      color: white;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .sin-actividad {
+      border-color: #e5e7eb;
+    }
+
+    .con-productos {
+      border-color: #f59e0b;
+    }
+
+    .con-pedido {
+      border-color: #3b82f6;
+    }
+
+    .listo {
+      border-color: #10b981;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>Mesas</h1>
+    <span>Vista general de las 50 mesas</span>
+  </div>
+
+  <a href="/index.html">Volver al inicio</a>
+</header>
+
+<main>
+
+  <div class="resumen">
+    <strong>Total de mesas:</strong> 50
+    <br>
+    <span style="color:#6b7280;">
+      Más adelante esta pantalla mostrará datos reales desde la base de datos.
+    </span>
+  </div>
+
+  <div class="grid" id="grid-mesas"></div>
+
+</main>
+
+<script>
+
+function crearMesas() {
+
+  const grid = document.getElementById("grid-mesas");
+
+  for (let i = 1; i <= 50; i++) {
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "mesa sin-actividad";
+
+    tarjeta.innerHTML = `
+      <h3>Mesa ${i}</h3>
+
+      <div class="dato">
+        Productos disponibles: 0
+      </div>
+
+      <div class="dato">
+        Pedidos activos: 0
+      </div>
+
+      <div class="estado">
+        Sin actividad
+      </div>
+
+      <br>
+
+      <a class="btn" href="/mesa.html?numero=${i}">
+        Ver detalle
+      </a>
+    `;
+
+    grid.appendChild(tarjeta);
+  }
+}
+
+crearMesas();
+
+</script>
+
+</body>
+</html>
