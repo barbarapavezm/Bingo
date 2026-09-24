@@ -1,6 +1,9 @@
 import { getStore } from "@netlify/blobs";
 
-const store = getStore("pedidos-bingo");
+const store = getStore({
+  name: "pedidos-bingo",
+  consistency: "strong"
+});
 
 export default async (req) => {
 
