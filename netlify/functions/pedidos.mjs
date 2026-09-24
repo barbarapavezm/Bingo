@@ -3,6 +3,7 @@ import { getStore } from "@netlify/blobs";
 const store = getStore("pedidos-bingo");
 
 export default async (req) => {
+
   try {
 
     // =========================
@@ -11,53 +12,124 @@ export default async (req) => {
 
     if (req.method === "POST") {
 
-      const pedido = await req.json();
+      const pedido =
+        await req.json();
+
 
       if (
         !pedido.mesa ||
         !pedido.nombre ||
-        !Array.isArray(pedido.productos) ||
+        !Array.isArray(
+          pedido.productos
+        ) ||
         pedido.productos.length === 0
       ) {
+
         return Response.json(
-          { error: "Faltan datos del pedido" },
-          { status: 400 }
+          {
+            error:
+              "Faltan datos del pedido"
+          },
+          {
+            status: 400
+          }
         );
+
       }
 
-      const id = crypto.randomUUID();
-      const ahora = new Date().toISOString();
+
+      const id =
+        crypto.randomUUID();
+
+
+      const ahora =
+        new Date()
+          .toISOString();
+
+
+      /*
+        ORIGEN
+
+        "caja"
+        = enviado directamente
+          desde caja.
+
+        "mesa"
+        = solicitado por la
+          persona desde su mesa.
+
+        Si no viene indicado,
+        asumimos "mesa".
+      */
+
+      const origen =
+        pedido.origen === "caja"
+          ? "caja"
+          : "mesa";
+
 
       const pedidoCompleto = {
-        id,
-        mesa: Number(pedido.mesa),
-        nombre: pedido.nombre.trim(),
-        productos: pedido.productos,
-        estado: "nuevo",
-        fecha: ahora,
-        actualizado: ahora,
 
-        prioridadPreparando: false,
+        id,
+
+        mesa:
+          Number(
+            pedido.mesa
+          ),
+
+        nombre:
+          pedido.nombre
+            .trim(),
+
+        productos:
+          pedido.productos,
+
+        origen,
+
+        estado:
+          "nuevo",
+
+        fecha:
+          ahora,
+
+        actualizado:
+          ahora,
+
+        prioridadPreparando:
+          false,
 
         historialEstados: [
           {
-            desde: null,
-            hacia: "nuevo",
-            fecha: ahora
+
+            desde:
+              null,
+
+            hacia:
+              "nuevo",
+
+            fecha:
+              ahora
+
           }
         ]
+
       };
+
 
       await store.setJSON(
         id,
         pedidoCompleto
       );
 
+
       return Response.json({
         ok: true,
-        pedido: pedidoCompleto
+        pedido:
+          pedidoCompleto
       });
+
     }
+
 
 
     // =========================
@@ -69,9 +141,14 @@ export default async (req) => {
       const lista =
         await store.list();
 
+
       const pedidos = [];
 
-      for (const blob of lista.blobs) {
+
+      for (
+        const blob
+        of lista.blobs
+      ) {
 
         const pedido =
           await store.get(
@@ -81,21 +158,50 @@ export default async (req) => {
             }
           );
 
+
         if (pedido) {
-          pedidos.push(pedido);
+
+          /*
+            Compatibilidad con
+            pedidos antiguos que
+            todavía no tengan
+            origen guardado.
+          */
+
+          if (!pedido.origen) {
+            pedido.origen =
+              "mesa";
+          }
+
+
+          pedidos.push(
+            pedido
+          );
+
         }
+
       }
+
 
       pedidos.sort(
         (a, b) =>
-          new Date(b.fecha) -
-          new Date(a.fecha)
+
+          new Date(
+            b.fecha
+          ) -
+
+          new Date(
+            a.fecha
+          )
       );
+
 
       return Response.json(
         pedidos
       );
+
     }
+
 
 
     // =========================
@@ -107,10 +213,12 @@ export default async (req) => {
       const datos =
         await req.json();
 
+
       if (
         !datos.id ||
         !datos.estado
       ) {
+
         return Response.json(
           {
             error:
@@ -120,7 +228,9 @@ export default async (req) => {
             status: 400
           }
         );
+
       }
+
 
       const pedido =
         await store.get(
@@ -130,7 +240,9 @@ export default async (req) => {
           }
         );
 
+
       if (!pedido) {
+
         return Response.json(
           {
             error:
@@ -140,7 +252,9 @@ export default async (req) => {
             status: 404
           }
         );
+
       }
+
 
       const estadosPermitidos = [
         "nuevo",
@@ -149,11 +263,13 @@ export default async (req) => {
         "entregado"
       ];
 
+
       if (
         !estadosPermitidos.includes(
           datos.estado
         )
       ) {
+
         return Response.json(
           {
             error:
@@ -163,26 +279,38 @@ export default async (req) => {
             status: 400
           }
         );
+
       }
+
 
       const estadoAnterior =
         pedido.estado;
 
+
       const ahora =
-        new Date().toISOString();
+        new Date()
+          .toISOString();
 
 
-      // Historial de estados
+
+      // =========================
+      // HISTORIAL
+      // =========================
 
       if (
         !Array.isArray(
           pedido.historialEstados
         )
       ) {
-        pedido.historialEstados = [];
+
+        pedido.historialEstados =
+          [];
+
       }
 
+
       pedido.historialEstados.push({
+
         desde:
           estadoAnterior,
 
@@ -191,14 +319,22 @@ export default async (req) => {
 
         fecha:
           ahora
+
       });
 
+
+
+      // =========================
+      // ACTUALIZAR ESTADO
+      // =========================
 
       pedido.estado =
         datos.estado;
 
+
       pedido.actualizado =
         ahora;
+
 
 
       // =========================
@@ -213,9 +349,12 @@ export default async (req) => {
         pedido.entregadoEn =
           ahora;
 
+
         pedido.prioridadPreparando =
           false;
+
       }
+
 
 
       // =========================
@@ -226,6 +365,7 @@ export default async (req) => {
       if (
         estadoAnterior ===
           "entregado" &&
+
         datos.estado ===
           "preparando"
       ) {
@@ -233,28 +373,55 @@ export default async (req) => {
         pedido.reabiertoEn =
           ahora;
 
+
         /*
-          Esto hará que aparezca
-          primero en Preparando.
+          Al volver desde
+          entregado a preparando
+          aparecerá al principio
+          de esa columna.
         */
 
         pedido.prioridadPreparando =
           true;
+
       }
 
 
-      // Si sale de preparando,
-      // pierde esa prioridad.
+
+      // =========================
+      // QUITAR PRIORIDAD
+      // =========================
 
       if (
-        datos.estado === "listo" ||
-        datos.estado === "nuevo" ||
-        datos.estado === "entregado"
+        datos.estado ===
+          "listo" ||
+
+        datos.estado ===
+          "nuevo" ||
+
+        datos.estado ===
+          "entregado"
       ) {
 
         pedido.prioridadPreparando =
           false;
+
       }
+
+
+
+      // =========================
+      // COMPATIBILIDAD
+      // PEDIDOS ANTIGUOS
+      // =========================
+
+      if (!pedido.origen) {
+
+        pedido.origen =
+          "mesa";
+
+      }
+
 
 
       await store.setJSON(
@@ -262,12 +429,23 @@ export default async (req) => {
         pedido
       );
 
+
       return Response.json({
-        ok: true,
+
+        ok:
+          true,
+
         pedido
+
       });
+
     }
 
+
+
+    // =========================
+    // MÉTODO NO PERMITIDO
+    // =========================
 
     return Response.json(
       {
@@ -279,12 +457,15 @@ export default async (req) => {
       }
     );
 
+
   } catch (error) {
+
 
     console.error(
       "Error en pedidos:",
       error
     );
+
 
     return Response.json(
       {
@@ -295,5 +476,7 @@ export default async (req) => {
         status: 500
       }
     );
+
   }
+
 };
