@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi mesa - Bingo</title>
+  <title>Mesas - Bingo</title>
 
   <style>
     body {
@@ -15,97 +15,90 @@
 
     header {
       background: white;
-      padding: 20px;
+      padding: 20px 30px;
       border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: #2563eb;
+      font-weight: bold;
     }
 
     main {
-      max-width: 700px;
+      max-width: 1200px;
       margin: auto;
-      padding: 20px;
+      padding: 30px;
     }
 
-    .panel {
+    .resumen {
       background: white;
-      padding: 22px;
+      padding: 20px;
       border-radius: 14px;
+      margin-bottom: 25px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
     }
 
-    .producto {
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
     }
 
-    .producto h3 {
+    .mesa {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 2px solid #e5e7eb;
+    }
+
+    .mesa.activa {
+      border-color: #f59e0b;
+    }
+
+    .mesa h3 {
       margin-top: 0;
+      margin-bottom: 12px;
     }
 
-    .info {
-      color: #6b7280;
+    .dato {
       font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .controles {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .cantidad-btn {
-      width: 38px;
-      height: 38px;
-      font-size: 20px;
-      background: #e5e7eb;
-    }
-
-    .cantidad {
-      font-weight: bold;
-      min-width: 25px;
-      text-align: center;
-    }
-
-    .enviar {
-      width: 100%;
-      padding: 16px;
-      background: #2563eb;
-      color: white;
-      font-size: 18px;
-      margin-top: 10px;
-    }
-
-    .pedido {
-      padding: 14px;
-      background: #f9fafb;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #e5e7eb;
+      margin: 5px 0;
+      color: #4b5563;
     }
 
     .estado {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
       font-size: 13px;
       font-weight: bold;
-      color: #2563eb;
-      margin-top: 6px;
+      background: #e5e7eb;
     }
 
-    .aviso {
-      background: #fff7ed;
-      color: #9a3412;
-      padding: 14px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+    .estado.activo {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 14px;
+      text-decoration: none;
+      background: #2563eb;
+      color: white;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .cargando {
+      color: #6b7280;
     }
   </style>
 </head>
@@ -113,212 +106,164 @@
 <body>
 
 <header>
-  <h1 id="titulo-mesa">Mesa</h1>
-  <p>Solicita los productos que ya compraste en caja.</p>
+  <div>
+    <h1>Mesas</h1>
+    <span>Vista general de las 50 mesas</span>
+  </div>
+
+  <a href="/index.html">Volver al inicio</a>
 </header>
 
 <main>
 
-  <div class="aviso">
-    Esta página no realiza pagos. Solo puedes pedir productos que ya hayan sido comprados previamente en caja.
+  <div class="resumen">
+    <strong>Total de mesas:</strong> 50
+    <br>
+    <span id="estado-carga" class="cargando">
+      Cargando información real...
+    </span>
   </div>
 
-  <div class="panel">
-
-    <h2>Productos disponibles</h2>
-
-    <div id="lista-productos"></div>
-
-    <button class="enviar" onclick="enviarPedido()">
-      Enviar pedido a cocina
-    </button>
-
-  </div>
-
-  <div class="panel">
-
-    <h2>Pedidos recientes</h2>
-
-    <div id="lista-pedidos">
-      <p style="color:#6b7280;">Aún no hay pedidos.</p>
-    </div>
-
-  </div>
+  <div class="grid" id="grid-mesas"></div>
 
 </main>
 
 <script>
 
-const parametros = new URLSearchParams(window.location.search);
-const numeroMesa = parametros.get("numero") || "?";
+async function obtenerVentas() {
 
-document.getElementById("titulo-mesa").textContent = "Mesa " + numeroMesa;
-
-/*
-  Datos de ejemplo.
-  Más adelante estos productos vendrán desde la base de datos
-  según lo que haya comprado realmente esta mesa.
-*/
-const productosDisponibles = [
-  {
-    id: 1,
-    nombre: "Completo",
-    comprados: 3,
-    pedidos: 0
-  },
-  {
-    id: 2,
-    nombre: "Té",
-    comprados: 2,
-    pedidos: 0
-  },
-  {
-    id: 3,
-    nombre: "Bebida",
-    comprados: 2,
-    pedidos: 0
-  }
-];
-
-const cantidadesPedido = {};
-
-function cargarProductos() {
-
-  const contenedor = document.getElementById("lista-productos");
-  contenedor.innerHTML = "";
-
-  productosDisponibles.forEach(producto => {
-
-    const disponibles = producto.comprados - producto.pedidos;
-
-    cantidadesPedido[producto.id] = 0;
-
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "producto";
-
-    tarjeta.innerHTML = `
-      <h3>${producto.nombre}</h3>
-
-      <div class="info">
-        Comprados: ${producto.comprados}
-      </div>
-
-      <div class="info">
-        Ya pedidos: ${producto.pedidos}
-      </div>
-
-      <div class="info">
-        <strong>Disponibles: ${disponibles}</strong>
-      </div>
-
-      <div class="controles">
-        <button class="cantidad-btn"
-          onclick="cambiarCantidad(${producto.id}, -1)">
-          −
-        </button>
-
-        <span class="cantidad"
-          id="cantidad-${producto.id}">
-          0
-        </span>
-
-        <button class="cantidad-btn"
-          onclick="cambiarCantidad(${producto.id}, 1)">
-          +
-        </button>
-      </div>
-    `;
-
-    contenedor.appendChild(tarjeta);
-  });
-}
-
-function cambiarCantidad(id, cambio) {
-
-  const producto = productosDisponibles.find(p => p.id === id);
-
-  const disponibles = producto.comprados - producto.pedidos;
-
-  cantidadesPedido[id] += cambio;
-
-  if (cantidadesPedido[id] < 0) {
-    cantidadesPedido[id] = 0;
-  }
-
-  if (cantidadesPedido[id] > disponibles) {
-    cantidadesPedido[id] = disponibles;
-  }
-
-  document.getElementById("cantidad-" + id).textContent =
-    cantidadesPedido[id];
-}
-
-function enviarPedido() {
-
-  const seleccionados = productosDisponibles.filter(
-    producto => cantidadesPedido[producto.id] > 0
+  const respuesta = await fetch(
+    "/.netlify/functions/ventas"
   );
 
-  if (seleccionados.length === 0) {
-    alert("Selecciona al menos un producto.");
-    return;
+  if (!respuesta.ok) {
+    throw new Error("No se pudieron cargar las ventas.");
   }
 
-  let resumen = "Pedido enviado:\\n\\n";
-
-  seleccionados.forEach(producto => {
-
-    const cantidad = cantidadesPedido[producto.id];
-
-    resumen += cantidad + " x " + producto.nombre + "\\n";
-
-    producto.pedidos += cantidad;
-
-    cantidadesPedido[producto.id] = 0;
-  });
-
-  alert(resumen);
-
-  agregarPedidoAlHistorial(seleccionados);
-
-  cargarProductos();
+  return await respuesta.json();
 }
 
-function agregarPedidoAlHistorial(productos) {
 
-  const contenedor = document.getElementById("lista-pedidos");
+async function crearMesas() {
 
-  if (contenedor.querySelector("p")) {
-    contenedor.innerHTML = "";
+  const grid =
+    document.getElementById("grid-mesas");
+
+  const estadoCarga =
+    document.getElementById("estado-carga");
+
+  try {
+
+    const ventas =
+      await obtenerVentas();
+
+    for (let numeroMesa = 1; numeroMesa <= 50; numeroMesa++) {
+
+      const ventasMesa =
+        ventas.filter(
+          venta =>
+            Number(venta.mesa) === numeroMesa
+        );
+
+      let productosDisponibles = 0;
+
+      const personas = new Set();
+
+      ventasMesa.forEach(venta => {
+
+        if (venta.nombre) {
+          personas.add(venta.nombre);
+        }
+
+        const productos =
+          Array.isArray(venta.productos)
+            ? venta.productos
+            : [];
+
+        productos.forEach(producto => {
+
+          // Solo comida/bebida se considera
+          // disponible para pedir a la mesa.
+          if (producto.categoria === "comida") {
+
+            productosDisponibles +=
+              Number(producto.cantidad || 0);
+          }
+
+        });
+      });
+
+
+      const tieneActividad =
+        ventasMesa.length > 0;
+
+      const tarjeta =
+        document.createElement("div");
+
+      tarjeta.className =
+        "mesa" +
+        (tieneActividad ? " activa" : "");
+
+      tarjeta.innerHTML = `
+
+        <h3>
+          Mesa ${numeroMesa}
+        </h3>
+
+        <div class="dato">
+          Productos disponibles:
+          <strong>
+            ${productosDisponibles}
+          </strong>
+        </div>
+
+        <div class="dato">
+          Personas con compra:
+          <strong>
+            ${personas.size}
+          </strong>
+        </div>
+
+        <div class="dato">
+          Pedidos activos:
+          <strong>0</strong>
+        </div>
+
+        <div class="estado ${tieneActividad ? "activo" : ""}">
+          ${
+            tieneActividad
+              ? "Con compras"
+              : "Sin actividad"
+          }
+        </div>
+
+        <br>
+
+        <a
+          class="btn"
+          href="/mesa.html?numero=${numeroMesa}"
+        >
+          Ver detalle
+        </a>
+      `;
+
+      grid.appendChild(tarjeta);
+    }
+
+    estadoCarga.textContent =
+      "Información actualizada con las ventas registradas.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    estadoCarga.textContent =
+      "No se pudo cargar la información.";
+
   }
-
-  const pedido = document.createElement("div");
-  pedido.className = "pedido";
-
-  let contenido = "";
-
-  productos.forEach(producto => {
-    contenido += `
-      <div>
-        ${producto.nombre}
-      </div>
-    `;
-  });
-
-  pedido.innerHTML = `
-    <strong>Pedido enviado</strong>
-
-    ${contenido}
-
-    <div class="estado">
-      Nuevo
-    </div>
-  `;
-
-  contenedor.prepend(pedido);
 }
 
-cargarProductos();
+crearMesas();
 
 </script>
 
