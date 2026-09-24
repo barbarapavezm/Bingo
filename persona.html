@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>Mi pedido - Bingo</title>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+header {
+  background: white;
+  padding: 22px;
+  border-bottom: 1px solid #ddd;
+}
+
+main {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+.panel {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.producto {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 12px;
+}
+
+.controles {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cantidad-btn {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+}
+
+.enviar {
+  width: 100%;
+  padding: 15px;
+  background: #2563eb;
+  color: white;
+  font-size: 17px;
+}
+
+.info {
+  color: #6b7280;
+  margin: 5px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1 id="nombre"></h1>
+
+<div id="mesa"></div>
+
+</header>
+
+
+<main>
+
+<div class="panel">
+
+<h2>
+  ¿Qué quieres que llevemos a tu mesa?
+</h2>
+
+<p>
+  Solo puedes solicitar productos
+  que ya fueron pagados en caja.
+</p>
+
+<div id="productos">
+  Cargando...
+</div>
+
+<button
+  class="enviar"
+  onclick="enviarPedido()">
+  Enviar pedido a cocina
+</button>
+
+</div>
+
+</main>
+
+
+<script>
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const numeroMesa =
+  Number(
+    params.get("mesa")
+  );
+
+const nombrePersona =
+  params.get("nombre") || "";
+
+
+document.getElementById(
+  "nombre"
+).textContent =
+  nombrePersona;
+
+document.getElementById(
+  "mesa"
+).textContent =
+  "Mesa " + numeroMesa;
+
+
+const disponibles = {};
+const seleccion = {};
+
+
+function normalizar(texto) {
+
+  return String(texto || "")
+    .trim()
+    .toLowerCase();
+
+}
+
+
+async function cargar() {
+
+  const contenedor =
+    document.getElementById(
+      "productos"
+    );
+
+
+  const [
+    respuestaVentas,
+    respuestaPedidos
+  ] = await Promise.all([
+
+    fetch(
+      "/.netlify/functions/ventas"
+    ),
+
+    fetch(
+      "/.netlify/functions/pedidos"
+    )
+
+  ]);
+
+
+  const ventas =
+    await respuestaVentas.json();
+
+  const pedidos =
+    respuestaPedidos.ok
+      ? await respuestaPedidos.json()
+      : [];
+
+
+  const compras = {};
+
+
+  ventas
+    .filter(
+      venta =>
+        Number(venta.mesa) ===
+          numeroMesa &&
+
+        normalizar(
+          venta.nombre
+        ) ===
+          normalizar(
+            nombrePersona
+          )
+    )
+    .forEach(
+      venta => {
+
+        venta.productos.forEach(
+          producto => {
+
+            if (
+              producto.categoria !==
+              "comida"
+            ) {
+              return;
+            }
+
+            if (!compras[producto.nombre]) {
+
+              compras[producto.nombre] = {
+                nombre:
+                  producto.nombre,
+
+                comprados: 0,
+
+                pedidos: 0
+              };
+
+            }
+
+            compras[
+              producto.nombre
+            ].comprados +=
+              Number(
+                producto.cantidad || 0
+              );
+
+          }
+        );
+
+      }
+    );
+
+
+  pedidos
+    .filter(
+      pedido =>
+        Number(pedido.mesa) ===
+          numeroMesa &&
+
+        normalizar(
+          pedido.nombre
+        ) ===
+          normalizar(
+            nombrePersona
+          )
+    )
+    .forEach(
+      pedido => {
+
+        pedido.productos.forEach(
+          producto => {
+
+            if (
+              compras[
+                producto.nombre
+              ]
+            ) {
+
+              compras[
+                producto.nombre
+              ].pedidos +=
+                Number(
+                  producto.cantidad || 0
+                );
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+  contenedor.innerHTML = "";
+
+
+  Object.values(
+    compras
+  ).forEach(
+    producto => {
+
+      const disponible =
+        Math.max(
+          0,
+          producto.comprados -
+          producto.pedidos
+        );
+
+
+      disponibles[
+        producto.nombre
+      ] = disponible;
+
+      seleccion[
+        producto.nombre
+      ] = 0;
+
+
+      const tarjeta =
+        document.createElement(
+          "div"
+        );
+
+      tarjeta.className =
+        "producto";
+
+
+      tarjeta.innerHTML = `
+
+        <strong>
+          ${producto.nombre}
+        </strong>
+
+        <div class="info">
+          Comprados:
+          ${producto.comprados}
+        </div>
+
+        <div class="info">
+          Ya solicitados:
+          ${producto.pedidos}
+        </div>
+
+        <div class="info">
+          Disponibles:
+          <strong>
+            ${disponible}
+          </strong>
+        </div>
+
+        <div class="controles">
+
+          <button
+            class="cantidad-btn"
+            onclick="cambiar('${producto.nombre}', -1)">
+            −
+          </button>
+
+          <span
+            id="cantidad-${producto.nombre}">
+            0
+          </span>
+
+          <button
+            class="cantidad-btn"
+            onclick="cambiar('${producto.nombre}', 1)">
+            +
+          </button>
+
+        </div>
+      `;
+
+
+      contenedor.appendChild(
+        tarjeta
+      );
+
+    });
+
+
+  if (
+    Object.keys(compras).length ===
+    0
+  ) {
+
+    contenedor.innerHTML =
+      "<p>No tienes productos para solicitar.</p>";
+
+  }
+
+}
+
+
+function cambiar(
+  producto,
+  cambio
+) {
+
+  seleccion[producto] += cambio;
+
+  if (
+    seleccion[producto] < 0
+  ) {
+    seleccion[producto] = 0;
+  }
+
+  if (
+    seleccion[producto] >
+    disponibles[producto]
+  ) {
+    seleccion[producto] =
+      disponibles[producto];
+  }
+
+  document.getElementById(
+    "cantidad-" + producto
+  ).textContent =
+    seleccion[producto];
+
+}
+
+
+async function enviarPedido() {
+
+  const productos =
+    Object.entries(
+      seleccion
+    )
+    .filter(
+      ([_, cantidad]) =>
+        cantidad > 0
+    )
+    .map(
+      ([nombre, cantidad]) => ({
+        nombre,
+        cantidad
+      })
+    );
+
+
+  if (
+    productos.length === 0
+  ) {
+
+    alert(
+      "Selecciona al menos un producto."
+    );
+
+    return;
+  }
+
+
+  const respuesta =
+    await fetch(
+      "/.netlify/functions/pedidos",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+            mesa:
+              numeroMesa,
+
+            nombre:
+              nombrePersona,
+
+            productos
+          })
+      }
+    );
+
+
+  if (!respuesta.ok) {
+
+    alert(
+      "No se pudo enviar el pedido."
+    );
+
+    return;
+  }
+
+
+  alert(
+    "✅ Pedido enviado a cocina."
+  );
+
+
+  location.reload();
+
+}
+
+
+cargar();
+
+</script>
+
+</body>
+
+</html>
