@@ -50,7 +50,7 @@ header a {
 }
 
 main {
-  max-width: 1150px;
+  max-width: 1200px;
   margin: auto;
   padding: 25px;
 }
@@ -67,6 +67,10 @@ main {
   box-shadow:
     0 2px 8px
     rgba(0,0,0,.08);
+}
+
+.oculto {
+  display: none !important;
 }
 
 
@@ -146,7 +150,7 @@ label {
 input {
   width: 100%;
 
-  padding: 13px;
+  padding: 12px;
 
   font-size: 16px;
 
@@ -157,11 +161,10 @@ input {
 }
 
 .actualizar {
-  border: none;
-
   background: #2563eb;
-
   color: white;
+
+  border: none;
 
   border-radius: 9px;
 
@@ -186,7 +189,7 @@ table {
 
   border-collapse: collapse;
 
-  min-width: 820px;
+  min-width: 930px;
 }
 
 th {
@@ -230,6 +233,15 @@ td {
   color: #6d28d9;
 }
 
+.mesa {
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.sin-mesa {
+  color: #9ca3af;
+}
+
 
 /* =========================
    ESTADO
@@ -257,6 +269,16 @@ td {
   color: #6b7280;
 }
 
+.hora {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 12px;
+
+  color: #6b7280;
+}
+
 
 /* =========================
    BOTONES
@@ -267,8 +289,16 @@ button {
   cursor: pointer;
 }
 
+.acciones {
+  display: flex;
+
+  gap: 7px;
+
+  flex-wrap: wrap;
+}
+
 .btn-activo {
-  padding: 9px 12px;
+  padding: 9px 11px;
 
   border-radius: 8px;
 
@@ -279,7 +309,7 @@ button {
 }
 
 .btn-inactivo {
-  padding: 9px 12px;
+  padding: 9px 11px;
 
   border-radius: 8px;
 
@@ -287,6 +317,17 @@ button {
 
   background: #e5e7eb;
   color: #374151;
+}
+
+.btn-editar {
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  font-weight: bold;
+
+  background: #7c3aed;
+  color: white;
 }
 
 .btn-copiar {
@@ -308,25 +349,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-
-/* =========================
-   MESA
-========================= */
-
-.mesa {
-  font-weight: bold;
-  color: #2563eb;
-}
-
-.sin-mesa {
-  color: #9ca3af;
-}
-
-
-/* =========================
-   VACÍO
-========================= */
-
 .vacio {
   text-align: center;
 
@@ -337,19 +359,183 @@ button:disabled {
 
 
 /* =========================
-   HORA
+   MODAL EDITAR
 ========================= */
 
-.hora {
-  display: block;
+.modal-fondo {
+  position: fixed;
 
-  margin-top: 4px;
+  inset: 0;
 
-  font-size: 12px;
+  background:
+    rgba(17, 24, 39, .55);
 
-  color: #6b7280;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  z-index: 999;
 }
 
+.modal {
+  width: 100%;
+
+  max-width: 620px;
+
+  max-height: 92vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 16px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 15px 50px
+    rgba(0,0,0,.25);
+}
+
+.modal-cabecera {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 15px;
+
+  margin-bottom: 18px;
+}
+
+.modal-cabecera h2 {
+  margin: 0 0 5px;
+}
+
+.cerrar {
+  background: #f3f4f6;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  font-size: 20px;
+
+  color: #374151;
+}
+
+.info-edicion {
+  background: #faf5ff;
+
+  border:
+    1px solid #ddd6fe;
+
+  border-radius: 11px;
+
+  padding: 15px;
+
+  margin-bottom: 18px;
+
+  line-height: 1.7;
+}
+
+.seccion-edicion {
+  padding: 18px 0;
+
+  border-top:
+    1px solid #e5e7eb;
+}
+
+.seccion-edicion h3 {
+  margin: 0 0 6px;
+}
+
+.descripcion {
+  color: #6b7280;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  margin-bottom: 14px;
+}
+
+.campos-dividir {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 12px;
+}
+
+.btn-guardar {
+  margin-top: 12px;
+
+  padding: 11px 15px;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-weight: bold;
+}
+
+.btn-dividir {
+  margin-top: 12px;
+
+  padding: 11px 15px;
+
+  border-radius: 8px;
+
+  background: #7c3aed;
+
+  color: white;
+
+  font-weight: bold;
+}
+
+.zona-peligro {
+  background: #fff7ed;
+
+  border:
+    1px solid #fed7aa;
+
+  border-radius: 11px;
+
+  padding: 15px;
+
+  margin-top: 10px;
+}
+
+.zona-peligro h3 {
+  color: #c2410c;
+}
+
+.btn-eliminar {
+  margin-top: 12px;
+
+  padding: 11px 15px;
+
+  border-radius: 8px;
+
+  background: #dc2626;
+
+  color: white;
+
+  font-weight: bold;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 750px) {
 
@@ -366,6 +552,10 @@ button:disabled {
   }
 
   .buscador {
+    grid-template-columns: 1fr;
+  }
+
+  .campos-dividir {
     grid-template-columns: 1fr;
   }
 
@@ -516,29 +706,17 @@ button:disabled {
 
 <tr>
 
-<th>
-  Nombre
-</th>
+<th>Nombre</th>
 
-<th>
-  Preventas
-</th>
+<th>Preventas</th>
 
-<th>
-  Código
-</th>
+<th>Código</th>
 
-<th>
-  Mesa
-</th>
+<th>Mesa</th>
 
-<th>
-  Estado
-</th>
+<th>Estado</th>
 
-<th>
-  Acción
-</th>
+<th>Acciones</th>
 
 </tr>
 
@@ -571,6 +749,226 @@ button:disabled {
 
 
 
+<!-- =========================
+     MODAL EDITAR
+========================= -->
+
+<div
+  id="modal-editar"
+  class="modal-fondo oculto"
+  onclick="cerrarSiFondo(event)"
+>
+
+<div class="modal">
+
+
+<div class="modal-cabecera">
+
+<div>
+
+<h2>
+  Editar preventa
+</h2>
+
+<div id="modal-persona-nombre">
+</div>
+
+</div>
+
+
+<button
+  class="cerrar"
+  onclick="cerrarEditor()"
+>
+  ×
+</button>
+
+</div>
+
+
+
+<div class="info-edicion">
+
+Código:
+<strong
+  class="codigo"
+  id="modal-codigo"
+>
+</strong>
+
+<br>
+
+Preventas actuales:
+<strong id="modal-cantidad">
+</strong>
+
+<br>
+
+Mesa:
+<strong id="modal-mesa">
+</strong>
+
+</div>
+
+
+
+<!-- CAMBIAR NOMBRE -->
+
+<div class="seccion-edicion">
+
+<h3>
+  Cambiar nombre
+</h3>
+
+<p class="descripcion">
+  Úsalo si el nombre fue escrito
+  incorrectamente.
+</p>
+
+<label for="editar-nombre">
+  Nombre
+</label>
+
+<input
+  id="editar-nombre"
+  type="text"
+  autocomplete="off"
+>
+
+<button
+  class="btn-guardar accion-edicion"
+  onclick="guardarNombre()"
+>
+  Guardar nombre
+</button>
+
+</div>
+
+
+
+<!-- DIVIDIR -->
+
+<div class="seccion-edicion">
+
+<h3>
+  Dividir preventas
+</h3>
+
+<p class="descripcion">
+
+Si esta persona compró varias preventas,
+puedes pasar algunas a otra persona.
+
+La nueva persona recibirá
+<strong>su propio código</strong>.
+
+El total recaudado no cambia.
+
+</p>
+
+
+<div class="campos-dividir">
+
+
+<div>
+
+<label for="cantidad-dividir">
+  Cantidad a separar
+</label>
+
+<input
+  id="cantidad-dividir"
+  type="number"
+  min="1"
+  step="1"
+  value="1"
+>
+
+</div>
+
+
+<div>
+
+<label for="nuevo-nombre">
+  Nueva persona
+</label>
+
+<input
+  id="nuevo-nombre"
+  type="text"
+  placeholder="Ej: Paula"
+  autocomplete="off"
+>
+
+</div>
+
+
+</div>
+
+
+<button
+  class="btn-dividir accion-edicion"
+  onclick="dividirPreventas()"
+>
+  Dividir preventas
+</button>
+
+</div>
+
+
+
+<!-- ELIMINAR -->
+
+<div class="seccion-edicion">
+
+<div class="zona-peligro">
+
+<h3>
+  Eliminar preventas vendidas por error
+</h3>
+
+<p class="descripcion">
+
+Esto sí modifica Caja.
+
+Cada preventa eliminada descontará
+<strong>$10.000</strong>
+del total registrado.
+
+</p>
+
+
+<label for="cantidad-eliminar">
+  Cantidad a eliminar
+</label>
+
+<input
+  id="cantidad-eliminar"
+  type="number"
+  min="1"
+  step="1"
+  value="1"
+>
+
+
+<button
+  class="btn-eliminar accion-edicion"
+  onclick="eliminarPreventas()"
+>
+  Eliminar preventa(s)
+</button>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
 <script>
 
 
@@ -582,8 +980,16 @@ let cambiandoEstado =
   new Set();
 
 
+let personaEditandoId =
+  null;
+
+
+let procesandoEdicion =
+  false;
+
+
 /* =========================
-   NORMALIZAR
+   UTILIDADES
 ========================= */
 
 function normalizar(texto) {
@@ -601,9 +1007,23 @@ function normalizar(texto) {
 }
 
 
-/* =========================
-   FORMATEAR HORA
-========================= */
+function formatoCLP(valor) {
+
+  return new Intl.NumberFormat(
+    "es-CL",
+    {
+      style:
+        "currency",
+
+      currency:
+        "CLP",
+
+      maximumFractionDigits:
+        0
+    }
+  ).format(valor);
+}
+
 
 function formatearHora(fecha) {
 
@@ -640,7 +1060,7 @@ function formatearHora(fecha) {
 
 
 /* =========================
-   CARGAR PREVENTAS
+   CARGAR
 ========================= */
 
 async function cargarPreventas() {
@@ -649,22 +1069,6 @@ async function cargarPreventas() {
     document.getElementById(
       "lista"
     );
-
-
-  lista.innerHTML = `
-
-    <tr>
-
-      <td
-        colspan="6"
-        class="vacio"
-      >
-        Cargando preventas...
-      </td>
-
-    </tr>
-
-  `;
 
 
   try {
@@ -734,8 +1138,7 @@ async function cargarPreventas() {
           colspan="6"
           class="vacio"
         >
-          ❌ No se pudieron cargar
-          las preventas.
+          ❌ No se pudieron cargar las preventas.
         </td>
 
       </tr>
@@ -800,7 +1203,7 @@ function actualizarResumen() {
 
 
 /* =========================
-   MOSTRAR
+   MOSTRAR TABLA
 ========================= */
 
 function mostrarPreventas() {
@@ -886,15 +1289,14 @@ function mostrarPreventas() {
   filtradas.forEach(
     persona => {
 
+
       const fila =
         document.createElement(
           "tr"
         );
 
 
-      /* =========================
-         NOMBRE
-      ========================= */
+      /* NOMBRE */
 
       const tdNombre =
         document.createElement(
@@ -911,9 +1313,8 @@ function mostrarPreventas() {
         "Sin nombre";
 
 
-      /* =========================
-         CANTIDAD
-      ========================= */
+
+      /* CANTIDAD */
 
       const tdCantidad =
         document.createElement(
@@ -932,9 +1333,8 @@ function mostrarPreventas() {
         );
 
 
-      /* =========================
-         CÓDIGO
-      ========================= */
+
+      /* CÓDIGO */
 
       const tdCodigo =
         document.createElement(
@@ -993,9 +1393,8 @@ function mostrarPreventas() {
       }
 
 
-      /* =========================
-         MESA
-      ========================= */
+
+      /* MESA */
 
       const tdMesa =
         document.createElement(
@@ -1027,9 +1426,8 @@ function mostrarPreventas() {
       }
 
 
-      /* =========================
-         ESTADO
-      ========================= */
+
+      /* ESTADO */
 
       const tdEstado =
         document.createElement(
@@ -1103,9 +1501,8 @@ function mostrarPreventas() {
       }
 
 
-      /* =========================
-         ACCIÓN
-      ========================= */
+
+      /* ACCIONES */
 
       const tdAccion =
         document.createElement(
@@ -1113,7 +1510,17 @@ function mostrarPreventas() {
         );
 
 
-      const boton =
+      const acciones =
+        document.createElement(
+          "div"
+        );
+
+
+      acciones.className =
+        "acciones";
+
+
+      const botonEstado =
         document.createElement(
           "button"
         );
@@ -1125,7 +1532,7 @@ function mostrarPreventas() {
         );
 
 
-      boton.disabled =
+      botonEstado.disabled =
         bloqueado;
 
 
@@ -1133,17 +1540,17 @@ function mostrarPreventas() {
         persona.activo
       ) {
 
-        boton.className =
+        botonEstado.className =
           "btn-inactivo";
 
 
-        boton.textContent =
+        botonEstado.textContent =
           bloqueado
             ? "Guardando..."
-            : "Marcar no activo";
+            : "No activo";
 
 
-        boton.onclick =
+        botonEstado.onclick =
           () =>
             cambiarEstado(
               persona.id,
@@ -1153,17 +1560,17 @@ function mostrarPreventas() {
 
       } else {
 
-        boton.className =
+        botonEstado.className =
           "btn-activo";
 
 
-        boton.textContent =
+        botonEstado.textContent =
           bloqueado
             ? "Guardando..."
-            : "✓ Marcar como llegó";
+            : "✓ Llegó";
 
 
-        boton.onclick =
+        botonEstado.onclick =
           () =>
             cambiarEstado(
               persona.id,
@@ -1172,14 +1579,41 @@ function mostrarPreventas() {
       }
 
 
-      tdAccion.appendChild(
-        boton
+      const editar =
+        document.createElement(
+          "button"
+        );
+
+
+      editar.className =
+        "btn-editar";
+
+
+      editar.textContent =
+        "Editar";
+
+
+      editar.onclick =
+        () =>
+          abrirEditor(
+            persona.id
+          );
+
+
+      acciones.appendChild(
+        botonEstado
       );
 
 
-      /* =========================
-         FILA
-      ========================= */
+      acciones.appendChild(
+        editar
+      );
+
+
+      tdAccion.appendChild(
+        acciones
+      );
+
 
       fila.appendChild(
         tdNombre
@@ -1216,7 +1650,7 @@ function mostrarPreventas() {
 
 
 /* =========================
-   CAMBIAR ESTADO
+   ACTIVO / NO ACTIVO
 ========================= */
 
 async function cambiarEstado(
@@ -1245,12 +1679,6 @@ async function cambiarEstado(
     return;
   }
 
-
-  /*
-    Si estamos quitando el estado,
-    pedimos confirmación para evitar
-    hacerlo por error.
-  */
 
   if (
     activo === false
@@ -1324,36 +1752,6 @@ async function cambiarEstado(
     }
 
 
-    /*
-      Actualizamos inmediatamente
-      nuestra copia local.
-    */
-
-    const posicion =
-      preventas.findIndex(
-        p =>
-          p.id ===
-          personaId
-      );
-
-
-    if (
-      posicion !== -1 &&
-      resultado.persona
-    ) {
-
-      preventas[
-        posicion
-      ] =
-        resultado.persona;
-    }
-
-
-    actualizarResumen();
-
-    mostrarPreventas();
-
-
   } catch (error) {
 
     console.error(
@@ -1374,14 +1772,649 @@ async function cambiarEstado(
     );
 
 
-    /*
-      Volvemos a consultar al servidor
-      para asegurarnos de tener
-      exactamente el estado guardado.
-    */
-
     await cargarPreventas();
   }
+}
+
+
+/* =========================
+   ABRIR EDITOR
+========================= */
+
+function abrirEditor(
+  personaId
+) {
+
+  const persona =
+    preventas.find(
+      p =>
+        p.id ===
+        personaId
+    );
+
+
+  if (!persona) {
+    return;
+  }
+
+
+  personaEditandoId =
+    personaId;
+
+
+  const cantidad =
+    Number(
+      persona.cantidadPreventas ||
+      0
+    );
+
+
+  document.getElementById(
+    "modal-persona-nombre"
+  ).textContent =
+    persona.nombre;
+
+
+  document.getElementById(
+    "modal-codigo"
+  ).textContent =
+    persona.codigoPreventa ||
+    "Sin código";
+
+
+  document.getElementById(
+    "modal-cantidad"
+  ).textContent =
+    cantidad;
+
+
+  document.getElementById(
+    "modal-mesa"
+  ).textContent =
+    persona.mesa
+
+      ? "Mesa " +
+        persona.mesa
+
+      : "Sin mesa";
+
+
+  document.getElementById(
+    "editar-nombre"
+  ).value =
+    persona.nombre;
+
+
+  document.getElementById(
+    "cantidad-dividir"
+  ).value =
+    1;
+
+
+  document.getElementById(
+    "cantidad-dividir"
+  ).max =
+    cantidad;
+
+
+  document.getElementById(
+    "nuevo-nombre"
+  ).value =
+    "";
+
+
+  document.getElementById(
+    "cantidad-eliminar"
+  ).value =
+    1;
+
+
+  document.getElementById(
+    "cantidad-eliminar"
+  ).max =
+    cantidad;
+
+
+  document.getElementById(
+    "modal-editar"
+  ).classList.remove(
+    "oculto"
+  );
+}
+
+
+/* =========================
+   CERRAR EDITOR
+========================= */
+
+function cerrarEditor() {
+
+  if (
+    procesandoEdicion
+  ) {
+    return;
+  }
+
+
+  personaEditandoId =
+    null;
+
+
+  document.getElementById(
+    "modal-editar"
+  ).classList.add(
+    "oculto"
+  );
+}
+
+
+function cerrarSiFondo(event) {
+
+  if (
+    event.target.id ===
+    "modal-editar"
+  ) {
+
+    cerrarEditor();
+  }
+}
+
+
+/* =========================
+   BLOQUEAR EDITOR
+========================= */
+
+function bloquearEditor(
+  bloquear
+) {
+
+  procesandoEdicion =
+    bloquear;
+
+
+  document
+    .querySelectorAll(
+      ".accion-edicion"
+    )
+    .forEach(
+      boton => {
+
+        boton.disabled =
+          bloquear;
+      }
+    );
+}
+
+
+/* =========================
+   PETICIÓN PERSONAS
+========================= */
+
+async function enviarAccion(
+  datos
+) {
+
+  const respuesta =
+    await fetch(
+
+      "/.netlify/functions/personas",
+
+      {
+        method:
+          "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            datos
+          )
+      }
+    );
+
+
+  const resultado =
+    await respuesta.json();
+
+
+  if (!respuesta.ok) {
+
+    throw new Error(
+      resultado.error ||
+      "No se pudo completar la operación."
+    );
+  }
+
+
+  return resultado;
+}
+
+
+/* =========================
+   CAMBIAR NOMBRE
+========================= */
+
+async function guardarNombre() {
+
+  if (
+    !personaEditandoId ||
+    procesandoEdicion
+  ) {
+    return;
+  }
+
+
+  const nombre =
+    document.getElementById(
+      "editar-nombre"
+    ).value.trim();
+
+
+  if (!nombre) {
+
+    alert(
+      "Escribe un nombre."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    bloquearEditor(
+      true
+    );
+
+
+    await enviarAccion({
+
+      accion:
+        "editar-nombre",
+
+      personaId:
+        personaEditandoId,
+
+      nombre
+
+    });
+
+
+    alert(
+      "✅ Nombre actualizado."
+    );
+
+
+    cerrarEditorForzado();
+
+    await cargarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+  } finally {
+
+    bloquearEditor(
+      false
+    );
+  }
+}
+
+
+/* =========================
+   DIVIDIR
+========================= */
+
+async function dividirPreventas() {
+
+  if (
+    !personaEditandoId ||
+    procesandoEdicion
+  ) {
+    return;
+  }
+
+
+  const persona =
+    preventas.find(
+      p =>
+        p.id ===
+        personaEditandoId
+    );
+
+
+  if (!persona) {
+    return;
+  }
+
+
+  const cantidad =
+    Number(
+      document.getElementById(
+        "cantidad-dividir"
+      ).value
+    );
+
+
+  const nuevoNombre =
+    document.getElementById(
+      "nuevo-nombre"
+    ).value.trim();
+
+
+  const disponibles =
+    Number(
+      persona.cantidadPreventas ||
+      0
+    );
+
+
+  if (
+    !Number.isInteger(
+      cantidad
+    ) ||
+    cantidad < 1 ||
+    cantidad > disponibles
+  ) {
+
+    alert(
+      "La cantidad debe estar entre 1 y " +
+      disponibles +
+      "."
+    );
+
+    return;
+  }
+
+
+  if (!nuevoNombre) {
+
+    alert(
+      "Escribe el nombre de la nueva persona."
+    );
+
+    return;
+  }
+
+
+  const confirmar =
+    confirm(
+
+      "¿Dividir " +
+      cantidad +
+      " preventa(s) de " +
+      persona.nombre +
+      " para " +
+      nuevoNombre +
+      "?\n\n" +
+
+      nuevoNombre +
+      " recibirá un código nuevo.\n\n" +
+
+      "El total de Caja NO cambiará."
+
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  try {
+
+    bloquearEditor(
+      true
+    );
+
+
+    const resultado =
+      await enviarAccion({
+
+        accion:
+          "dividir-preventas",
+
+        personaId:
+          personaEditandoId,
+
+        nuevoNombre,
+
+        cantidad
+
+      });
+
+
+    const nueva =
+      resultado.nuevaPersona;
+
+
+    alert(
+
+      "✅ Preventas divididas\n\n" +
+
+      nueva.nombre +
+      "\n" +
+
+      "Preventas: " +
+      nueva.cantidadPreventas +
+      "\n" +
+
+      "Nuevo código: " +
+      nueva.codigoPreventa
+
+    );
+
+
+    cerrarEditorForzado();
+
+    await cargarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+  } finally {
+
+    bloquearEditor(
+      false
+    );
+  }
+}
+
+
+/* =========================
+   ELIMINAR PREVENTAS
+========================= */
+
+async function eliminarPreventas() {
+
+  if (
+    !personaEditandoId ||
+    procesandoEdicion
+  ) {
+    return;
+  }
+
+
+  const persona =
+    preventas.find(
+      p =>
+        p.id ===
+        personaEditandoId
+    );
+
+
+  if (!persona) {
+    return;
+  }
+
+
+  const cantidad =
+    Number(
+      document.getElementById(
+        "cantidad-eliminar"
+      ).value
+    );
+
+
+  const disponibles =
+    Number(
+      persona.cantidadPreventas ||
+      0
+    );
+
+
+  if (
+    !Number.isInteger(
+      cantidad
+    ) ||
+    cantidad < 1 ||
+    cantidad > disponibles
+  ) {
+
+    alert(
+      "La cantidad debe estar entre 1 y " +
+      disponibles +
+      "."
+    );
+
+    return;
+  }
+
+
+  const monto =
+    cantidad *
+    10000;
+
+
+  const confirmar =
+    confirm(
+
+      "⚠️ ¿Eliminar " +
+      cantidad +
+      " preventa(s) de " +
+      persona.nombre +
+      "?\n\n" +
+
+      "Se descontarán " +
+      formatoCLP(
+        monto
+      ) +
+      " del total de Caja.\n\n" +
+
+      "Esta opción es para corregir una venta ingresada por error."
+
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  try {
+
+    bloquearEditor(
+      true
+    );
+
+
+    const resultado =
+      await enviarAccion({
+
+        accion:
+          "eliminar-preventas",
+
+        personaId:
+          personaEditandoId,
+
+        cantidad
+
+      });
+
+
+    alert(
+
+      "✅ Corrección realizada\n\n" +
+
+      "Preventas eliminadas: " +
+      resultado.cantidadEliminada +
+      "\n" +
+
+      "Monto descontado de Caja: " +
+      formatoCLP(
+        resultado.montoDescontado
+      )
+
+    );
+
+
+    cerrarEditorForzado();
+
+    await cargarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+  } finally {
+
+    bloquearEditor(
+      false
+    );
+  }
+}
+
+
+/* =========================
+   CIERRE FORZADO
+========================= */
+
+function cerrarEditorForzado() {
+
+  personaEditandoId =
+    null;
+
+
+  document.getElementById(
+    "modal-editar"
+  ).classList.add(
+    "oculto"
+  );
 }
 
 
@@ -1419,22 +2452,57 @@ async function copiarCodigo(
 
 
 /* =========================
+   ESC
+========================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+      "Escape"
+    ) {
+
+      cerrarEditor();
+    }
+  }
+);
+
+
+/* =========================
    INICIO
 ========================= */
 
 cargarPreventas();
 
 
-/*
-  Se refresca cada 10 segundos.
-
-  Así si alguien entra mediante
-  el QR desde otra mesa,
-  esta página también se actualiza.
-*/
-
 setInterval(
-  cargarPreventas,
+  () => {
+
+    /*
+      Si estás editando a alguien
+      no refrescamos la tabla en medio
+      de la operación.
+    */
+
+    const modalAbierto =
+      !document
+        .getElementById(
+          "modal-editar"
+        )
+        .classList.contains(
+          "oculto"
+        );
+
+
+    if (!modalAbierto) {
+
+      cargarPreventas();
+    }
+
+  },
+
   10000
 );
 
