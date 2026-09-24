@@ -50,7 +50,7 @@ header a {
 }
 
 main {
-  max-width: 1050px;
+  max-width: 1150px;
   margin: auto;
   padding: 25px;
 }
@@ -78,31 +78,45 @@ main {
   display: grid;
 
   grid-template-columns:
-    repeat(2, 1fr);
+    repeat(3, 1fr);
 
   gap: 15px;
+
+  margin-bottom: 20px;
 }
 
 .resumen-box {
-  background: #faf5ff;
+  background: white;
 
-  border:
-    1px solid #ddd6fe;
+  border-radius: 14px;
 
-  border-radius: 12px;
+  padding: 20px;
 
-  padding: 18px;
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.08);
 }
 
 .resumen-numero {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: bold;
-  color: #6d28d9;
 }
 
 .resumen-texto {
   color: #6b7280;
-  margin-top: 4px;
+  margin-top: 5px;
+}
+
+.morado {
+  color: #7c3aed;
+}
+
+.azul {
+  color: #2563eb;
+}
+
+.verde {
+  color: #059669;
 }
 
 
@@ -110,25 +124,52 @@ main {
    BUSCADOR
 ========================= */
 
-.buscador label {
-  display: block;
+.buscador {
+  display: grid;
 
-  font-weight: bold;
+  grid-template-columns:
+    1fr auto;
 
-  margin-bottom: 8px;
+  gap: 12px;
+
+  align-items: end;
 }
 
-.buscador input {
+label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-weight: bold;
+}
+
+input {
   width: 100%;
 
   padding: 13px;
 
-  border-radius: 9px;
+  font-size: 16px;
 
   border:
     1px solid #ccc;
 
-  font-size: 16px;
+  border-radius: 9px;
+}
+
+.actualizar {
+  border: none;
+
+  background: #2563eb;
+
+  color: white;
+
+  border-radius: 9px;
+
+  padding: 13px 18px;
+
+  font-weight: bold;
+
+  cursor: pointer;
 }
 
 
@@ -145,20 +186,18 @@ table {
 
   border-collapse: collapse;
 
-  min-width: 650px;
+  min-width: 820px;
 }
 
 th {
-  background: #f9fafb;
-
   text-align: left;
 
   padding: 13px;
 
+  background: #f9fafb;
+
   border-bottom:
     2px solid #e5e7eb;
-
-  color: #374151;
 }
 
 td {
@@ -166,6 +205,8 @@ td {
 
   border-bottom:
     1px solid #e5e7eb;
+
+  vertical-align: middle;
 }
 
 .nombre {
@@ -189,79 +230,142 @@ td {
   color: #6d28d9;
 }
 
-.copiar {
-  background: #ede9fe;
-  color: #6d28d9;
 
-  border: none;
+/* =========================
+   ESTADO
+========================= */
 
-  border-radius: 7px;
+.estado {
+  display: inline-block;
 
   padding: 7px 10px;
 
+  border-radius: 999px;
+
+  font-size: 13px;
+
+  font-weight: bold;
+}
+
+.estado-activo {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.estado-inactivo {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+
+/* =========================
+   BOTONES
+========================= */
+
+button {
+  border: none;
   cursor: pointer;
+}
+
+.btn-activo {
+  padding: 9px 12px;
+
+  border-radius: 8px;
 
   font-weight: bold;
 
-  margin-left: 8px;
+  background: #10b981;
+  color: white;
 }
+
+.btn-inactivo {
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  font-weight: bold;
+
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-copiar {
+  margin-left: 6px;
+
+  padding: 6px 9px;
+
+  border-radius: 7px;
+
+  background: #ede9fe;
+
+  color: #6d28d9;
+
+  font-weight: bold;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+
+/* =========================
+   MESA
+========================= */
+
+.mesa {
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.sin-mesa {
+  color: #9ca3af;
+}
+
+
+/* =========================
+   VACÍO
+========================= */
 
 .vacio {
   text-align: center;
 
+  color: #6b7280;
+
   padding: 40px 20px;
+}
+
+
+/* =========================
+   HORA
+========================= */
+
+.hora {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 12px;
 
   color: #6b7280;
 }
 
-.actualizar {
-  border: none;
 
-  background: #2563eb;
-  color: white;
+@media (max-width: 750px) {
 
-  padding: 10px 14px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-weight: bold;
-}
-
-.encabezado-lista {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 15px;
-
-  margin-bottom: 15px;
-}
-
-.encabezado-lista h2 {
-  margin: 0;
-}
-
-
-@media (max-width: 700px) {
+  header {
+    padding: 16px;
+  }
 
   main {
     padding: 15px;
   }
 
-  header {
-    padding: 16px;
-
-    align-items:
-      flex-start;
-
-    gap: 12px;
+  .resumen {
+    grid-template-columns: 1fr;
   }
 
-  .resumen {
+  .buscador {
     grid-template-columns: 1fr;
   }
 
@@ -284,7 +388,7 @@ td {
 </h1>
 
 <span>
-  Registro de preventas vendidas
+  Control de preventas y llegadas
 </span>
 
 </div>
@@ -305,11 +409,12 @@ td {
 
 <div class="resumen">
 
+
 <div class="resumen-box">
 
 <div
-  class="resumen-numero"
-  id="total-personas"
+  id="cantidad-personas"
+  class="resumen-numero morado"
 >
   0
 </div>
@@ -324,8 +429,8 @@ td {
 <div class="resumen-box">
 
 <div
-  class="resumen-numero"
-  id="total-preventas"
+  id="cantidad-preventas"
+  class="resumen-numero azul"
 >
   0
 </div>
@@ -336,6 +441,23 @@ td {
 
 </div>
 
+
+<div class="resumen-box">
+
+<div
+  id="cantidad-activos"
+  class="resumen-numero verde"
+>
+  0
+</div>
+
+<div class="resumen-texto">
+  Personas que llegaron
+</div>
+
+</div>
+
+
 </div>
 
 
@@ -344,35 +466,27 @@ td {
      BUSCADOR
 ========================= -->
 
-<div class="panel buscador">
+<div class="panel">
+
+<div class="buscador">
+
+
+<div>
 
 <label for="buscar">
-  Buscar preventa
+  Buscar persona
 </label>
 
 <input
   id="buscar"
   type="text"
-  placeholder="Buscar por nombre o código..."
+  placeholder="Escribe nombre o código..."
   autocomplete="off"
   oninput="mostrarPreventas()"
 >
 
 </div>
 
-
-
-<!-- =========================
-     LISTADO
-========================= -->
-
-<div class="panel">
-
-<div class="encabezado-lista">
-
-<h2>
-  Preventas registradas
-</h2>
 
 <button
   class="actualizar"
@@ -381,8 +495,18 @@ td {
   Actualizar
 </button>
 
+
 </div>
 
+</div>
+
+
+
+<!-- =========================
+     TABLA
+========================= -->
+
+<div class="panel">
 
 <div class="tabla-contenedor">
 
@@ -397,23 +521,36 @@ td {
 </th>
 
 <th>
-  Cantidad
+  Preventas
 </th>
 
 <th>
   Código
 </th>
 
+<th>
+  Mesa
+</th>
+
+<th>
+  Estado
+</th>
+
+<th>
+  Acción
+</th>
+
 </tr>
 
 </thead>
 
-<tbody id="lista-preventas">
+
+<tbody id="lista">
 
 <tr>
 
 <td
-  colspan="3"
+  colspan="6"
   class="vacio"
 >
   Cargando...
@@ -441,6 +578,10 @@ let preventas =
   [];
 
 
+let cambiandoEstado =
+  new Set();
+
+
 /* =========================
    NORMALIZAR
 ========================= */
@@ -461,23 +602,61 @@ function normalizar(texto) {
 
 
 /* =========================
-   CARGAR VENTAS
+   FORMATEAR HORA
+========================= */
+
+function formatearHora(fecha) {
+
+  if (!fecha) {
+    return "";
+  }
+
+
+  const d =
+    new Date(fecha);
+
+
+  if (
+    Number.isNaN(
+      d.getTime()
+    )
+  ) {
+
+    return "";
+  }
+
+
+  return d.toLocaleTimeString(
+    "es-CL",
+    {
+      hour:
+        "2-digit",
+
+      minute:
+        "2-digit"
+    }
+  );
+}
+
+
+/* =========================
+   CARGAR PREVENTAS
 ========================= */
 
 async function cargarPreventas() {
 
-  const tbody =
+  const lista =
     document.getElementById(
-      "lista-preventas"
+      "lista"
     );
 
 
-  tbody.innerHTML = `
+  lista.innerHTML = `
 
     <tr>
 
       <td
-        colspan="3"
+        colspan="6"
         class="vacio"
       >
         Cargando preventas...
@@ -493,7 +672,7 @@ async function cargarPreventas() {
     const respuesta =
       await fetch(
 
-        "/.netlify/functions/ventas?t=" +
+        "/.netlify/functions/personas?tipo=preventa&t=" +
         Date.now(),
 
         {
@@ -506,176 +685,30 @@ async function cargarPreventas() {
     if (!respuesta.ok) {
 
       throw new Error(
-        "No se pudieron cargar las ventas."
+        "No se pudieron cargar las preventas."
       );
     }
 
 
-    const ventas =
+    const datos =
       await respuesta.json();
 
 
-    const agrupadas =
-      new Map();
-
-
-    ventas
-
-      .filter(
-        venta => {
-
-          if (
-            venta.tipoVenta ===
-            "preventa"
-          ) {
-            return true;
-          }
-
-
-          /*
-            Compatibilidad con
-            preventas antiguas.
-          */
-
-          return Array.isArray(
-            venta.productos
-          ) &&
-          venta.productos.some(
-            producto =>
-              normalizar(
-                producto.nombre
-              ) ===
-              "preventa"
-          );
-
-        }
-      )
-
-      .forEach(
-        venta => {
-
-
-          const productoPreventa =
-            Array.isArray(
-              venta.productos
-            )
-
-              ? venta.productos.find(
-                  producto =>
-                    normalizar(
-                      producto.nombre
-                    ) ===
-                    "preventa"
-                )
-
-              : null;
-
-
-          const cantidad =
-            Number(
-              productoPreventa
-                ?.cantidad ||
-              venta.cantidadPreventas ||
-              1
-            );
-
-
-          /*
-            La clave principal es
-            clienteId.
-
-            Así una misma persona
-            puede tener varias
-            preventas manteniendo
-            un único código.
-          */
-
-          const clave =
-
-            venta.clienteId ||
-
-            venta.codigoPreventa ||
-
-            (
-              normalizar(
-                venta.nombre
-              ) +
-              "-" +
-              (
-                venta.codigoPreventa ||
-                "sin-codigo"
-              )
-            );
-
-
-          if (
-            !agrupadas.has(
-              clave
-            )
-          ) {
-
-            agrupadas.set(
-              clave,
-              {
-
-                clienteId:
-                  venta.clienteId ||
-                  null,
-
-                nombre:
-                  venta.nombre ||
-                  "Sin nombre",
-
-                codigo:
-                  venta.codigoPreventa ||
-                  "",
-
-                cantidad:
-                  0
-
-              }
-            );
-          }
-
-
-          const registro =
-            agrupadas.get(
-              clave
-            );
-
-
-          registro.cantidad +=
-            cantidad;
-
-
-          /*
-            Si alguna venta posterior
-            trae el código, lo usamos.
-          */
-
-          if (
-            !registro.codigo &&
-            venta.codigoPreventa
-          ) {
-
-            registro.codigo =
-              venta.codigoPreventa;
-          }
-
-        }
-      );
-
-
     preventas =
-      Array.from(
-        agrupadas.values()
-      );
+      Array.isArray(datos)
+        ? datos
+        : [];
 
 
     preventas.sort(
       (a, b) =>
-        a.nombre.localeCompare(
-          b.nombre,
+
+        String(
+          a.nombre || ""
+        ).localeCompare(
+          String(
+            b.nombre || ""
+          ),
           "es"
         )
     );
@@ -693,15 +726,15 @@ async function cargarPreventas() {
     );
 
 
-    tbody.innerHTML = `
+    lista.innerHTML = `
 
       <tr>
 
         <td
-          colspan="3"
+          colspan="6"
           class="vacio"
         >
-          No se pudieron cargar
+          ❌ No se pudieron cargar
           las preventas.
         </td>
 
@@ -718,11 +751,11 @@ async function cargarPreventas() {
 
 function actualizarResumen() {
 
-  const cantidadPersonas =
+  const personas =
     preventas.length;
 
 
-  const cantidadPreventas =
+  const totalPreventas =
     preventas.reduce(
       (
         suma,
@@ -731,7 +764,7 @@ function actualizarResumen() {
 
         suma +
         Number(
-          persona.cantidad ||
+          persona.cantidadPreventas ||
           0
         ),
 
@@ -739,16 +772,30 @@ function actualizarResumen() {
     );
 
 
-  document.getElementById(
-    "total-personas"
-  ).textContent =
-    cantidadPersonas;
+  const activos =
+    preventas.filter(
+      persona =>
+        persona.activo ===
+        true
+    ).length;
 
 
   document.getElementById(
-    "total-preventas"
+    "cantidad-personas"
   ).textContent =
-    cantidadPreventas;
+    personas;
+
+
+  document.getElementById(
+    "cantidad-preventas"
+  ).textContent =
+    totalPreventas;
+
+
+  document.getElementById(
+    "cantidad-activos"
+  ).textContent =
+    activos;
 }
 
 
@@ -758,9 +805,9 @@ function actualizarResumen() {
 
 function mostrarPreventas() {
 
-  const tbody =
+  const lista =
     document.getElementById(
-      "lista-preventas"
+      "lista"
     );
 
 
@@ -784,7 +831,7 @@ function mostrarPreventas() {
 
         const codigo =
           normalizar(
-            persona.codigo
+            persona.codigoPreventa
           );
 
 
@@ -801,7 +848,7 @@ function mostrarPreventas() {
     );
 
 
-  tbody.innerHTML =
+  lista.innerHTML =
     "";
 
 
@@ -810,42 +857,26 @@ function mostrarPreventas() {
     0
   ) {
 
-    const fila =
-      document.createElement(
-        "tr"
-      );
+    lista.innerHTML = `
 
+      <tr>
 
-    const celda =
-      document.createElement(
-        "td"
-      );
+        <td
+          colspan="6"
+          class="vacio"
+        >
+          ${
+            busqueda
 
+              ? "No encontré ninguna preventa con esa búsqueda."
 
-    celda.colSpan =
-      3;
+              : "Todavía no hay preventas registradas."
+          }
+        </td>
 
+      </tr>
 
-    celda.className =
-      "vacio";
-
-
-    celda.textContent =
-      busqueda
-
-        ? "No encontré preventas con esa búsqueda."
-
-        : "Todavía no hay preventas registradas.";
-
-
-    fila.appendChild(
-      celda
-    );
-
-
-    tbody.appendChild(
-      fila
-    );
+    `;
 
 
     return;
@@ -855,14 +886,15 @@ function mostrarPreventas() {
   filtradas.forEach(
     persona => {
 
-
       const fila =
         document.createElement(
           "tr"
         );
 
 
-      /* NOMBRE */
+      /* =========================
+         NOMBRE
+      ========================= */
 
       const tdNombre =
         document.createElement(
@@ -875,10 +907,13 @@ function mostrarPreventas() {
 
 
       tdNombre.textContent =
-        persona.nombre;
+        persona.nombre ||
+        "Sin nombre";
 
 
-      /* CANTIDAD */
+      /* =========================
+         CANTIDAD
+      ========================= */
 
       const tdCantidad =
         document.createElement(
@@ -891,10 +926,15 @@ function mostrarPreventas() {
 
 
       tdCantidad.textContent =
-        persona.cantidad;
+        Number(
+          persona.cantidadPreventas ||
+          0
+        );
 
 
-      /* CÓDIGO */
+      /* =========================
+         CÓDIGO
+      ========================= */
 
       const tdCodigo =
         document.createElement(
@@ -902,79 +942,271 @@ function mostrarPreventas() {
         );
 
 
+      const codigo =
+        document.createElement(
+          "span"
+        );
+
+
+      codigo.className =
+        "codigo";
+
+
+      codigo.textContent =
+        persona.codigoPreventa ||
+        "Sin código";
+
+
+      tdCodigo.appendChild(
+        codigo
+      );
+
+
       if (
-        persona.codigo
+        persona.codigoPreventa
       ) {
 
-        const codigo =
-          document.createElement(
-            "span"
-          );
-
-
-        codigo.className =
-          "codigo";
-
-
-        codigo.textContent =
-          persona.codigo;
-
-
-        const boton =
+        const copiar =
           document.createElement(
             "button"
           );
 
 
-        boton.className =
-          "copiar";
+        copiar.className =
+          "btn-copiar";
 
 
-        boton.textContent =
+        copiar.textContent =
           "Copiar";
 
 
-        boton.onclick =
+        copiar.onclick =
           () =>
             copiarCodigo(
-              persona.codigo
+              persona.codigoPreventa
             );
 
 
         tdCodigo.appendChild(
-          codigo
+          copiar
+        );
+      }
+
+
+      /* =========================
+         MESA
+      ========================= */
+
+      const tdMesa =
+        document.createElement(
+          "td"
         );
 
 
-        tdCodigo.appendChild(
-          boton
-        );
+      if (
+        persona.mesa
+      ) {
+
+        tdMesa.className =
+          "mesa";
+
+
+        tdMesa.textContent =
+          "Mesa " +
+          persona.mesa;
 
 
       } else {
 
-        tdCodigo.textContent =
-          "Sin código";
+        tdMesa.className =
+          "sin-mesa";
 
+
+        tdMesa.textContent =
+          "Sin mesa";
       }
 
+
+      /* =========================
+         ESTADO
+      ========================= */
+
+      const tdEstado =
+        document.createElement(
+          "td"
+        );
+
+
+      const estado =
+        document.createElement(
+          "span"
+        );
+
+
+      if (
+        persona.activo
+      ) {
+
+        estado.className =
+          "estado estado-activo";
+
+
+        estado.textContent =
+          "● Activo";
+
+
+        tdEstado.appendChild(
+          estado
+        );
+
+
+        if (
+          persona.llegadaEn
+        ) {
+
+          const hora =
+            document.createElement(
+              "span"
+            );
+
+
+          hora.className =
+            "hora";
+
+
+          hora.textContent =
+            "Llegó " +
+            formatearHora(
+              persona.llegadaEn
+            );
+
+
+          tdEstado.appendChild(
+            hora
+          );
+        }
+
+
+      } else {
+
+        estado.className =
+          "estado estado-inactivo";
+
+
+        estado.textContent =
+          "○ No activo";
+
+
+        tdEstado.appendChild(
+          estado
+        );
+      }
+
+
+      /* =========================
+         ACCIÓN
+      ========================= */
+
+      const tdAccion =
+        document.createElement(
+          "td"
+        );
+
+
+      const boton =
+        document.createElement(
+          "button"
+        );
+
+
+      const bloqueado =
+        cambiandoEstado.has(
+          persona.id
+        );
+
+
+      boton.disabled =
+        bloqueado;
+
+
+      if (
+        persona.activo
+      ) {
+
+        boton.className =
+          "btn-inactivo";
+
+
+        boton.textContent =
+          bloqueado
+            ? "Guardando..."
+            : "Marcar no activo";
+
+
+        boton.onclick =
+          () =>
+            cambiarEstado(
+              persona.id,
+              false
+            );
+
+
+      } else {
+
+        boton.className =
+          "btn-activo";
+
+
+        boton.textContent =
+          bloqueado
+            ? "Guardando..."
+            : "✓ Marcar como llegó";
+
+
+        boton.onclick =
+          () =>
+            cambiarEstado(
+              persona.id,
+              true
+            );
+      }
+
+
+      tdAccion.appendChild(
+        boton
+      );
+
+
+      /* =========================
+         FILA
+      ========================= */
 
       fila.appendChild(
         tdNombre
       );
 
-
       fila.appendChild(
         tdCantidad
       );
-
 
       fila.appendChild(
         tdCodigo
       );
 
+      fila.appendChild(
+        tdMesa
+      );
 
-      tbody.appendChild(
+      fila.appendChild(
+        tdEstado
+      );
+
+      fila.appendChild(
+        tdAccion
+      );
+
+
+      lista.appendChild(
         fila
       );
 
@@ -984,7 +1216,177 @@ function mostrarPreventas() {
 
 
 /* =========================
-   COPIAR
+   CAMBIAR ESTADO
+========================= */
+
+async function cambiarEstado(
+  personaId,
+  activo
+) {
+
+  if (
+    cambiandoEstado.has(
+      personaId
+    )
+  ) {
+    return;
+  }
+
+
+  const persona =
+    preventas.find(
+      p =>
+        p.id ===
+        personaId
+    );
+
+
+  if (!persona) {
+    return;
+  }
+
+
+  /*
+    Si estamos quitando el estado,
+    pedimos confirmación para evitar
+    hacerlo por error.
+  */
+
+  if (
+    activo === false
+  ) {
+
+    const confirmar =
+      confirm(
+
+        "¿Quieres marcar a " +
+        persona.nombre +
+        " como No activo?"
+
+      );
+
+
+    if (!confirmar) {
+      return;
+    }
+  }
+
+
+  cambiandoEstado.add(
+    personaId
+  );
+
+
+  mostrarPreventas();
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+
+        "/.netlify/functions/personas",
+
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                "actualizar-activo",
+
+              personaId,
+
+              activo
+
+            })
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        resultado.error ||
+        "No se pudo actualizar el estado."
+      );
+    }
+
+
+    /*
+      Actualizamos inmediatamente
+      nuestra copia local.
+    */
+
+    const posicion =
+      preventas.findIndex(
+        p =>
+          p.id ===
+          personaId
+      );
+
+
+    if (
+      posicion !== -1 &&
+      resultado.persona
+    ) {
+
+      preventas[
+        posicion
+      ] =
+        resultado.persona;
+    }
+
+
+    actualizarResumen();
+
+    mostrarPreventas();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+  } finally {
+
+    cambiandoEstado.delete(
+      personaId
+    );
+
+
+    /*
+      Volvemos a consultar al servidor
+      para asegurarnos de tener
+      exactamente el estado guardado.
+    */
+
+    await cargarPreventas();
+  }
+}
+
+
+/* =========================
+   COPIAR CÓDIGO
 ========================= */
 
 async function copiarCodigo(
@@ -1022,8 +1424,22 @@ async function copiarCodigo(
 
 cargarPreventas();
 
-</script>
 
+/*
+  Se refresca cada 10 segundos.
+
+  Así si alguien entra mediante
+  el QR desde otra mesa,
+  esta página también se actualiza.
+*/
+
+setInterval(
+  cargarPreventas,
+  10000
+);
+
+
+</script>
 
 </body>
 
