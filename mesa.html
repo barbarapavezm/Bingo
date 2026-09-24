@@ -1,113 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Mesa - Bingo</title>
+<meta charset="UTF-8">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f6f8;
-      color: #1f2937;
-    }
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
 
-    header {
-      background: white;
-      padding: 20px 30px;
-      border-bottom: 1px solid #ddd;
-    }
+<title>Detalle de mesa - Bingo</title>
 
-    main {
-      max-width: 850px;
-      margin: auto;
-      padding: 25px;
-    }
+<style>
 
-    .persona {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
+* {
+  box-sizing: border-box;
+}
 
-    .persona h2 {
-      margin-top: 0;
-    }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+  color: #1f2937;
+}
 
-    .producto {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 15px;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
+header {
+  background: white;
+  padding: 20px 30px;
+  border-bottom: 1px solid #ddd;
+}
 
-    .btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 11px 15px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-    }
+header h1 {
+  margin-top: 0;
+}
 
-    .vacio {
-      background: white;
-      padding: 30px;
-      border-radius: 14px;
-      text-align: center;
-      color: #6b7280;
-    }
+.volver {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: bold;
+}
 
-    .volver {
-      color: #2563eb;
-      text-decoration: none;
-    }
-  </style>
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 25px;
+}
+
+.persona {
+  background: white;
+
+  border-radius: 14px;
+
+  padding: 20px;
+
+  margin-bottom: 18px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.08);
+}
+
+.persona-cabecera {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    flex-start;
+
+  gap: 15px;
+
+  margin-bottom: 15px;
+}
+
+.persona h2 {
+  margin: 0 0 5px;
+}
+
+.tipo {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.producto {
+  display: grid;
+
+  grid-template-columns:
+    1fr auto auto;
+
+  gap: 15px;
+
+  padding: 8px 0;
+
+  border-bottom:
+    1px solid #eee;
+}
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+
+  padding: 9px 12px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+}
+
+.btn-cuenta {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-mesa {
+  background: #f59e0b;
+  color: white;
+}
+
+.vacio {
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 14px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+.aviso-antiguo {
+  color: #92400e;
+  background: #fef3c7;
+
+  padding: 8px;
+
+  border-radius: 8px;
+
+  margin-top: 10px;
+
+  font-size: 13px;
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <header>
 
-  <h1 id="titulo">
-    Mesa
-  </h1>
+<h1 id="titulo">
+  Mesa
+</h1>
 
-  <a
-    class="volver"
-    href="/mesas.html">
-    ← Volver a mesas
-  </a>
+<a
+  class="volver"
+  href="/mesas.html">
+  ← Volver a mesas
+</a>
 
 </header>
 
+
 <main>
 
-  <div id="contenido">
-    Cargando...
-  </div>
+<div id="contenido">
+  Cargando...
+</div>
 
 </main>
 
 
 <script>
 
+
 const params =
   new URLSearchParams(
     window.location.search
   );
 
+
 const mesa =
   Number(
     params.get("numero")
   );
+
 
 document.getElementById(
   "titulo"
@@ -116,10 +203,211 @@ document.getElementById(
 
 
 function normalizar(texto) {
+
   return String(texto || "")
     .trim()
     .toLowerCase();
+
 }
+
+
+function esEntregable(producto) {
+
+  if (
+    producto.categoria ===
+    "comida"
+  ) {
+    return true;
+  }
+
+
+  const conocidos = [
+    "completo",
+    "té",
+    "te",
+    "café",
+    "cafe",
+    "bebida",
+    "agua"
+  ];
+
+
+  return conocidos.includes(
+    normalizar(
+      producto.nombre
+    )
+  );
+}
+
+
+/* =========================
+   CAMBIAR MESA
+========================= */
+
+
+async function cambiarMesa(
+  personaId,
+  nombre
+) {
+
+  const nuevaMesaTexto =
+    prompt(
+      "¿A qué mesa quieres mover a " +
+      nombre +
+      "?\n\n" +
+      "Escribe un número entre 1 y 50:",
+      mesa
+    );
+
+
+  if (
+    nuevaMesaTexto ===
+    null
+  ) {
+    return;
+  }
+
+
+  const nuevaMesa =
+    Number(
+      nuevaMesaTexto
+    );
+
+
+  if (
+    !Number.isInteger(
+      nuevaMesa
+    ) ||
+    nuevaMesa < 1 ||
+    nuevaMesa > 50
+  ) {
+
+    alert(
+      "La mesa debe ser un número entre 1 y 50."
+    );
+
+    return;
+  }
+
+
+  if (
+    nuevaMesa === mesa
+  ) {
+
+    alert(
+      nombre +
+      " ya está en la Mesa " +
+      mesa +
+      "."
+    );
+
+    return;
+  }
+
+
+  const confirmar =
+    confirm(
+      "¿Mover a " +
+      nombre +
+      "?\n\n" +
+
+      "Mesa actual: " +
+      mesa +
+
+      "\nNueva mesa: " +
+      nuevaMesa +
+
+      "\n\nTambién se moverán sus compras y pedidos."
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        "/.netlify/functions/personas",
+        {
+
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                "cambiar-mesa",
+
+              personaId,
+
+              nuevaMesa
+
+            })
+
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        resultado.error ||
+        "No se pudo cambiar la mesa."
+      );
+    }
+
+
+    alert(
+      "✅ " +
+      nombre +
+      " fue movido/a a Mesa " +
+      nuevaMesa +
+      "."
+    );
+
+
+    /*
+      Recargamos esta mesa.
+      La persona debería desaparecer
+      de aquí inmediatamente.
+    */
+
+    await cargar();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   CARGAR
+========================= */
 
 
 async function cargar() {
@@ -129,26 +417,67 @@ async function cargar() {
       "contenido"
     );
 
+
+  contenido.innerHTML =
+    "Actualizando...";
+
+
   try {
 
+    const tiempo =
+      Date.now();
+
+
     const [
+      respuestaPersonas,
       respuestaVentas,
       respuestaPedidos
-    ] = await Promise.all([
+    ] =
+      await Promise.all([
 
-      fetch(
-        "/.netlify/functions/ventas"
-      ),
+        fetch(
+          "/.netlify/functions/personas?mesa=" +
+          mesa +
+          "&t=" +
+          tiempo,
+          {
+            cache:
+              "no-store"
+          }
+        ),
 
-      fetch(
-        "/.netlify/functions/pedidos"
-      )
+        fetch(
+          "/.netlify/functions/ventas?t=" +
+          tiempo,
+          {
+            cache:
+              "no-store"
+          }
+        ),
 
-    ]);
+        fetch(
+          "/.netlify/functions/pedidos?t=" +
+          tiempo,
+          {
+            cache:
+              "no-store"
+          }
+        )
+
+      ]);
+
+
+    const personas =
+      respuestaPersonas.ok
+        ? await respuestaPersonas.json()
+        : [];
 
 
     const ventas =
-      await respuestaVentas.json();
+      respuestaVentas.ok
+        ? await respuestaVentas.json()
+        : [];
+
 
     const pedidos =
       respuestaPedidos.ok
@@ -156,44 +485,373 @@ async function cargar() {
         : [];
 
 
+    contenido.innerHTML =
+      "";
+
+
+    /*
+      Aquí guardamos ventas de esta
+      mesa que todavía sean antiguas
+      y no tengan una persona creada.
+    */
+
     const ventasMesa =
       ventas.filter(
         venta =>
-          Number(venta.mesa) === mesa
+          Number(
+            venta.mesa
+          ) === mesa
       );
 
 
-    if (ventasMesa.length === 0) {
+    const nombresPersonas =
+      new Set(
+        personas.map(
+          persona =>
+            normalizar(
+              persona.nombre
+            )
+        )
+      );
 
-      contenido.innerHTML = `
-        <div class="vacio">
-          Esta mesa todavía no tiene compras.
+
+    /* =========================
+       PERSONAS NUEVAS
+    ========================= */
+
+
+    for (
+      const persona
+      of personas
+    ) {
+
+
+      const compras = {};
+
+
+      ventasMesa
+        .filter(
+          venta =>
+
+            venta.clienteId ===
+              persona.id ||
+
+            (
+              !venta.clienteId &&
+              normalizar(
+                venta.nombre
+              ) ===
+                normalizar(
+                  persona.nombre
+                )
+            )
+        )
+        .forEach(
+          venta => {
+
+            const productos =
+              Array.isArray(
+                venta.productos
+              )
+                ? venta.productos
+                : [];
+
+
+            productos.forEach(
+              producto => {
+
+                if (
+                  !esEntregable(
+                    producto
+                  )
+                ) {
+                  return;
+                }
+
+
+                if (
+                  !compras[
+                    producto.nombre
+                  ]
+                ) {
+
+                  compras[
+                    producto.nombre
+                  ] = {
+
+                    comprados:
+                      0,
+
+                    pedidos:
+                      0
+
+                  };
+
+                }
+
+
+                compras[
+                  producto.nombre
+                ].comprados +=
+                  Number(
+                    producto.cantidad ||
+                    0
+                  );
+
+              }
+            );
+
+          }
+        );
+
+
+      pedidos
+        .filter(
+          pedido =>
+
+            Number(
+              pedido.mesa
+            ) === mesa &&
+
+            (
+              pedido.clienteId ===
+                persona.id ||
+
+              (
+                !pedido.clienteId &&
+                normalizar(
+                  pedido.nombre
+                ) ===
+                  normalizar(
+                    persona.nombre
+                  )
+              )
+            )
+        )
+        .forEach(
+          pedido => {
+
+            const productos =
+              Array.isArray(
+                pedido.productos
+              )
+                ? pedido.productos
+                : [];
+
+
+            productos.forEach(
+              producto => {
+
+                if (
+                  compras[
+                    producto.nombre
+                  ]
+                ) {
+
+                  compras[
+                    producto.nombre
+                  ].pedidos +=
+                    Number(
+                      producto.cantidad ||
+                      0
+                    );
+
+                }
+
+              }
+            );
+
+          }
+        );
+
+
+      let productosHTML =
+        "";
+
+
+      Object.entries(
+        compras
+      ).forEach(
+        ([
+          nombreProducto,
+          datos
+        ]) => {
+
+          const disponibles =
+            Math.max(
+              0,
+
+              datos.comprados -
+              datos.pedidos
+            );
+
+
+          productosHTML += `
+
+            <div class="producto">
+
+              <span>
+                ${nombreProducto}
+              </span>
+
+              <span>
+                Comprados:
+                ${datos.comprados}
+              </span>
+
+              <span>
+                Disponibles:
+                <strong>
+                  ${disponibles}
+                </strong>
+              </span>
+
+            </div>
+          `;
+
+        }
+      );
+
+
+      const tarjeta =
+        document.createElement(
+          "div"
+        );
+
+
+      tarjeta.className =
+        "persona";
+
+
+      tarjeta.innerHTML = `
+
+        <div class="persona-cabecera">
+
+          <div>
+
+            <h2>
+              ${persona.nombre}
+            </h2>
+
+            <div class="tipo">
+
+              ${
+                persona.tipo ===
+                "preventa"
+
+                  ? "Preventa"
+
+                  : "Ingreso sin preventa"
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="acciones">
+
+            <button
+              class="btn btn-cuenta"
+              onclick="
+                window.location.href =
+                '/persona.html?id=${persona.id}&mesa=${mesa}&nombre=${encodeURIComponent(persona.nombre)}'
+              "
+            >
+              Ver cuenta
+            </button>
+
+
+            <button
+              class="btn btn-mesa"
+              onclick='cambiarMesa(
+                ${JSON.stringify(
+                  persona.id
+                )},
+                ${JSON.stringify(
+                  persona.nombre
+                )}
+              )'
+            >
+              Cambiar mesa
+            </button>
+
+          </div>
+
         </div>
+
+
+        ${
+          productosHTML ||
+          `
+            <p>
+              Todavía no tiene comida
+              o bebidas compradas.
+            </p>
+          `
+        }
       `;
 
-      return;
+
+      contenido.appendChild(
+        tarjeta
+      );
+
     }
 
 
-    const personas = {};
+
+    /* =========================
+       VENTAS ANTIGUAS
+       SIN CUENTA PERSONAL
+    ========================= */
+
+
+    const antiguas = {};
 
 
     ventasMesa.forEach(
       venta => {
 
-        const nombre =
-          venta.nombre ||
-          "Sin nombre";
+        /*
+          Si ya tiene clienteId,
+          pertenece a una cuenta.
+        */
+
+        if (
+          venta.clienteId
+        ) {
+          return;
+        }
+
 
         const clave =
-          normalizar(nombre);
+          normalizar(
+            venta.nombre ||
+            "Sin nombre"
+          );
 
 
-        if (!personas[clave]) {
+        if (
+          nombresPersonas.has(
+            clave
+          )
+        ) {
+          return;
+        }
 
-          personas[clave] = {
-            nombre,
-            productos: {}
+
+        if (!antiguas[clave]) {
+
+          antiguas[clave] = {
+
+            nombre:
+              venta.nombre ||
+              "Sin nombre",
+
+            productos:
+              {}
+
           };
 
         }
@@ -211,38 +869,39 @@ async function cargar() {
           producto => {
 
             if (
-              producto.categoria !==
-              "comida"
+              !esEntregable(
+                producto
+              )
             ) {
               return;
             }
 
 
             if (
-              !personas[clave]
-                .productos[
-                  producto.nombre
-                ]
+              !antiguas[
+                clave
+              ].productos[
+                producto.nombre
+              ]
             ) {
 
-              personas[clave]
-                .productos[
-                  producto.nombre
-                ] = {
-                  comprados: 0,
-                  pedidos: 0
-                };
-
+              antiguas[
+                clave
+              ].productos[
+                producto.nombre
+              ] = 0;
             }
 
 
-            personas[clave]
-              .productos[
-                producto.nombre
-              ].comprados +=
-                Number(
-                  producto.cantidad || 0
-                );
+            antiguas[
+              clave
+            ].productos[
+              producto.nombre
+            ] +=
+              Number(
+                producto.cantidad ||
+                0
+              );
 
           }
         );
@@ -251,83 +910,23 @@ async function cargar() {
     );
 
 
-    // Sumar productos ya pedidos
-    pedidos
-      .filter(
-        pedido =>
-          Number(pedido.mesa) === mesa
-      )
-      .forEach(
-        pedido => {
-
-          const clave =
-            normalizar(
-              pedido.nombre
-            );
-
-          if (!personas[clave]) {
-            return;
-          }
-
-          pedido.productos.forEach(
-            producto => {
-
-              if (
-                personas[clave]
-                  .productos[
-                    producto.nombre
-                  ]
-              ) {
-
-                personas[clave]
-                  .productos[
-                    producto.nombre
-                  ].pedidos +=
-                    Number(
-                      producto.cantidad || 0
-                    );
-
-              }
-
-            }
-          );
-
-        }
-      );
-
-
-    contenido.innerHTML = "";
-
-
     Object.values(
-      personas
+      antiguas
     ).forEach(
       persona => {
 
-        const tarjeta =
-          document.createElement(
-            "div"
-          );
 
-        tarjeta.className =
-          "persona";
-
-
-        let productosHTML = "";
+        let productosHTML =
+          "";
 
 
         Object.entries(
           persona.productos
         ).forEach(
-          ([nombre, datos]) => {
-
-            const disponibles =
-              Math.max(
-                0,
-                datos.comprados -
-                datos.pedidos
-              );
-
+          ([
+            nombre,
+            cantidad
+          ]) => {
 
             productosHTML += `
 
@@ -339,14 +938,11 @@ async function cargar() {
 
                 <span>
                   Comprados:
-                  ${datos.comprados}
+                  ${cantidad}
                 </span>
 
                 <span>
-                  Disponibles:
-                  <strong>
-                    ${disponibles}
-                  </strong>
+                  Cuenta antigua
                 </span>
 
               </div>
@@ -356,24 +952,33 @@ async function cargar() {
         );
 
 
+        const tarjeta =
+          document.createElement(
+            "div"
+          );
+
+
+        tarjeta.className =
+          "persona";
+
+
         tarjeta.innerHTML = `
 
           <h2>
             ${persona.nombre}
           </h2>
 
-          ${
-            productosHTML ||
-            "<p>Solo tiene compras de bingo.</p>"
-          }
+          ${productosHTML}
 
-          <a
-            class="btn"
-            href="/persona.html?mesa=${mesa}&nombre=${encodeURIComponent(persona.nombre)}"
-          >
-            Entrar a la cuenta de
-            ${persona.nombre}
-          </a>
+          <div class="aviso-antiguo">
+
+            Esta compra fue creada antes
+            del nuevo sistema de cuentas.
+
+            Las nuevas personas sí podrán
+            cambiarse de mesa desde aquí.
+
+          </div>
         `;
 
 
@@ -385,23 +990,52 @@ async function cargar() {
     );
 
 
+
+    if (
+      contenido.children.length ===
+      0
+    ) {
+
+      contenido.innerHTML = `
+
+        <div class="vacio">
+
+          No hay personas registradas
+          en esta mesa.
+
+        </div>
+      `;
+
+    }
+
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     contenido.innerHTML = `
+
       <div class="vacio">
-        No se pudo cargar esta mesa.
+
+        No se pudo cargar
+        la información de esta mesa.
+
       </div>
     `;
 
   }
+
 }
 
 
 cargar();
 
+
 </script>
 
 </body>
+
 </html>
