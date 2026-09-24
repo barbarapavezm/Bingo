@@ -1,25 +1,24 @@
 import { getStore } from "@netlify/blobs";
 
-const personasStore =
-  getStore({
-    name: "personas-bingo",
-    consistency: "strong"
-  });
 
-const ventasStore =
-  getStore({
-    name: "ventas-bingo",
-    consistency: "strong"
-  });
+const personasStore = getStore({
+  name: "personas-bingo",
+  consistency: "strong"
+});
 
-const pedidosStore =
-  getStore({
-    name: "pedidos-bingo",
-    consistency: "strong"
-  });
+const ventasStore = getStore({
+  name: "ventas-bingo",
+  consistency: "strong"
+});
+
+const pedidosStore = getStore({
+  name: "pedidos-bingo",
+  consistency: "strong"
+});
 
 
 function normalizar(texto) {
+
   return String(texto || "")
     .trim()
     .toLowerCase();
@@ -27,6 +26,7 @@ function normalizar(texto) {
 
 
 function normalizarCodigo(codigo) {
+
   return String(codigo || "")
     .trim()
     .toUpperCase();
@@ -60,6 +60,7 @@ async function codigoExiste(codigo) {
   const lista =
     await personasStore.list();
 
+
   for (const blob of lista.blobs) {
 
     const persona =
@@ -70,13 +71,19 @@ async function codigoExiste(codigo) {
         }
       );
 
+
     if (
       persona &&
-      persona.codigoPreventa === codigo
+      normalizarCodigo(
+        persona.codigoPreventa
+      ) ===
+        normalizarCodigo(codigo)
     ) {
+
       return true;
     }
   }
+
 
   return false;
 }
@@ -86,19 +93,22 @@ async function crearCodigoUnico() {
 
   for (
     let intento = 0;
-    intento < 20;
+    intento < 30;
     intento++
   ) {
 
     const codigo =
       generarCodigo();
 
+
     if (
       !(await codigoExiste(codigo))
     ) {
+
       return codigo;
     }
   }
+
 
   throw new Error(
     "No se pudo generar un código único."
@@ -106,9 +116,55 @@ async function crearCodigoUnico() {
 }
 
 
+/* =========================
+   BUSCAR PREVENTA POR CÓDIGO
+========================= */
+
+async function buscarPorCodigo(codigo) {
+
+  const buscado =
+    normalizarCodigo(codigo);
+
+
+  const lista =
+    await personasStore.list();
+
+
+  for (const blob of lista.blobs) {
+
+    const persona =
+      await personasStore.get(
+        blob.key,
+        {
+          type: "json"
+        }
+      );
+
+
+    if (
+      persona &&
+      normalizarCodigo(
+        persona.codigoPreventa
+      ) === buscado
+    ) {
+
+      return persona;
+    }
+  }
+
+
+  return null;
+}
+
+
+/* =========================
+   FUNCIÓN PRINCIPAL
+========================= */
+
 export default async (req) => {
 
   try {
+
 
     /* =========================
        POST
@@ -119,12 +175,15 @@ export default async (req) => {
       const datos =
         await req.json();
 
+
       const accion =
         datos.accion;
 
 
+
       /* =========================
-         CREAR SIN PREVENTA
+         CREAR PERSONA
+         SIN PREVENTA
       ========================= */
 
       if (
@@ -133,7 +192,10 @@ export default async (req) => {
       ) {
 
         const mesa =
-          Number(datos.mesa);
+          Number(
+            datos.mesa
+          );
+
 
         const nombre =
           String(
@@ -163,6 +225,7 @@ export default async (req) => {
         const id =
           crypto.randomUUID();
 
+
         const ahora =
           new Date()
             .toISOString();
@@ -182,6 +245,15 @@ export default async (req) => {
           codigoPreventa:
             null,
 
+          cantidadPreventas:
+            0,
+
+          activo:
+            true,
+
+          llegadaEn:
+            ahora,
+
           fechaCreacion:
             ahora,
 
@@ -189,12 +261,21 @@ export default async (req) => {
             ahora,
 
           historialMesas: [
+
             {
-              desde: null,
-              hacia: mesa,
-              fecha: ahora,
-              motivo: "Ingreso inicial"
+              desde:
+                null,
+
+              hacia:
+                mesa,
+
+              fecha:
+                ahora,
+
+              motivo:
+                "Ingreso inicial"
             }
+
           ]
 
         };
@@ -216,6 +297,7 @@ export default async (req) => {
 
       /* =========================
          CREAR PREVENTA
+         COMPATIBILIDAD
       ========================= */
 
       if (
@@ -229,12 +311,25 @@ export default async (req) => {
           ).trim();
 
 
-        if (!nombre) {
+        const cantidadPreventas =
+          Number(
+            datos.cantidadPreventas ||
+            1
+          );
+
+
+        if (
+          !nombre ||
+          !Number.isInteger(
+            cantidadPreventas
+          ) ||
+          cantidadPreventas < 1
+        ) {
 
           return Response.json(
             {
               error:
-                "Falta el nombre."
+                "Datos de preventa inválidos."
             },
             {
               status: 400
@@ -246,8 +341,10 @@ export default async (req) => {
         const id =
           crypto.randomUUID();
 
+
         const codigoPreventa =
           await crearCodigoUnico();
+
 
         const ahora =
           new Date()
@@ -267,6 +364,14 @@ export default async (req) => {
             "preventa",
 
           codigoPreventa,
+
+          cantidadPreventas,
+
+          activo:
+            false,
+
+          llegadaEn:
+            null,
 
           fechaCreacion:
             ahora,
@@ -296,7 +401,7 @@ export default async (req) => {
 
       /* =========================
          ASIGNAR PREVENTA
-         A MESA
+         A UNA MESA
       ========================= */
 
       if (
@@ -308,6 +413,7 @@ export default async (req) => {
           normalizarCodigo(
             datos.codigo
           );
+
 
         const mesa =
           Number(
@@ -334,45 +440,13 @@ export default async (req) => {
         }
 
 
-        const lista =
-          await personasStore.list();
-
-        let personaEncontrada =
-          null;
-
-
-        for (
-          const blob
-          of lista.blobs
-        ) {
-
-          const persona =
-            await personasStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
+        const persona =
+          await buscarPorCodigo(
+            codigo
+          );
 
 
-          if (
-            persona &&
-            normalizarCodigo(
-              persona.codigoPreventa
-            ) === codigo
-          ) {
-
-            personaEncontrada =
-              persona;
-
-            break;
-          }
-        }
-
-
-        if (
-          !personaEncontrada
-        ) {
+        if (!persona) {
 
           return Response.json(
             {
@@ -386,14 +460,32 @@ export default async (req) => {
         }
 
 
+        const mesaAnterior =
+          persona.mesa
+            ? Number(
+                persona.mesa
+              )
+            : null;
+
+
+        /*
+          Si ya pertenece a otra mesa,
+          no permitimos que la persona
+          se cambie sola.
+
+          El cambio debe hacerlo
+          administración.
+        */
+
         if (
-          personaEncontrada.mesa
+          mesaAnterior &&
+          mesaAnterior !== mesa
         ) {
 
           return Response.json(
             {
               error:
-                "Esta preventa ya fue asociada a una mesa."
+                "Esta preventa ya está asociada a otra mesa. Solicita el cambio a administración."
             },
             {
               status: 409
@@ -407,39 +499,77 @@ export default async (req) => {
             .toISOString();
 
 
-        personaEncontrada.mesa =
+        persona.mesa =
           mesa;
 
-        personaEncontrada.asignadoEn =
+
+        persona.asignadoEn =
+          persona.asignadoEn ||
+          ahora;
+
+
+        /*
+          Al usar correctamente el
+          código sabemos que llegó
+          al evento.
+        */
+
+        persona.activo =
+          true;
+
+
+        persona.llegadaEn =
+          persona.llegadaEn ||
           ahora;
 
 
         if (
           !Array.isArray(
-            personaEncontrada.historialMesas
+            persona.historialMesas
           )
         ) {
 
-          personaEncontrada.historialMesas =
+          persona.historialMesas =
             [];
         }
 
 
-        personaEncontrada.historialMesas.push({
-          desde: null,
-          hacia: mesa,
-          fecha: ahora,
-          motivo: "Asignación de preventa"
-        });
+        /*
+          Solo registramos la asignación
+          si todavía no estaba en esa mesa.
+        */
+
+        if (
+          mesaAnterior !== mesa
+        ) {
+
+          persona.historialMesas.push({
+
+            desde:
+              mesaAnterior,
+
+            hacia:
+              mesa,
+
+            fecha:
+              ahora,
+
+            motivo:
+              "Asignación mediante código de preventa"
+
+          });
+        }
 
 
         await personasStore.setJSON(
-          personaEncontrada.id,
-          personaEncontrada
+          persona.id,
+          persona
         );
 
 
-        /* Mover ventas asociadas */
+        /* =========================
+           ACTUALIZAR VENTAS
+        ========================= */
 
         const listaVentas =
           await ventasStore.list();
@@ -462,7 +592,7 @@ export default async (req) => {
           if (
             venta &&
             venta.clienteId ===
-              personaEncontrada.id
+              persona.id
           ) {
 
             venta.mesa =
@@ -470,8 +600,48 @@ export default async (req) => {
 
 
             await ventasStore.setJSON(
-              venta.id,
+              blob.key,
               venta
+            );
+          }
+        }
+
+
+        /* =========================
+           ACTUALIZAR PEDIDOS
+        ========================= */
+
+        const listaPedidos =
+          await pedidosStore.list();
+
+
+        for (
+          const blob
+          of listaPedidos.blobs
+        ) {
+
+          const pedido =
+            await pedidosStore.get(
+              blob.key,
+              {
+                type: "json"
+              }
+            );
+
+
+          if (
+            pedido &&
+            pedido.clienteId ===
+              persona.id
+          ) {
+
+            pedido.mesa =
+              mesa;
+
+
+            await pedidosStore.setJSON(
+              blob.key,
+              pedido
             );
           }
         }
@@ -479,8 +649,95 @@ export default async (req) => {
 
         return Response.json({
           ok: true,
-          persona:
-            personaEncontrada
+          persona
+        });
+      }
+
+
+
+      /* =========================
+         ACTIVO / NO ACTIVO
+      ========================= */
+
+      if (
+        accion ===
+        "actualizar-activo"
+      ) {
+
+        const personaId =
+          String(
+            datos.personaId || ""
+          ).trim();
+
+
+        if (!personaId) {
+
+          return Response.json(
+            {
+              error:
+                "Falta la persona."
+            },
+            {
+              status: 400
+            }
+          );
+        }
+
+
+        const persona =
+          await personasStore.get(
+            personaId,
+            {
+              type: "json"
+            }
+          );
+
+
+        if (!persona) {
+
+          return Response.json(
+            {
+              error:
+                "Persona no encontrada."
+            },
+            {
+              status: 404
+            }
+          );
+        }
+
+
+        const activo =
+          datos.activo === true;
+
+
+        persona.activo =
+          activo;
+
+
+        if (activo) {
+
+          persona.llegadaEn =
+            persona.llegadaEn ||
+            new Date()
+              .toISOString();
+
+        } else {
+
+          persona.llegadaEn =
+            null;
+        }
+
+
+        await personasStore.setJSON(
+          persona.id,
+          persona
+        );
+
+
+        return Response.json({
+          ok: true,
+          persona
         });
       }
 
@@ -488,7 +745,7 @@ export default async (req) => {
 
       /* =========================
          CAMBIAR MESA
-         ADMINISTRADOR
+         ADMIN
       ========================= */
 
       if (
@@ -500,6 +757,7 @@ export default async (req) => {
           String(
             datos.personaId || ""
           ).trim();
+
 
         const nuevaMesa =
           Number(
@@ -584,6 +842,7 @@ export default async (req) => {
         persona.mesa =
           nuevaMesa;
 
+
         persona.asignadoEn =
           ahora;
 
@@ -600,6 +859,7 @@ export default async (req) => {
 
 
         persona.historialMesas.push({
+
           desde:
             mesaAnterior,
 
@@ -611,6 +871,7 @@ export default async (req) => {
 
           motivo:
             "Cambio realizado por administración"
+
         });
 
 
@@ -620,9 +881,7 @@ export default async (req) => {
         );
 
 
-        /* =========================
-           MOVER VENTAS
-        ========================= */
+        /* MOVER VENTAS */
 
         const listaVentas =
           await ventasStore.list();
@@ -647,11 +906,6 @@ export default async (req) => {
           }
 
 
-          /*
-            Forma correcta:
-            ventas enlazadas por clienteId.
-          */
-
           if (
             venta.clienteId ===
             persona.id
@@ -662,27 +916,26 @@ export default async (req) => {
 
 
             await ventasStore.setJSON(
-              venta.id,
+              blob.key,
               venta
             );
+
 
             continue;
           }
 
 
           /*
-            Compatibilidad temporal
-            con compras antiguas.
-
-            Si todavía no tienen clienteId,
-            pero coinciden nombre + mesa,
-            las asociamos a esta cuenta.
+            Compatibilidad con ventas
+            antiguas sin clienteId.
           */
 
           if (
             !venta.clienteId &&
             mesaAnterior &&
-            Number(venta.mesa) ===
+            Number(
+              venta.mesa
+            ) ===
               mesaAnterior &&
             normalizar(
               venta.nombre
@@ -695,21 +948,20 @@ export default async (req) => {
             venta.mesa =
               nuevaMesa;
 
+
             venta.clienteId =
               persona.id;
 
 
             await ventasStore.setJSON(
-              venta.id,
+              blob.key,
               venta
             );
           }
         }
 
 
-        /* =========================
-           MOVER PEDIDOS
-        ========================= */
+        /* MOVER PEDIDOS */
 
         const listaPedidos =
           await pedidosStore.list();
@@ -744,23 +996,21 @@ export default async (req) => {
 
 
             await pedidosStore.setJSON(
-              pedido.id,
+              blob.key,
               pedido
             );
+
 
             continue;
           }
 
 
-          /*
-            Compatibilidad con
-            pedidos antiguos.
-          */
-
           if (
             !pedido.clienteId &&
             mesaAnterior &&
-            Number(pedido.mesa) ===
+            Number(
+              pedido.mesa
+            ) ===
               mesaAnterior &&
             normalizar(
               pedido.nombre
@@ -773,12 +1023,13 @@ export default async (req) => {
             pedido.mesa =
               nuevaMesa;
 
+
             pedido.clienteId =
               persona.id;
 
 
             await pedidosStore.setJSON(
-              pedido.id,
+              blob.key,
               pedido
             );
           }
@@ -830,7 +1081,16 @@ export default async (req) => {
         );
 
 
-      /* PERSONA POR ID */
+      const tipo =
+        url.searchParams.get(
+          "tipo"
+        );
+
+
+
+      /* =========================
+         PERSONA POR ID
+      ========================= */
 
       if (id) {
 
@@ -863,7 +1123,104 @@ export default async (req) => {
       }
 
 
-      /* PERSONAS DE UNA MESA */
+
+      /* =========================
+         TODAS LAS PREVENTAS
+      ========================= */
+
+      if (
+        tipo ===
+        "preventa"
+      ) {
+
+        const lista =
+          await personasStore.list();
+
+
+        const personas =
+          [];
+
+
+        for (
+          const blob
+          of lista.blobs
+        ) {
+
+          const persona =
+            await personasStore.get(
+              blob.key,
+              {
+                type: "json"
+              }
+            );
+
+
+          if (
+            persona &&
+            persona.tipo ===
+              "preventa" &&
+            Number(
+              persona.cantidadPreventas ||
+              0
+            ) > 0
+          ) {
+
+            /*
+              Compatibilidad con cuentas
+              antiguas que todavía no
+              tengan estos campos.
+            */
+
+            if (
+              persona.activo ===
+              undefined
+            ) {
+
+              persona.activo =
+                false;
+            }
+
+
+            if (
+              persona.llegadaEn ===
+              undefined
+            ) {
+
+              persona.llegadaEn =
+                null;
+            }
+
+
+            personas.push(
+              persona
+            );
+          }
+        }
+
+
+        personas.sort(
+          (a, b) =>
+            String(
+              a.nombre
+            ).localeCompare(
+              String(
+                b.nombre
+              ),
+              "es"
+            )
+        );
+
+
+        return Response.json(
+          personas
+        );
+      }
+
+
+
+      /* =========================
+         PERSONAS DE MESA
+      ========================= */
 
       if (mesaParametro) {
 
@@ -894,6 +1251,7 @@ export default async (req) => {
         const lista =
           await personasStore.list();
 
+
         const personas =
           [];
 
@@ -916,7 +1274,8 @@ export default async (req) => {
             persona &&
             Number(
               persona.mesa
-            ) === mesa
+            ) ===
+              mesa
           ) {
 
             personas.push(
@@ -928,11 +1287,14 @@ export default async (req) => {
 
         personas.sort(
           (a, b) =>
-            String(a.nombre)
-              .localeCompare(
-                String(b.nombre),
-                "es"
-              )
+            String(
+              a.nombre
+            ).localeCompare(
+              String(
+                b.nombre
+              ),
+              "es"
+            )
         );
 
 
@@ -942,10 +1304,11 @@ export default async (req) => {
       }
 
 
+
       return Response.json(
         {
           error:
-            "Falta indicar ID o mesa."
+            "Falta indicar ID, mesa o tipo."
         },
         {
           status: 400
