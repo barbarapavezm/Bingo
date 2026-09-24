@@ -27,7 +27,7 @@ body {
 
 header {
   background: white;
-  padding: 18px 28px;
+  padding: 20px 30px;
   border-bottom: 1px solid #ddd;
 
   display: flex;
@@ -57,7 +57,9 @@ main {
 
 .panel {
   background: white;
+
   padding: 22px;
+
   border-radius: 14px;
 
   box-shadow:
@@ -98,7 +100,7 @@ main {
 .tipo-btn strong {
   display: block;
   font-size: 18px;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .tipo-btn span {
@@ -123,29 +125,50 @@ main {
 
 .fila {
   display: grid;
+
   grid-template-columns:
     repeat(3, 1fr);
 
   gap: 18px;
 }
 
+.fila-2 {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 18px;
+}
+
 label {
   display: block;
+
   margin-bottom: 7px;
+
   font-weight: bold;
 }
 
 select,
 input {
   width: 100%;
+
   padding: 12px;
 
   font-size: 16px;
 
   border-radius: 8px;
-  border: 1px solid #ccc;
+
+  border:
+    1px solid #ccc;
 
   background: white;
+}
+
+.nota {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 
@@ -187,7 +210,9 @@ input {
 
 .controles {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 
   margin-top: 12px;
@@ -212,6 +237,7 @@ button {
   min-width: 30px;
 
   text-align: center;
+
   font-weight: bold;
 }
 
@@ -228,13 +254,9 @@ button {
   border-radius: 10px;
 
   background: #eff6ff;
-  border: 1px solid #bfdbfe;
-}
 
-.nota {
-  color: #6b7280;
-  font-size: 13px;
-  line-height: 1.5;
+  border:
+    1px solid #bfdbfe;
 }
 
 
@@ -244,43 +266,91 @@ button {
 
 .preventa {
   background: #faf5ff;
-  border: 1px solid #ddd6fe;
+
+  border:
+    1px solid #ddd6fe;
 }
 
 .preventa-precio {
-  font-size: 34px;
+  font-size: 32px;
   font-weight: bold;
 
   color: #6d28d9;
 
-  margin: 12px 0 18px;
+  margin: 10px 0 18px;
 }
 
 .lista-preventa {
-  line-height: 1.9;
+  line-height: 1.8;
 }
 
 .once-pendiente {
-  color: #92400e;
-
-  background: #fef3c7;
-
-  border-radius: 9px;
+  margin-top: 15px;
 
   padding: 12px;
 
-  margin-top: 14px;
+  border-radius: 9px;
+
+  background: #fef3c7;
+
+  color: #92400e;
+}
+
+.subpanel {
+  margin-top: 18px;
+
+  padding: 18px;
+
+  background: #f9fafb;
+
+  border:
+    1px solid #e5e7eb;
+
+  border-radius: 11px;
 }
 
 
 /* =========================
-   CÓDIGO PREVENTA
+   PERSONA EXISTENTE
+========================= */
+
+.info-persona {
+  margin-top: 12px;
+
+  padding: 14px;
+
+  border-radius: 9px;
+
+  background: #ecfdf5;
+
+  border:
+    1px solid #a7f3d0;
+
+  line-height: 1.6;
+}
+
+.codigo {
+  font-family: monospace;
+
+  font-size: 20px;
+
+  letter-spacing: 2px;
+
+  font-weight: bold;
+
+  color: #6d28d9;
+}
+
+
+/* =========================
+   RESULTADO PREVENTA
 ========================= */
 
 .resultado-preventa {
   background: #ecfdf5;
 
-  border: 2px solid #10b981;
+  border:
+    2px solid #10b981;
 
   border-radius: 14px;
 
@@ -293,11 +363,13 @@ button {
 
 .resultado-preventa h2 {
   margin-top: 0;
+
   color: #047857;
 }
 
-.codigo {
+.codigo-grande {
   font-size: 36px;
+
   font-weight: bold;
 
   letter-spacing: 6px;
@@ -308,10 +380,11 @@ button {
 }
 
 .copiar {
-  background: #10b981;
-  color: white;
-
   padding: 10px 16px;
+
+  background: #10b981;
+
+  color: white;
 
   font-weight: bold;
 }
@@ -323,6 +396,7 @@ button {
 
 .total {
   font-size: 30px;
+
   font-weight: bold;
 
   margin-top: 7px;
@@ -336,6 +410,7 @@ button {
   font-size: 17px;
 
   background: #2563eb;
+
   color: white;
 
   margin-top: 18px;
@@ -357,10 +432,8 @@ button {
     padding: 16px;
   }
 
-  .fila {
-    grid-template-columns: 1fr;
-  }
-
+  .fila,
+  .fila-2,
   .tipos {
     grid-template-columns: 1fr;
   }
@@ -411,16 +484,19 @@ button {
   ✅ Preventa registrada
 </h2>
 
-<div id="resultado-nombre"></div>
-
-<div class="codigo" id="resultado-codigo">
+<div id="resultado-nombre">
 </div>
 
-<p>
-  Este es el código que debe guardar
-  la persona para asociarse después
-  a la mesa que elija.
-</p>
+<div
+  class="codigo-grande"
+  id="resultado-codigo"
+>
+</div>
+
+<div id="resultado-detalle">
+</div>
+
+<br>
 
 <button
   class="copiar"
@@ -434,7 +510,7 @@ button {
 
 
 <!-- =========================
-     TIPO VENTA
+     TIPO DE VENTA
 ========================= -->
 
 <div class="panel">
@@ -445,8 +521,9 @@ button {
 
 <div class="tipos">
 
+
 <button
-  id="btn-tipo-normal"
+  id="btn-normal"
   class="tipo-btn activo-normal"
   onclick="seleccionarTipo('normal')"
 >
@@ -456,14 +533,14 @@ button {
 </strong>
 
 <span>
-  La persona ya está sentada en una mesa.
+  La persona ya está sentada.
 </span>
 
 </button>
 
 
 <button
-  id="btn-tipo-preventa"
+  id="btn-preventa"
   class="tipo-btn"
   onclick="seleccionarTipo('preventa')"
 >
@@ -473,10 +550,11 @@ button {
 </strong>
 
 <span>
-  La persona todavía no tiene mesa.
+  Venta anticipada con código.
 </span>
 
 </button>
+
 
 </div>
 
@@ -485,12 +563,10 @@ button {
 
 
 <!-- =========================
-     VENTA NORMAL
+     ZONA NORMAL
 ========================= -->
 
-<div
-  id="zona-normal"
->
+<div id="zona-normal">
 
 
 <div class="panel">
@@ -572,7 +648,7 @@ button {
 <select id="entrega">
 
 <option value="mesa">
-  Dejar disponibles para que la persona las pida después
+  Dejar disponibles para pedir después
 </option>
 
 <option value="cocina">
@@ -583,9 +659,9 @@ button {
 
 <p class="nota">
 
-Si la persona todavía no aparece aquí,
-debe escanear primero el QR de su mesa
-y elegir “No tengo preventa”.
+Si la persona no aparece,
+primero debe registrarse mediante
+el QR de su mesa.
 
 </p>
 
@@ -631,7 +707,7 @@ y elegir “No tengo preventa”.
 
 
 <!-- =========================
-     PREVENTA
+     ZONA PREVENTA
 ========================= -->
 
 <div
@@ -640,22 +716,93 @@ y elegir “No tengo preventa”.
 >
 
 
+<div class="panel preventa">
+
+<h2>
+  🎟️ Preventa
+</h2>
+
+<div class="preventa-precio">
+  $10.000 c/u
+</div>
+
+<div class="lista-preventa">
+
+✓ Juego 1<br>
+✓ Juego 2<br>
+✓ Juego 3<br>
+✓ Juego 4<br>
+✓ Juego Mayor<br>
+✓ Once
+
+</div>
+
+
+<div class="once-pendiente">
+
+<strong>
+  Once pendiente de definir
+</strong>
+
+<br><br>
+
+Más adelante la podremos reemplazar
+por los productos definitivos,
+por ejemplo Completo + Té.
+
+</div>
+
+</div>
+
+
+
 <div class="panel">
+
+<h2>
+  Datos de la preventa
+</h2>
+
 
 <div class="fila">
 
 
 <div>
 
-<label for="nombre-preventa">
-  Nombre de la persona
+<label for="modo-preventa">
+  ¿Es una persona nueva?
+</label>
+
+<select
+  id="modo-preventa"
+  onchange="cambiarModoPreventa()"
+>
+
+<option value="nueva">
+  Nueva persona
+</option>
+
+<option value="existente">
+  Agregar a una preventa existente
+</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label for="cantidad-preventas">
+  Cantidad de preventas
 </label>
 
 <input
-  id="nombre-preventa"
-  type="text"
-  placeholder="Ej: Camila"
-  autocomplete="off"
+  id="cantidad-preventas"
+  type="number"
+  min="1"
+  step="1"
+  value="1"
+  oninput="actualizarTotal()"
 >
 
 </div>
@@ -689,13 +836,29 @@ y elegir “No tengo preventa”.
 </div>
 
 
+
+<!-- NUEVA PERSONA -->
+
+<div
+  id="preventa-nueva"
+  class="subpanel"
+>
+
+<label for="nombre-preventa">
+  Nombre
+</label>
+
+<input
+  id="nombre-preventa"
+  type="text"
+  placeholder="Ej: Camila"
+  autocomplete="off"
+>
+
 <p class="nota">
 
-La preventa no necesita mesa.
-
-Se generará un código que la persona
-usará cuando llegue y escanee el QR
-de la mesa donde decidió sentarse.
+Se creará una cuenta nueva
+y un código único de preventa.
 
 </p>
 
@@ -703,57 +866,65 @@ de la mesa donde decidió sentarse.
 
 
 
-<div class="panel preventa">
+<!-- PERSONA EXISTENTE -->
 
-<h2>
-  🎟️ Preventa
-</h2>
+<div
+  id="preventa-existente"
+  class="subpanel oculto"
+>
 
-<div class="preventa-precio">
-  $10.000
-</div>
-
-<strong>
-  Incluye:
-</strong>
-
-<div class="lista-preventa">
-
-✓ 1 × Juego 1<br>
-✓ 1 × Juego 2<br>
-✓ 1 × Juego 3<br>
-✓ 1 × Juego 4<br>
-✓ 1 × Juego Mayor<br>
-✓ 1 × Once
-
-</div>
+<div class="fila-2">
 
 
-<div class="once-pendiente">
+<div>
 
-<strong>
-  Once pendiente de definir
-</strong>
+<label for="buscar-preventa">
+  Buscar por nombre o código
+</label>
 
-<br><br>
-
-Más adelante podremos cambiar este
-beneficio por los productos reales,
-por ejemplo:
-
-<br>
-
-<strong>
-  1 Completo + 1 Té
-</strong>
-
-<br><br>
-
-Esos productos quedarán disponibles
-en la cuenta de la persona cuando
-se asocie a su mesa.
+<input
+  id="buscar-preventa"
+  type="text"
+  placeholder="Ej: Camila o K7P3A"
+  autocomplete="off"
+  oninput="filtrarPreventasExistentes()"
+>
 
 </div>
+
+
+<div>
+
+<label for="persona-preventa">
+  Persona
+</label>
+
+<select
+  id="persona-preventa"
+  onchange="mostrarInfoPreventa()"
+>
+
+<option value="">
+  Seleccionar persona
+</option>
+
+</select>
+
+</div>
+
+
+</div>
+
+
+<div
+  id="info-preventa"
+  class="info-persona oculto"
+>
+</div>
+
+
+</div>
+
 
 </div>
 
@@ -773,15 +944,16 @@ se asocie a su mesa.
 </div>
 
 <div
-  class="total"
   id="total"
+  class="total"
 >
   $0
 </div>
 
+
 <button
-  class="registrar"
   id="boton-registrar"
+  class="registrar"
   onclick="registrarVenta()"
 >
   Registrar venta
@@ -791,6 +963,7 @@ se asocie a su mesa.
 
 
 </main>
+
 
 
 <script>
@@ -809,6 +982,10 @@ let tipoVentaActual =
 
 
 let personasMesa =
+  [];
+
+
+let preventasExistentes =
   [];
 
 
@@ -906,54 +1083,12 @@ const productos = [
 ];
 
 
-const beneficiosPreventa = {
-
-  juegos: [
-
-    {
-      nombre: "Juego 1",
-      cantidad: 1
-    },
-
-    {
-      nombre: "Juego 2",
-      cantidad: 1
-    },
-
-    {
-      nombre: "Juego 3",
-      cantidad: 1
-    },
-
-    {
-      nombre: "Juego 4",
-      cantidad: 1
-    },
-
-    {
-      nombre: "Juego Mayor",
-      cantidad: 1
-    }
-
-  ],
-
-  once: {
-
-    cantidad: 1,
-
-    estado:
-      "pendiente"
-
-  }
-
-};
-
-
-const cantidades = {};
+const cantidades =
+  {};
 
 
 /* =========================
-   FORMATO CLP
+   FORMATO
 ========================= */
 
 function formatoCLP(valor) {
@@ -969,8 +1104,23 @@ function formatoCLP(valor) {
 }
 
 
+function normalizar(texto) {
+
+  return String(
+    texto || ""
+  )
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+}
+
+
 /* =========================
-   TIPO VENTA
+   TIPO DE VENTA
 ========================= */
 
 function seleccionarTipo(tipo) {
@@ -999,19 +1149,9 @@ function seleccionarTipo(tipo) {
   );
 
 
-  const btnNormal =
-    document.getElementById(
-      "btn-tipo-normal"
-    );
-
-
-  const btnPreventa =
-    document.getElementById(
-      "btn-tipo-preventa"
-    );
-
-
-  btnNormal.className =
+  document.getElementById(
+    "btn-normal"
+  ).className =
     "tipo-btn" +
     (
       normal
@@ -1020,12 +1160,14 @@ function seleccionarTipo(tipo) {
     );
 
 
-  btnPreventa.className =
+  document.getElementById(
+    "btn-preventa"
+  ).className =
     "tipo-btn" +
     (
-      !normal
-        ? " activo-preventa"
-        : ""
+      normal
+        ? ""
+        : " activo-preventa"
     );
 
 
@@ -1045,6 +1187,12 @@ function seleccionarTipo(tipo) {
     normal
       ? "Registrar venta"
       : "Registrar preventa";
+
+
+  if (!normal) {
+
+    cargarPreventasExistentes();
+  }
 
 
   actualizarTotal();
@@ -1069,22 +1217,22 @@ function cargarMesas() {
     i++
   ) {
 
-    const option =
+    const opcion =
       document.createElement(
         "option"
       );
 
 
-    option.value =
+    opcion.value =
       i;
 
 
-    option.textContent =
+    opcion.textContent =
       "Mesa " + i;
 
 
     select.appendChild(
-      option
+      opcion
     );
   }
 }
@@ -1122,7 +1270,7 @@ async function cargarPersonasMesa() {
 
 
   select.innerHTML =
-    '<option value="">Cargando personas...</option>';
+    '<option value="">Cargando...</option>';
 
 
   try {
@@ -1214,7 +1362,7 @@ async function cargarPersonasMesa() {
 
 
 /* =========================
-   CREAR PRODUCTOS
+   PRODUCTOS NORMALES
 ========================= */
 
 function crearProductos() {
@@ -1236,7 +1384,8 @@ function crearProductos() {
 
       cantidades[
         producto.id
-      ] = 0;
+      ] =
+        0;
 
 
       const tarjeta =
@@ -1260,7 +1409,6 @@ function crearProductos() {
             producto.precio
           )}
         </div>
-
 
         <div class="controles">
 
@@ -1311,10 +1459,6 @@ function crearProductos() {
 }
 
 
-/* =========================
-   CANTIDAD
-========================= */
-
 function cambiarCantidad(
   id,
   cambio
@@ -1334,7 +1478,8 @@ function cambiarCantidad(
 
     cantidades[
       id
-    ] = 0;
+    ] =
+      0;
   }
 
 
@@ -1351,8 +1496,335 @@ function cambiarCantidad(
 
 
 /* =========================
+   PREVENTAS EXISTENTES
+========================= */
+
+async function cargarPreventasExistentes() {
+
+  try {
+
+    const respuesta =
+      await fetch(
+
+        "/.netlify/functions/personas?tipo=preventa&t=" +
+        Date.now(),
+
+        {
+          cache:
+            "no-store"
+        }
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "No se pudieron cargar las preventas."
+      );
+    }
+
+
+    const datos =
+      await respuesta.json();
+
+
+    preventasExistentes =
+      Array.isArray(datos)
+        ? datos
+        : [];
+
+
+    filtrarPreventasExistentes();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    preventasExistentes =
+      [];
+
+
+    const select =
+      document.getElementById(
+        "persona-preventa"
+      );
+
+
+    select.innerHTML =
+      '<option value="">Error cargando preventas</option>';
+  }
+}
+
+
+/* =========================
+   MODO PREVENTA
+========================= */
+
+function cambiarModoPreventa() {
+
+  const modo =
+    document.getElementById(
+      "modo-preventa"
+    ).value;
+
+
+  const nueva =
+    modo === "nueva";
+
+
+  document.getElementById(
+    "preventa-nueva"
+  ).classList.toggle(
+    "oculto",
+    !nueva
+  );
+
+
+  document.getElementById(
+    "preventa-existente"
+  ).classList.toggle(
+    "oculto",
+    nueva
+  );
+
+
+  if (!nueva) {
+
+    cargarPreventasExistentes();
+  }
+}
+
+
+/* =========================
+   FILTRAR PREVENTAS
+========================= */
+
+function filtrarPreventasExistentes() {
+
+  const buscar =
+    normalizar(
+      document.getElementById(
+        "buscar-preventa"
+      ).value
+    );
+
+
+  const select =
+    document.getElementById(
+      "persona-preventa"
+    );
+
+
+  const valorAnterior =
+    select.value;
+
+
+  select.innerHTML =
+    '<option value="">Seleccionar persona</option>';
+
+
+  const filtradas =
+    preventasExistentes.filter(
+      persona => {
+
+        const nombre =
+          normalizar(
+            persona.nombre
+          );
+
+
+        const codigo =
+          normalizar(
+            persona.codigoPreventa
+          );
+
+
+        return (
+          !buscar ||
+          nombre.includes(
+            buscar
+          ) ||
+          codigo.includes(
+            buscar
+          )
+        );
+      }
+    );
+
+
+  filtradas.forEach(
+    persona => {
+
+      const opcion =
+        document.createElement(
+          "option"
+        );
+
+
+      opcion.value =
+        persona.id;
+
+
+      opcion.textContent =
+        persona.nombre +
+        " — " +
+        persona.codigoPreventa +
+        " — " +
+        Number(
+          persona.cantidadPreventas ||
+          0
+        ) +
+        " preventa(s)";
+
+
+      select.appendChild(
+        opcion
+      );
+    }
+  );
+
+
+  if (
+    filtradas.some(
+      persona =>
+        persona.id ===
+        valorAnterior
+    )
+  ) {
+
+    select.value =
+      valorAnterior;
+  }
+
+
+  mostrarInfoPreventa();
+}
+
+
+/* =========================
+   INFO PREVENTA
+========================= */
+
+function mostrarInfoPreventa() {
+
+  const personaId =
+    document.getElementById(
+      "persona-preventa"
+    ).value;
+
+
+  const caja =
+    document.getElementById(
+      "info-preventa"
+    );
+
+
+  if (!personaId) {
+
+    caja.classList.add(
+      "oculto"
+    );
+
+    caja.innerHTML =
+      "";
+
+    return;
+  }
+
+
+  const persona =
+    preventasExistentes.find(
+      p =>
+        p.id ===
+        personaId
+    );
+
+
+  if (!persona) {
+
+    caja.classList.add(
+      "oculto"
+    );
+
+    return;
+  }
+
+
+  caja.innerHTML = `
+
+    <strong>
+      ${persona.nombre}
+    </strong>
+
+    <br>
+
+    Código:
+    <span class="codigo">
+      ${persona.codigoPreventa}
+    </span>
+
+    <br>
+
+    Preventas actuales:
+    <strong>
+      ${Number(
+        persona.cantidadPreventas ||
+        0
+      )}
+    </strong>
+
+    ${
+      persona.mesa
+
+        ? "<br>Mesa actual: <strong>" +
+          persona.mesa +
+          "</strong>"
+
+        : ""
+    }
+
+  `;
+
+
+  caja.classList.remove(
+    "oculto"
+  );
+}
+
+
+/* =========================
    TOTAL
 ========================= */
+
+function cantidadPreventaActual() {
+
+  let cantidad =
+    Number(
+      document.getElementById(
+        "cantidad-preventas"
+      ).value
+    );
+
+
+  if (
+    !Number.isInteger(
+      cantidad
+    ) ||
+    cantidad < 1
+  ) {
+
+    cantidad =
+      1;
+  }
+
+
+  return cantidad;
+}
+
 
 function calcularTotalNormal() {
 
@@ -1382,7 +1854,8 @@ function actualizarTotal() {
     tipoVentaActual ===
       "preventa"
 
-      ? PRECIO_PREVENTA
+      ? cantidadPreventaActual() *
+        PRECIO_PREVENTA
 
       : calcularTotalNormal();
 
@@ -1427,10 +1900,10 @@ async function registrarVenta() {
 
 async function registrarPreventa() {
 
-  const nombre =
+  const modo =
     document.getElementById(
-      "nombre-preventa"
-    ).value.trim();
+      "modo-preventa"
+    ).value;
 
 
   const pago =
@@ -1439,14 +1912,8 @@ async function registrarPreventa() {
     ).value;
 
 
-  if (!nombre) {
-
-    alert(
-      "Escribe el nombre de la persona."
-    );
-
-    return;
-  }
+  const cantidad =
+    cantidadPreventaActual();
 
 
   if (!pago) {
@@ -1459,48 +1926,96 @@ async function registrarPreventa() {
   }
 
 
+  let nombre =
+    "";
+
+
+  let clienteId =
+    null;
+
+
+  if (
+    modo === "nueva"
+  ) {
+
+    nombre =
+      document.getElementById(
+        "nombre-preventa"
+      ).value.trim();
+
+
+    if (!nombre) {
+
+      alert(
+        "Escribe el nombre de la persona."
+      );
+
+      return;
+    }
+
+
+  } else {
+
+    clienteId =
+      document.getElementById(
+        "persona-preventa"
+      ).value;
+
+
+    if (!clienteId) {
+
+      alert(
+        "Selecciona la persona a la que quieres agregar preventas."
+      );
+
+      return;
+    }
+
+
+    const persona =
+      preventasExistentes.find(
+        p =>
+          p.id ===
+          clienteId
+      );
+
+
+    if (!persona) {
+
+      alert(
+        "No se encontró la preventa seleccionada."
+      );
+
+      return;
+    }
+
+
+    nombre =
+      persona.nombre;
+  }
+
+
   const venta = {
 
     tipoVenta:
       "preventa",
-
-    mesa:
-      null,
 
     nombre,
 
     metodoPago:
       pago,
 
-    productos: [
+    cantidadPreventas:
+      cantidad
 
-      {
-        id: 12,
-
-        nombre:
-          "Preventa",
-
-        precio:
-          PRECIO_PREVENTA,
-
-        cantidad:
-          1,
-
-        subtotal:
-          PRECIO_PREVENTA,
-
-        categoria:
-          "preventa"
-      }
-
-    ],
-
-    beneficiosPreventa:
-      beneficiosPreventa,
-
-    total:
-      PRECIO_PREVENTA
   };
+
+
+  if (clienteId) {
+
+    venta.clienteId =
+      clienteId;
+  }
 
 
   const boton =
@@ -1520,7 +2035,7 @@ async function registrarPreventa() {
 
 
     boton.textContent =
-      "Creando preventa...";
+      "Registrando preventa...";
 
 
     const respuesta =
@@ -1558,40 +2073,58 @@ async function registrarPreventa() {
     }
 
 
+    const persona =
+      resultado.persona;
+
+
     if (
-      !resultado.persona ||
-      !resultado.persona.codigoPreventa
+      !persona ||
+      !persona.codigoPreventa
     ) {
 
       throw new Error(
-        "La preventa se guardó, pero no se recibió el código."
+        "La venta se guardó, pero no se recibió el código."
       );
     }
 
 
-    const codigo =
-      resultado.persona
-        .codigoPreventa;
-
-
     ultimoCodigoPreventa =
-      codigo;
+      persona.codigoPreventa;
 
 
     document.getElementById(
       "resultado-codigo"
     ).textContent =
-      codigo;
+      persona.codigoPreventa;
 
 
     document.getElementById(
       "resultado-nombre"
     ).textContent =
-      nombre +
-      " — " +
+      persona.nombre;
+
+
+    document.getElementById(
+      "resultado-detalle"
+    ).innerHTML =
+
+      "Se agregaron <strong>" +
+      cantidad +
+      "</strong> preventa(s)." +
+
+      "<br>Total cobrado: <strong>" +
       formatoCLP(
+        cantidad *
         PRECIO_PREVENTA
-      );
+      ) +
+      "</strong>" +
+
+      "<br>Preventas totales de esta persona: <strong>" +
+      Number(
+        persona.cantidadPreventas ||
+        cantidad
+      ) +
+      "</strong>";
 
 
     document.getElementById(
@@ -1609,13 +2142,6 @@ async function registrarPreventa() {
     });
 
 
-    alert(
-      "✅ Preventa registrada.\n\n" +
-      "Código: " +
-      codigo
-    );
-
-
     document.getElementById(
       "nombre-preventa"
     ).value =
@@ -1626,6 +2152,37 @@ async function registrarPreventa() {
       "pago-preventa"
     ).value =
       "";
+
+
+    document.getElementById(
+      "cantidad-preventas"
+    ).value =
+      1;
+
+
+    document.getElementById(
+      "buscar-preventa"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "persona-preventa"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "info-preventa"
+    ).classList.add(
+      "oculto"
+    );
+
+
+    await cargarPreventasExistentes();
+
+
+    actualizarTotal();
 
 
   } catch (error) {
@@ -1670,9 +2227,10 @@ async function copiarCodigo() {
 
   try {
 
-    await navigator.clipboard.writeText(
-      ultimoCodigoPreventa
-    );
+    await navigator.clipboard
+      .writeText(
+        ultimoCodigoPreventa
+      );
 
 
     alert(
@@ -1982,7 +2540,9 @@ async function registrarVentaNormal() {
         );
 
 
-      if (!respuestaPedido.ok) {
+      if (
+        !respuestaPedido.ok
+      ) {
 
         alert(
 
@@ -2022,11 +2582,12 @@ async function registrarVentaNormal() {
 
       mensaje +=
 
-        entrega === "cocina"
+        entrega ===
+          "cocina"
 
           ? "\n\n🍽️ Comida enviada a cocina."
 
-          : "\n\n📱 Comida disponible para pedir desde su cuenta.";
+          : "\n\n📱 Comida disponible para pedir después.";
     }
 
 
@@ -2131,6 +2692,11 @@ crearProductos();
 seleccionarTipo(
   "normal"
 );
+
+cambiarModoPreventa();
+
+actualizarTotal();
+
 
 </script>
 
