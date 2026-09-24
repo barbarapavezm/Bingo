@@ -1,10 +1,16 @@
 import { getStore } from "@netlify/blobs";
 
 const ventasStore =
-  getStore("ventas-bingo");
+  getStore({
+    name: "ventas-bingo",
+    consistency: "strong"
+  });
 
 const personasStore =
-  getStore("personas-bingo");
+  getStore({
+    name: "personas-bingo",
+    consistency: "strong"
+  });
 
 
 /* =========================
