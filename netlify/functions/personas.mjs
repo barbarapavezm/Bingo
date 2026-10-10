@@ -179,40 +179,77 @@ async function buscarPorCodigo(codigo, personasStore) {
    PREVENTAS / VENTAS
 ========================= */
 
-function crearBeneficios(cantidad, tipoOnce = "normal") {
+function normalizarTiposOnce(
+  valores,
+  cantidad,
+  fallback = "normal"
+) {
 
-  return {
+  let tipos =
+    Array.isArray(valores)
+      ? valores
+          .map(normalizarTipoOnce)
+          .filter(Boolean)
+      : [];
 
-    juegos: [
-      {
-        nombre: "Juego 1",
-        cantidad
-      },
-      {
-        nombre: "Juego 2",
-        cantidad
-      },
-      {
-        nombre: "Juego 3",
-        cantidad
-      },
-      {
-        nombre: "Juego 4",
-        cantidad
-      },
-      {
-        nombre: "Juego Mayor",
-        cantidad
-      }
-    ],
 
-    once: {
-      cantidad,
-      tipo: normalizarTipoOnce(tipoOnce) || "normal",
-      estado: "pendiente"
-    }
+  if (
+    tipos.length === 0
+  ) {
 
-  };
+    const tipoFallback =
+      normalizarTipoOnce(
+        fallback
+      ) ||
+      "normal";
+
+
+    tipos =
+      Array.from(
+        {
+          length:
+            cantidad
+        },
+        () =>
+          tipoFallback
+      );
+  }
+
+
+  if (
+    tipos.length !==
+    cantidad
+  ) {
+
+    return null;
+  }
+
+
+  return tipos;
+}
+
+
+function resumenTipoOnce(tipos) {
+
+  if (
+    !Array.isArray(tipos) ||
+    tipos.length === 0
+  ) {
+
+    return null;
+  }
+
+
+  const primero =
+    tipos[0];
+
+
+  return tipos.every(
+    tipo =>
+      tipo === primero
+  )
+    ? primero
+    : "mixta";
 }
 
 
@@ -259,55 +296,249 @@ function obtenerCantidadVenta(venta) {
 }
 
 
-function actualizarCantidadVenta(
+function obtenerTiposOnceVenta(
   venta,
-  cantidad
+  cantidad = null
 ) {
+
+  const total =
+    cantidad ??
+    obtenerCantidadVenta(
+      venta
+    );
+
+
+  if (
+    Array.isArray(
+      venta?.tiposOnce
+    )
+  ) {
+
+    const tipos =
+      normalizarTiposOnce(
+        venta.tiposOnce,
+        total
+      );
+
+
+    if (tipos) {
+      return tipos;
+    }
+  }
+
+
+  if (
+    Array.isArray(
+      venta?.beneficiosPreventa?.once?.tipos
+    )
+  ) {
+
+    const tipos =
+      normalizarTiposOnce(
+        venta.beneficiosPreventa.once.tipos,
+        total
+      );
+
+
+    if (tipos) {
+      return tipos;
+    }
+  }
+
+
+  const unico =
+    normalizarTipoOnce(
+      venta?.tipoOnce ||
+      venta?.beneficiosPreventa?.once?.tipo
+    );
+
+
+  if (unico) {
+
+    return Array.from(
+      {
+        length:
+          total
+      },
+      () =>
+        unico
+    );
+  }
+
+
+  if (
+    Array.isArray(
+      venta?.productos
+    )
+  ) {
+
+    const encontrados =
+      [];
+
+
+    venta.productos.forEach(
+      producto => {
+
+        const nombre =
+          normalizar(
+            producto?.nombre
+          );
+
+
+        let tipo =
+          null;
+
+
+        if (nombre === "once normal") {
+          tipo = "normal";
+        }
+
+
+        if (nombre === "once vegetariana") {
+          tipo = "vegetariana";
+        }
+
+
+        if (nombre === "once vegana") {
+          tipo = "vegana";
+        }
+
+
+        if (tipo) {
+
+          const cantidadProducto =
+            Math.max(
+              0,
+              Number(
+                producto?.cantidad ||
+                0
+              )
+            );
+
+
+          for (
+            let i = 0;
+            i < cantidadProducto;
+            i++
+          ) {
+
+            encontrados.push(
+              tipo
+            );
+          }
+        }
+      }
+    );
+
+
+    if (
+      encontrados.length ===
+      total
+    ) {
+
+      return encontrados;
+    }
+  }
+
+
+  return Array.from(
+    {
+      length:
+        total
+    },
+    () =>
+      "normal"
+  );
+}
+
+
+function crearBeneficios(
+  cantidad,
+  tiposOnce
+) {
+
+  const tipos =
+    normalizarTiposOnce(
+      tiposOnce,
+      cantidad
+    ) ||
+    Array.from(
+      {
+        length:
+          cantidad
+      },
+      () =>
+        "normal"
+    );
+
+
+  return {
+
+    juegos: [
+      {
+        nombre: "Juego 1",
+        cantidad
+      },
+      {
+        nombre: "Juego 2",
+        cantidad
+      },
+      {
+        nombre: "Juego 3",
+        cantidad
+      },
+      {
+        nombre: "Juego 4",
+        cantidad
+      },
+      {
+        nombre: "Juego Mayor",
+        cantidad
+      }
+    ],
+
+    once: {
+      cantidad,
+      tipos,
+      estado: "pendiente"
+    }
+
+  };
+}
+
+
+function construirProductosPreventa(
+  cantidad,
+  tiposOnce
+) {
+
+  const conteo = {
+    normal: 0,
+    vegetariana: 0,
+    vegana: 0
+  };
+
+
+  tiposOnce.forEach(
+    tipo => {
+
+      if (
+        conteo[tipo] !==
+        undefined
+      ) {
+
+        conteo[tipo]++;
+      }
+    }
+  );
+
 
   const total =
     cantidad *
     PRECIO_PREVENTA;
 
 
-  const tipoOnce =
-    normalizarTipoOnce(
-      venta?.tipoOnce ||
-      venta?.beneficiosPreventa?.once?.tipo ||
-      (
-        Array.isArray(venta?.productos)
-          ? (
-              venta.productos.find(
-                producto =>
-                  normalizar(producto.nombre) === "once vegana"
-              )
-                ? "vegana"
-                : venta.productos.find(
-                    producto =>
-                      normalizar(producto.nombre) === "once vegetariana"
-                  )
-                    ? "vegetariana"
-                    : venta.productos.find(
-                        producto =>
-                          normalizar(producto.nombre) === "once normal"
-                      )
-                        ? "normal"
-                        : null
-            )
-          : null
-      )
-    ) ||
-    "normal";
-
-
-  venta.cantidadPreventas =
-    cantidad;
-
-
-  venta.tipoOnce =
-    tipoOnce;
-
-
-  venta.productos = [
+  const productos = [
     {
       id: 12,
       nombre: "Preventa",
@@ -315,23 +546,128 @@ function actualizarCantidadVenta(
       cantidad,
       subtotal: total,
       categoria: "preventa"
-    },
-    {
-      id: "once-preventa",
-      nombre: nombreOnce(tipoOnce),
-      precio: 0,
-      cantidad,
-      subtotal: 0,
-      categoria: "comida",
-      incluidoEnPreventa: true
     }
   ];
+
+
+  [
+    "normal",
+    "vegetariana",
+    "vegana"
+  ].forEach(
+    tipo => {
+
+      if (
+        conteo[tipo] > 0
+      ) {
+
+        productos.push({
+          id:
+            "once-preventa-" +
+            tipo,
+
+          nombre:
+            nombreOnce(
+              tipo
+            ),
+
+          precio:
+            0,
+
+          cantidad:
+            conteo[tipo],
+
+          subtotal:
+            0,
+
+          categoria:
+            "comida",
+
+          incluidoEnPreventa:
+            true,
+
+          tipoOnce:
+            tipo
+        });
+      }
+    }
+  );
+
+
+  return productos;
+}
+
+
+function actualizarCantidadVenta(
+  venta,
+  cantidad,
+  tiposForzados = null
+) {
+
+  const total =
+    cantidad *
+    PRECIO_PREVENTA;
+
+
+  let tipos =
+    tiposForzados;
+
+
+  if (!tipos) {
+
+    tipos =
+      obtenerTiposOnceVenta(
+        venta,
+        obtenerCantidadVenta(
+          venta
+        )
+      ).slice(
+        0,
+        cantidad
+      );
+  }
+
+
+  tipos =
+    normalizarTiposOnce(
+      tipos,
+      cantidad
+    ) ||
+    Array.from(
+      {
+        length:
+          cantidad
+      },
+      () =>
+        "normal"
+    );
+
+
+  venta.cantidadPreventas =
+    cantidad;
+
+
+  venta.tiposOnce =
+    tipos;
+
+
+  venta.tipoOnce =
+    resumenTipoOnce(
+      tipos
+    );
+
+
+  venta.productos =
+    construirProductosPreventa(
+      cantidad,
+      tipos
+    );
 
 
   venta.beneficiosPreventa =
     crearBeneficios(
       cantidad,
-      tipoOnce
+      tipos
     );
 
 
@@ -434,6 +770,83 @@ async function totalPreventasEnVentas(
       ),
     0
   );
+}
+
+
+async function sincronizarTiposOncePersona(
+  persona,
+  ventasStore
+) {
+
+  const ventas =
+    await obtenerVentasPreventa(
+      persona.id,
+      ventasStore
+    );
+
+
+  const tipos =
+    [];
+
+
+  let cantidad =
+    0;
+
+
+  for (const item of ventas) {
+
+    const cant =
+      obtenerCantidadVenta(
+        item.venta
+      );
+
+
+    cantidad +=
+      cant;
+
+
+    tipos.push(
+      ...obtenerTiposOnceVenta(
+        item.venta,
+        cant
+      )
+    );
+  }
+
+
+  persona.cantidadPreventas =
+    cantidad;
+
+
+  persona.tiposOnce =
+    tipos;
+
+
+  persona.tipoOnce =
+    resumenTipoOnce(
+      tipos
+    );
+
+
+  if (
+    cantidad === 0
+  ) {
+
+    persona.tipo =
+      "sin-preventa";
+
+
+    persona.codigoPreventa =
+      null;
+
+  } else {
+
+    persona.tipo =
+      "preventa";
+  }
+
+
+  return persona;
 }
 
 
@@ -549,9 +962,37 @@ async function traspasarVentas(
 
       /*
         Si movemos solo una parte,
-        dejamos una parte en la
-        persona original...
+        conservamos exactamente el tipo
+        de Once de cada preventa.
       */
+
+      const tiposOriginales =
+        obtenerTiposOnceVenta(
+          venta,
+          cantidadVenta
+        );
+
+
+      const tiposMover =
+        tiposOriginales.slice(
+          0,
+          mover
+        );
+
+
+      const tiposQuedan =
+        tiposOriginales.slice(
+          mover
+        );
+
+
+      const ventaOriginal =
+        JSON.parse(
+          JSON.stringify(
+            venta
+          )
+        );
+
 
       const cantidadOriginal =
         cantidadVenta -
@@ -560,7 +1001,8 @@ async function traspasarVentas(
 
       actualizarCantidadVenta(
         venta,
-        cantidadOriginal
+        cantidadOriginal,
+        tiposQuedan
       );
 
 
@@ -570,24 +1012,12 @@ async function traspasarVentas(
       );
 
 
-      /*
-        ...y creamos otro registro
-        por la parte transferida.
-
-        $40.000 puede pasar a:
-        $20.000 original +
-        $20.000 nueva persona.
-
-        El total de Caja sigue siendo
-        exactamente $40.000.
-      */
-
       const nuevaVentaId =
         crypto.randomUUID();
 
 
       const nuevaVenta = {
-        ...venta,
+        ...ventaOriginal,
 
         id:
           nuevaVentaId,
@@ -615,7 +1045,8 @@ async function traspasarVentas(
 
       actualizarCantidadVenta(
         nuevaVenta,
-        mover
+        mover,
+        tiposMover
       );
 
 
@@ -718,9 +1149,24 @@ async function descontarVentas(
 
     } else {
 
+      const tiposActuales =
+        obtenerTiposOnceVenta(
+          item.venta,
+          cantidadVenta
+        );
+
+
+      const tiposRestantes =
+        tiposActuales.slice(
+          0,
+          nuevaCantidad
+        );
+
+
       actualizarCantidadVenta(
         item.venta,
-        nuevaCantidad
+        nuevaCantidad,
+        tiposRestantes
       );
 
 
@@ -764,6 +1210,11 @@ export default async (req) => {
 
     const pedidosStore = getStore({
       name: "pedidos-bingo",
+      consistency: "strong"
+    });
+
+    const entregasStore = getStore({
+      name: "entregas-bingo",
       consistency: "strong"
     });
 
@@ -916,11 +1367,20 @@ export default async (req) => {
           );
 
 
-        const tipoOnce =
-          normalizarTipoOnce(
+        const tiposOnce =
+          normalizarTiposOnce(
+            datos.tiposOnce,
+            cantidadPreventas,
             datos.tipoOnce
           ) ||
-          "normal";
+          Array.from(
+            {
+              length:
+                cantidadPreventas
+            },
+            () =>
+              "normal"
+          );
 
 
         if (
@@ -972,7 +1432,12 @@ export default async (req) => {
 
           cantidadPreventas,
 
-          tipoOnce,
+          tiposOnce,
+
+          tipoOnce:
+            resumenTipoOnce(
+              tiposOnce
+            ),
 
           activo:
             false,
@@ -1470,12 +1935,14 @@ export default async (req) => {
 
 
       /* =========================
-         EDITAR TIPO DE ONCE
+         EDITAR ONCES
       ========================= */
 
       if (
         accion ===
-        "editar-tipo-once"
+          "editar-tipo-once" ||
+        accion ===
+          "editar-tipos-once"
       ) {
 
         const personaId =
@@ -1484,34 +1951,12 @@ export default async (req) => {
           ).trim();
 
 
-        const tipoOnce =
-          normalizarTipoOnce(
-            datos.tipoOnce
-          );
-
-
-        if (
-          !personaId ||
-          !tipoOnce
-        ) {
-
-          return Response.json(
-            {
-              error:
-                "Tipo de Once inválido."
-            },
-            {
-              status: 400
-            }
-          );
-        }
-
-
         const persona =
           await personasStore.get(
             personaId,
             {
-              type: "json"
+              type:
+                "json"
             }
           );
 
@@ -1524,14 +1969,122 @@ export default async (req) => {
                 "Persona no encontrada."
             },
             {
-              status: 404
+              status:
+                404
             }
           );
         }
 
 
-        persona.tipoOnce =
-          tipoOnce;
+        const cantidadTotal =
+          Number(
+            persona.cantidadPreventas ||
+            0
+          );
+
+
+        let tiposOnce =
+          null;
+
+
+        if (
+          accion ===
+          "editar-tipos-once"
+        ) {
+
+          tiposOnce =
+            normalizarTiposOnce(
+              datos.tiposOnce,
+              cantidadTotal
+            );
+
+        } else {
+
+          const tipoOnce =
+            normalizarTipoOnce(
+              datos.tipoOnce
+            );
+
+
+          if (tipoOnce) {
+
+            tiposOnce =
+              Array.from(
+                {
+                  length:
+                    cantidadTotal
+                },
+                () =>
+                  tipoOnce
+              );
+          }
+        }
+
+
+        if (!tiposOnce) {
+
+          return Response.json(
+            {
+              error:
+                "Debes indicar un tipo de Once válido para cada preventa."
+            },
+            {
+              status:
+                400
+            }
+          );
+        }
+
+
+        const ventas =
+          await obtenerVentasPreventa(
+            persona.id,
+            ventasStore
+          );
+
+
+        let indice =
+          0;
+
+
+        for (const item of ventas) {
+
+          const cantidadVenta =
+            obtenerCantidadVenta(
+              item.venta
+            );
+
+
+          const tiposVenta =
+            tiposOnce.slice(
+              indice,
+              indice +
+              cantidadVenta
+            );
+
+
+          actualizarCantidadVenta(
+            item.venta,
+            cantidadVenta,
+            tiposVenta
+          );
+
+
+          await ventasStore.setJSON(
+            item.key,
+            item.venta
+          );
+
+
+          indice +=
+            cantidadVenta;
+        }
+
+
+        await sincronizarTiposOncePersona(
+          persona,
+          ventasStore
+        );
 
 
         await personasStore.setJSON(
@@ -1540,58 +2093,9 @@ export default async (req) => {
         );
 
 
-        const listaVentas =
-          await ventasStore.list();
-
-
-        for (const blob of listaVentas.blobs) {
-
-          const venta =
-            await ventasStore.get(
-              blob.key,
-              {
-                type: "json"
-              }
-            );
-
-
-          if (
-            venta &&
-            venta.clienteId === persona.id &&
-            (
-              venta.tipoVenta === "preventa" ||
-              (
-                Array.isArray(venta.productos) &&
-                venta.productos.some(
-                  producto =>
-                    normalizar(producto.nombre) === "preventa"
-                )
-              )
-            )
-          ) {
-
-            venta.tipoOnce =
-              tipoOnce;
-
-
-            actualizarCantidadVenta(
-              venta,
-              obtenerCantidadVenta(
-                venta
-              )
-            );
-
-
-            await ventasStore.setJSON(
-              blob.key,
-              venta
-            );
-          }
-        }
-
-
         return Response.json({
-          ok: true,
+          ok:
+            true,
           persona
         });
       }
@@ -1746,11 +2250,11 @@ export default async (req) => {
           cantidadPreventas:
             cantidad,
 
+          tiposOnce:
+            [],
+
           tipoOnce:
-            normalizarTipoOnce(
-              personaOrigen.tipoOnce
-            ) ||
-            "normal",
+            null,
 
           activo:
             false,
@@ -1798,14 +2302,22 @@ export default async (req) => {
         );
 
 
+        await sincronizarTiposOncePersona(
+          personaOrigen,
+          ventasStore
+        );
+
+
+        await sincronizarTiposOncePersona(
+          nuevaPersona,
+          ventasStore
+        );
+
+
         /*
           Restamos las preventas
           a la persona original.
         */
-
-        personaOrigen.cantidadPreventas =
-          cantidadActual -
-          cantidad;
 
 
         if (
@@ -1988,9 +2500,10 @@ export default async (req) => {
             .toISOString();
 
 
-        persona.cantidadPreventas =
-          cantidadActual -
-          cantidad;
+        await sincronizarTiposOncePersona(
+          persona,
+          ventasStore
+        );
 
 
         if (
@@ -2347,6 +2860,189 @@ export default async (req) => {
         return Response.json({
           ok: true,
           persona
+        });
+      }
+
+
+
+      /* =========================
+         ELIMINAR PERSONA COMPLETA
+      ========================= */
+
+      if (
+        accion ===
+        "eliminar-persona"
+      ) {
+
+        const personaId =
+          String(
+            datos.personaId || ""
+          ).trim();
+
+
+        if (!personaId) {
+
+          return Response.json(
+            {
+              error:
+                "Falta identificar a la persona."
+            },
+            {
+              status: 400
+            }
+          );
+        }
+
+
+        const persona =
+          await personasStore.get(
+            personaId,
+            {
+              type: "json"
+            }
+          );
+
+
+        if (!persona) {
+
+          return Response.json(
+            {
+              error:
+                "Persona no encontrada."
+            },
+            {
+              status: 404
+            }
+          );
+        }
+
+
+        let ventasEliminadas = 0;
+        let pedidosEliminados = 0;
+        let entregasEliminadas = 0;
+
+
+        const listaVentas =
+          await ventasStore.list();
+
+
+        for (
+          const blob
+          of listaVentas.blobs
+        ) {
+
+          const venta =
+            await ventasStore.get(
+              blob.key,
+              {
+                type: "json"
+              }
+            );
+
+
+          if (
+            venta &&
+            venta.clienteId ===
+              personaId
+          ) {
+
+            await ventasStore.delete(
+              blob.key
+            );
+
+            ventasEliminadas++;
+          }
+        }
+
+
+        const listaPedidos =
+          await pedidosStore.list();
+
+
+        for (
+          const blob
+          of listaPedidos.blobs
+        ) {
+
+          const pedido =
+            await pedidosStore.get(
+              blob.key,
+              {
+                type: "json"
+              }
+            );
+
+
+          if (
+            pedido &&
+            pedido.clienteId ===
+              personaId
+          ) {
+
+            await pedidosStore.delete(
+              blob.key
+            );
+
+            pedidosEliminados++;
+          }
+        }
+
+
+        const listaEntregas =
+          await entregasStore.list();
+
+
+        for (
+          const blob
+          of listaEntregas.blobs
+        ) {
+
+          const entrega =
+            await entregasStore.get(
+              blob.key,
+              {
+                type: "json"
+              }
+            );
+
+
+          if (
+            entrega &&
+            entrega.clienteId ===
+              personaId
+          ) {
+
+            await entregasStore.delete(
+              blob.key
+            );
+
+            entregasEliminadas++;
+          }
+        }
+
+
+        await personasStore.delete(
+          personaId
+        );
+
+
+        return Response.json({
+          ok: true,
+
+          personaEliminada: {
+            id:
+              persona.id,
+
+            nombre:
+              persona.nombre,
+
+            mesa:
+              persona.mesa
+          },
+
+          ventasEliminadas,
+          pedidosEliminados,
+          entregasEliminadas
         });
       }
 
