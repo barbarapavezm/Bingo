@@ -2275,84 +2275,19 @@ async function enviarMensajeChat(
    PRODUCTOS
 ========================= */
 
-const productos = [
+let productos = [
 
-  {
-    id: 1,
-    nombre: "Completo",
-    precio: 1500,
-    categoria: "comida"
-  },
-
-  {
-    id: 2,
-    nombre: "Té",
-    precio: 1000,
-    categoria: "comida"
-  },
-
-  {
-    id: 3,
-    nombre: "Café",
-    precio: 1000,
-    categoria: "comida"
-  },
-
-  {
-    id: 4,
-    nombre: "Bebida",
-    precio: 1000,
-    categoria: "comida"
-  },
-
-  {
-    id: 5,
-    nombre: "Agua",
-    precio: 500,
-    categoria: "comida"
-  },
-
-  {
-    id: 6,
-    nombre: "Juego 1",
-    precio: 1000,
-    categoria: "bingo"
-  },
-
-  {
-    id: 7,
-    nombre: "Juego 2",
-    precio: 1000,
-    categoria: "bingo"
-  },
-
-  {
-    id: 8,
-    nombre: "Juego 3",
-    precio: 1000,
-    categoria: "bingo"
-  },
-
-  {
-    id: 9,
-    nombre: "Juego 4",
-    precio: 1000,
-    categoria: "bingo"
-  },
-
-  {
-    id: 10,
-    nombre: "Juego Mayor",
-    precio: 2000,
-    categoria: "bingo"
-  },
-
-  {
-    id: 11,
-    nombre: "Pack de 11",
-    precio: 5000,
-    categoria: "bingo"
-  }
+  { id: 1, nombre: "Completo", precio: 1500, categoria: "comida" },
+  { id: 2, nombre: "Té", precio: 1000, categoria: "comida" },
+  { id: 3, nombre: "Café", precio: 1000, categoria: "comida" },
+  { id: 4, nombre: "Bebida", precio: 1000, categoria: "comida" },
+  { id: 5, nombre: "Agua", precio: 500, categoria: "comida" },
+  { id: 6, nombre: "Juego 1", precio: 1500, categoria: "bingo" },
+  { id: 7, nombre: "Juego 2", precio: 1500, categoria: "bingo" },
+  { id: 8, nombre: "Juego 3", precio: 1500, categoria: "bingo" },
+  { id: 9, nombre: "Juego 4", precio: 1500, categoria: "bingo" },
+  { id: 10, nombre: "Juego Mayor", precio: 3000, categoria: "bingo" },
+  { id: 11, nombre: "Once", precio: 3000, categoria: "comida" }
 
 ];
 
@@ -2703,6 +2638,49 @@ function cambiarPersonaCaja() {
    PRODUCTOS NORMALES
 ========================= */
 
+async function cargarProductosConfigurados() {
+
+  try {
+
+    const respuesta =
+      await fetch(
+        "/.netlify/functions/productos?t=" +
+        Date.now(),
+        { cache: "no-store" }
+      );
+
+
+    if (!respuesta.ok) {
+      throw new Error(
+        "No se pudieron cargar los productos configurados."
+      );
+    }
+
+
+    const datos =
+      await respuesta.json();
+
+
+    if (
+      Array.isArray(datos.productos) &&
+      datos.productos.length > 0
+    ) {
+
+      productos =
+        datos.productos;
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Usando valores base de productos:",
+      error
+    );
+  }
+}
+
+
 function crearProductos() {
 
   const comida =
@@ -2715,6 +2693,22 @@ function crearProductos() {
     document.getElementById(
       "productos-bingo"
     );
+
+
+  comida.innerHTML =
+    "";
+
+
+  bingo.innerHTML =
+    "";
+
+
+  Object.keys(
+    cantidades
+  ).forEach(
+    id =>
+      delete cantidades[id]
+  );
 
 
   productos.forEach(
@@ -4463,17 +4457,25 @@ function limpiarNormal() {
    INICIO
 ========================= */
 
-cargarMesas();
+async function iniciarCaja() {
 
-crearProductos();
+  cargarMesas();
 
-seleccionarTipo(
-  "normal"
-);
+  await cargarProductosConfigurados();
 
-cambiarModoPreventa();
+  crearProductos();
 
-renderSelectoresOnce();
+  seleccionarTipo(
+    "normal"
+  );
+
+  cambiarModoPreventa();
+
+  renderSelectoresOnce();
+}
+
+
+iniciarCaja();
 
 
 const inputCantidadPreventas =
