@@ -10,7 +10,7 @@ body { margin:0; font-family:Arial,sans-serif; background:#f4f6f8; color:#1f2937
 header { background:white; border-bottom:1px solid #ddd; padding:20px 28px; display:flex; justify-content:space-between; align-items:center; gap:15px; }
 header h1 { margin:0 0 4px; }
 header span { color:#6b7280; }
-header a { color:#2563eb; text-decoration:none; font-weight:bold; }
+header a, header button.volver { color:#2563eb; text-decoration:none; font-weight:bold; background:transparent; border:0; padding:0; cursor:pointer; font-size:16px; }
 main { max-width:1000px; margin:auto; padding:25px; }
 .panel { background:white; border-radius:14px; padding:22px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
 .aviso { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
@@ -25,7 +25,7 @@ input,select { width:100%; padding:10px; font-size:16px; border:1px solid #d1d5d
 .precio { max-width:150px; }
 .categoria { max-width:160px; }
 .botones { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
-button { border:0; border-radius:9px; padding:12px 18px; font-weight:bold; cursor:pointer; }
+button:not(.volver) { border:0; border-radius:9px; padding:12px 18px; font-weight:bold; cursor:pointer; }
 .guardar { background:#2563eb; color:white; }
 .recargar { background:#e5e7eb; color:#374151; }
 button:disabled { opacity:.55; cursor:not-allowed; }
@@ -41,7 +41,7 @@ button:disabled { opacity:.55; cursor:not-allowed; }
     <h1>📦 Productos</h1>
     <span>Los cambios quedan guardados y se usan en Caja</span>
   </div>
-  <a href="/acceso-cocina.html">Volver</a>
+  <button class="volver" type="button" onclick="volverAtras()">← Volver</button>
 </header>
 <main>
   <div class="panel aviso">
@@ -62,7 +62,7 @@ button:disabled { opacity:.55; cursor:not-allowed; }
   <div class="panel">
     <h2 style="margin-top:0;">Productos y precios</h2>
     <div class="nota" style="margin-bottom:15px;">
-      Puedes cambiar nombre, precio y categoría. Presiona <b>Guardar cambios</b> al terminar.
+      Puedes cambiar nombre, precio, categoría, si está activo y si es entregable. Presiona <b>Guardar cambios</b> al terminar.
     </div>
 
     <div class="tabla">
@@ -72,10 +72,12 @@ button:disabled { opacity:.55; cursor:not-allowed; }
             <th>Producto</th>
             <th>Precio</th>
             <th>Categoría</th>
+            <th>Activo</th>
+            <th>Entregable</th>
           </tr>
         </thead>
         <tbody id="lista-productos">
-          <tr><td colspan="3">Cargando...</td></tr>
+          <tr><td colspan="5">Cargando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -88,6 +90,20 @@ button:disabled { opacity:.55; cursor:not-allowed; }
   </div>
 </main>
 <script>
+function volverAtras() {
+  try {
+    const anterior = document.referrer ? new URL(document.referrer) : null;
+    if (anterior && anterior.origin === window.location.origin) {
+      window.history.back();
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  window.location.href = "/index.html";
+}
+
 let productos = [];
 let guardando = false;
 
@@ -108,7 +124,7 @@ async function cargarProductos() {
   const tbody = document.getElementById("lista-productos");
   const estado = document.getElementById("estado");
   estado.textContent = "";
-  tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
 
   try {
     const respuesta = await fetch("/.netlify/functions/productos?t=" + Date.now(), { cache:"no-store" });
@@ -119,7 +135,7 @@ async function cargarProductos() {
     renderProductos();
   } catch (error) {
     console.error(error);
-    tbody.innerHTML = '<tr><td colspan="3">❌ No se pudieron cargar los productos.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5">❌ No se pudieron cargar los productos.</td></tr>';
     estado.className = "estado error";
     estado.textContent = error.message;
   }
@@ -144,6 +160,22 @@ function renderProductos() {
           <option value="bingo" ${producto.categoria === "bingo" ? "selected" : ""}>Bingo</option>
         </select>
       </td>
+      <td style="text-align:center;">
+        <input
+          id="activo-${indice}"
+          type="checkbox"
+          style="width:auto; transform:scale(1.25);"
+          ${producto.activo !== false ? "checked" : ""}
+        >
+      </td>
+      <td style="text-align:center;">
+        <input
+          id="entregable-${indice}"
+          type="checkbox"
+          style="width:auto; transform:scale(1.25);"
+          ${producto.entregable !== false ? "checked" : ""}
+        >
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -154,7 +186,9 @@ function leerFormulario() {
     id: Number(producto.id),
     nombre: document.getElementById("nombre-" + indice).value.trim(),
     precio: Number(document.getElementById("precio-" + indice).value),
-    categoria: document.getElementById("categoria-" + indice).value
+    categoria: document.getElementById("categoria-" + indice).value,
+    activo: document.getElementById("activo-" + indice).checked,
+    entregable: document.getElementById("entregable-" + indice).checked
   }));
 }
 
