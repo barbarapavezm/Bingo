@@ -1,485 +1,232 @@
 import { getStore } from "@netlify/blobs";
 
-const store = getStore({
-  name: "pedidos-bingo",
-  consistency: "strong"
-});
+function respuestaError(mensaje, status = 400) {
+  return Response.json(
+    { error: mensaje },
+    { status }
+  );
+}
+
+function limpiarProductos(productos) {
+  if (!Array.isArray(productos)) {
+    return [];
+  }
+
+  return productos
+    .map(producto => ({
+      nombre: String(producto?.nombre || "").trim(),
+      cantidad: Math.max(
+        0,
+        Math.floor(Number(producto?.cantidad || 0))
+      )
+    }))
+    .filter(
+      producto =>
+        producto.nombre &&
+        producto.cantidad > 0
+    );
+}
 
 export default async (req) => {
-
   try {
+    /*
+      IMPORTANTE:
+      abrimos el store dentro de cada ejecución,
+      igual que en las otras funciones corregidas,
+      para evitar reutilizar credenciales vencidas.
+    */
+    const pedidosStore = getStore({
+      name: "pedidos-bingo",
+      consistency: "strong"
+    });
 
-    // =========================
-    // CREAR PEDIDO
-    // =========================
-
-    if (req.method === "POST") {
-
-      const pedido =
-        await req.json();
-
-
-      if (
-        !pedido.mesa ||
-        !pedido.nombre ||
-        !Array.isArray(
-          pedido.productos
-        ) ||
-        pedido.productos.length === 0
-      ) {
-
-        return Response.json(
-          {
-            error:
-              "Faltan datos del pedido"
-          },
-          {
-            status: 400
-          }
-        );
-
-      }
-
-
-      const id =
-        crypto.randomUUID();
-
-
-      const ahora =
-        new Date()
-          .toISOString();
-
-
-      /*
-        ORIGEN
-
-        "caja"
-        = enviado directamente
-          desde caja.
-
-        "mesa"
-        = solicitado por la
-          persona desde su mesa.
-
-        Si no viene indicado,
-        asumimos "mesa".
-      */
-
-      const origen =
-        pedido.origen === "caja"
-          ? "caja"
-          : "mesa";
-
-
-      const pedidoCompleto = {
-
-        id,
-
-        mesa:
-          Number(
-            pedido.mesa
-          ),
-
-        nombre:
-          pedido.nombre
-            .trim(),
-
-        productos:
-          pedido.productos,
-
-        origen,
-
-        estado:
-          "nuevo",
-
-        fecha:
-          ahora,
-
-        actualizado:
-          ahora,
-
-        prioridadPreparando:
-          false,
-
-        historialEstados: [
-          {
-
-            desde:
-              null,
-
-            hacia:
-              "nuevo",
-
-            fecha:
-              ahora
-
-          }
-        ]
-
-      };
-
-
-      await store.setJSON(
-        id,
-        pedidoCompleto
-      );
-
-
-      return Response.json({
-        ok: true,
-        pedido:
-          pedidoCompleto
-      });
-
-    }
-
-
-
-    // =========================
-    // OBTENER PEDIDOS
-    // =========================
-
+    /* =========================
+       GET - LISTAR PEDIDOS
+    ========================= */
     if (req.method === "GET") {
-
-      const lista =
-        await store.list();
-
-
+      const lista = await pedidosStore.list();
       const pedidos = [];
 
-
-      for (
-        const blob
-        of lista.blobs
-      ) {
-
-        const pedido =
-          await store.get(
-            blob.key,
-            {
-              type: "json"
-            }
-          );
-
+      for (const blob of lista.blobs) {
+        const pedido = await pedidosStore.get(
+          blob.key,
+          { type: "json" }
+        );
 
         if (pedido) {
-
-          /*
-            Compatibilidad con
-            pedidos antiguos que
-            todavía no tengan
-            origen guardado.
-          */
-
-          if (!pedido.origen) {
-            pedido.origen =
-              "mesa";
-          }
-
-
-          pedidos.push(
-            pedido
-          );
-
+          pedidos.push({
+            ...pedido,
+            id: pedido.id || blob.key
+          });
         }
-
       }
-
 
       pedidos.sort(
         (a, b) =>
-
-          new Date(
-            b.fecha
-          ) -
-
-          new Date(
-            a.fecha
-          )
+          new Date(a.fecha || a.actualizado || 0) -
+          new Date(b.fecha || b.actualizado || 0)
       );
 
-
-      return Response.json(
-        pedidos
-      );
-
+      return Response.json(pedidos);
     }
 
+    /* =========================
+       POST - CREAR PEDIDO
+    ========================= */
+    if (req.method === "POST") {
+      const datos = await req.json();
 
-
-    // =========================
-    // CAMBIAR ESTADO
-    // =========================
-
-    if (req.method === "PUT") {
-
-      const datos =
-        await req.json();
-
+      const mesa = Number(datos.mesa);
+      const nombre = String(datos.nombre || "").trim();
+      const clienteId = String(datos.clienteId || "").trim() || null;
+      const origen = String(datos.origen || "mesa").trim();
+      const productos = limpiarProductos(datos.productos);
 
       if (
-        !datos.id ||
-        !datos.estado
+        !Number.isInteger(mesa) ||
+        mesa < 1 ||
+        mesa > 50
       ) {
-
-        return Response.json(
-          {
-            error:
-              "Faltan datos"
-          },
-          {
-            status: 400
-          }
+        return respuestaError(
+          "La mesa debe ser un número entre 1 y 50."
         );
-
       }
 
-
-      const pedido =
-        await store.get(
-          datos.id,
-          {
-            type: "json"
-          }
+      if (!nombre) {
+        return respuestaError(
+          "Falta el nombre de la persona."
         );
-
-
-      if (!pedido) {
-
-        return Response.json(
-          {
-            error:
-              "Pedido no encontrado"
-          },
-          {
-            status: 404
-          }
-        );
-
       }
 
+      if (productos.length === 0) {
+        return respuestaError(
+          "El pedido no tiene productos válidos."
+        );
+      }
 
-      const estadosPermitidos = [
+      const id = crypto.randomUUID();
+      const ahora = new Date().toISOString();
+
+      const pedido = {
+        id,
+        mesa,
+        clienteId,
+        nombre,
+        origen,
+        productos,
+        estado: "nuevo",
+        fecha: ahora,
+        actualizado: ahora,
+        entregadoEn: null,
+        prioridadPreparando: false
+      };
+
+      await pedidosStore.setJSON(
+        id,
+        pedido
+      );
+
+      return Response.json(
+        {
+          ok: true,
+          pedido
+        },
+        {
+          status: 201
+        }
+      );
+    }
+
+    /* =========================
+       PUT - CAMBIAR ESTADO
+    ========================= */
+    if (req.method === "PUT") {
+      const datos = await req.json();
+
+      const id = String(datos.id || "").trim();
+      const estado = String(datos.estado || "").trim();
+
+      const estadosValidos = [
         "nuevo",
         "preparando",
         "listo",
         "entregado"
       ];
 
-
-      if (
-        !estadosPermitidos.includes(
-          datos.estado
-        )
-      ) {
-
-        return Response.json(
-          {
-            error:
-              "Estado inválido"
-          },
-          {
-            status: 400
-          }
+      if (!id) {
+        return respuestaError(
+          "Falta el id del pedido."
         );
-
       }
 
-
-      const estadoAnterior =
-        pedido.estado;
-
-
-      const ahora =
-        new Date()
-          .toISOString();
-
-
-
-      // =========================
-      // HISTORIAL
-      // =========================
-
-      if (
-        !Array.isArray(
-          pedido.historialEstados
-        )
-      ) {
-
-        pedido.historialEstados =
-          [];
-
+      if (!estadosValidos.includes(estado)) {
+        return respuestaError(
+          "Estado de pedido inválido."
+        );
       }
 
+      const pedido = await pedidosStore.get(
+        id,
+        { type: "json" }
+      );
 
-      pedido.historialEstados.push({
-
-        desde:
-          estadoAnterior,
-
-        hacia:
-          datos.estado,
-
-        fecha:
-          ahora
-
-      });
-
-
-
-      // =========================
-      // ACTUALIZAR ESTADO
-      // =========================
-
-      pedido.estado =
-        datos.estado;
-
-
-      pedido.actualizado =
-        ahora;
-
-
-
-      // =========================
-      // MARCAR ENTREGADO
-      // =========================
-
-      if (
-        datos.estado ===
-        "entregado"
-      ) {
-
-        pedido.entregadoEn =
-          ahora;
-
-
-        pedido.prioridadPreparando =
-          false;
-
+      if (!pedido) {
+        return respuestaError(
+          "Pedido no encontrado.",
+          404
+        );
       }
 
+      const ahora = new Date().toISOString();
+      const estabaEntregado =
+        pedido.estado === "entregado";
 
+      pedido.estado = estado;
+      pedido.actualizado = ahora;
 
-      // =========================
-      // DEVOLVER ENTREGADO
-      // A PREPARANDO
-      // =========================
-
-      if (
-        estadoAnterior ===
-          "entregado" &&
-
-        datos.estado ===
-          "preparando"
-      ) {
-
-        pedido.reabiertoEn =
-          ahora;
-
+      if (estado === "entregado") {
+        pedido.entregadoEn = ahora;
+        pedido.prioridadPreparando = false;
+      } else {
+        pedido.entregadoEn = null;
 
         /*
-          Al volver desde
-          entregado a preparando
-          aparecerá al principio
-          de esa columna.
+          Si un pedido entregado vuelve a preparando,
+          Cocina lo muestra con prioridad.
         */
-
         pedido.prioridadPreparando =
-          true;
-
+          estabaEntregado &&
+          estado === "preparando";
       }
 
-
-
-      // =========================
-      // QUITAR PRIORIDAD
-      // =========================
-
-      if (
-        datos.estado ===
-          "listo" ||
-
-        datos.estado ===
-          "nuevo" ||
-
-        datos.estado ===
-          "entregado"
-      ) {
-
-        pedido.prioridadPreparando =
-          false;
-
-      }
-
-
-
-      // =========================
-      // COMPATIBILIDAD
-      // PEDIDOS ANTIGUOS
-      // =========================
-
-      if (!pedido.origen) {
-
-        pedido.origen =
-          "mesa";
-
-      }
-
-
-
-      await store.setJSON(
-        pedido.id,
+      await pedidosStore.setJSON(
+        id,
         pedido
       );
 
-
       return Response.json({
-
-        ok:
-          true,
-
+        ok: true,
         pedido
-
       });
-
     }
 
-
-
-    // =========================
-    // MÉTODO NO PERMITIDO
-    // =========================
-
-    return Response.json(
-      {
-        error:
-          "Método no permitido"
-      },
-      {
-        status: 405
-      }
+    return respuestaError(
+      "Método no permitido.",
+      405
     );
-
 
   } catch (error) {
-
-
-    console.error(
-      "Error en pedidos:",
-      error
-    );
-
+    console.error(error);
 
     return Response.json(
       {
         error:
-          "Error procesando pedido"
+          error?.message ||
+          "Error interno al gestionar pedidos."
       },
       {
         status: 500
       }
     );
-
   }
-
 };
