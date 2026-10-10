@@ -2711,7 +2711,12 @@ function crearProductos() {
   );
 
 
-  productos.forEach(
+  productos
+    .filter(
+      producto =>
+        producto.activo !== false
+    )
+    .forEach(
     producto => {
 
       cantidades[
@@ -4004,7 +4009,13 @@ async function registrarVentaNormal() {
             ],
 
           categoria:
-            producto.categoria
+            producto.categoria,
+
+          activo:
+            producto.activo !== false,
+
+          entregable:
+            producto.entregable !== false
 
         })
       );
@@ -4216,7 +4227,9 @@ async function registrarVentaNormal() {
       seleccionados.filter(
         producto =>
           producto.categoria ===
-          "comida"
+            "comida" &&
+          producto.entregable !==
+            false
       );
 
 
