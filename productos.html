@@ -62,7 +62,7 @@ button:disabled { opacity:.55; cursor:not-allowed; }
   <div class="panel">
     <h2 style="margin-top:0;">Productos y precios</h2>
     <div class="nota" style="margin-bottom:15px;">
-      Puedes cambiar nombre, precio, categoría, si está activo y si es entregable. Presiona <b>Guardar cambios</b> al terminar.
+      Puedes cambiar nombre, precio, categoría, si está activo y si es entregable. También puedes crear productos nuevos con <b>➕ Agregar producto</b>. Presiona <b>Guardar cambios</b> al terminar.
     </div>
 
     <div class="tabla">
@@ -83,6 +83,7 @@ button:disabled { opacity:.55; cursor:not-allowed; }
     </div>
 
     <div class="botones">
+      <button type="button" class="guardar" onclick="agregarProducto()">➕ Agregar producto</button>
       <button id="guardar" class="guardar" onclick="guardarCambios()">Guardar cambios</button>
       <button class="recargar" onclick="cargarProductos()">Volver a cargar</button>
     </div>
@@ -190,6 +191,54 @@ function leerFormulario() {
     activo: document.getElementById("activo-" + indice).checked,
     entregable: document.getElementById("entregable-" + indice).checked
   }));
+}
+
+function agregarProducto() {
+  const ids =
+    productos
+      .map(producto => Number(producto.id))
+      .filter(id => Number.isInteger(id) && id > 0);
+
+  const nuevoId =
+    ids.length > 0
+      ? Math.max(...ids) + 1
+      : 1;
+
+  productos.push({
+    id: nuevoId,
+    nombre: "",
+    precio: 0,
+    categoria: "comida",
+    activo: true,
+    entregable: true
+  });
+
+  renderProductos();
+
+  const nuevoIndice =
+    productos.length - 1;
+
+  const inputNombre =
+    document.getElementById(
+      "nombre-" + nuevoIndice
+    );
+
+  if (inputNombre) {
+    inputNombre.focus();
+    inputNombre.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+
+  const estado =
+    document.getElementById("estado");
+
+  estado.className =
+    "estado";
+
+  estado.textContent =
+    "✏️ Completa el nombre, precio, categoría y opciones del nuevo producto, luego presiona Guardar cambios.";
 }
 
 async function guardarCambios() {
