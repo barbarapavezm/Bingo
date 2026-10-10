@@ -580,8 +580,8 @@
     </button>
 
 
-    <a href="/index.html">
-      Volver al inicio
+    <a href="/acceso-cocina.html">
+      Volver al menú de cocina
     </a>
 
   </div>
@@ -1145,6 +1145,38 @@ async function cargarPedidos() {
 
     console.error(
       error
+    );
+
+    const indicador =
+      document.getElementById(
+        "ultima-actualizacion"
+      );
+
+    if (indicador) {
+      indicador.textContent =
+        "❌ Error cargando pedidos";
+    }
+
+    const idsColumnas = [
+      "nuevos",
+      "preparando",
+      "listos"
+    ];
+
+    idsColumnas.forEach(
+      id => {
+        const elemento =
+          document.getElementById(id);
+
+        if (elemento) {
+          elemento.innerHTML = `
+            <div class="vacio">
+              No se pudieron cargar los pedidos.
+              Revisa la función pedidos.mjs.
+            </div>
+          `;
+        }
+      }
     );
 
 
