@@ -2,27 +2,40 @@ import { getStore } from "@netlify/blobs";
 
 
 const PRODUCTOS_BASE = [
-  { id: 1, nombre: "Completo", precio: 1500, categoria: "comida" },
-  { id: 2, nombre: "Té", precio: 1000, categoria: "comida" },
-  { id: 3, nombre: "Café", precio: 1000, categoria: "comida" },
-  { id: 4, nombre: "Bebida", precio: 1000, categoria: "comida" },
-  { id: 5, nombre: "Agua", precio: 500, categoria: "comida" },
-  { id: 6, nombre: "Juego 1", precio: 1500, categoria: "bingo" },
-  { id: 7, nombre: "Juego 2", precio: 1500, categoria: "bingo" },
-  { id: 8, nombre: "Juego 3", precio: 1500, categoria: "bingo" },
-  { id: 9, nombre: "Juego 4", precio: 1500, categoria: "bingo" },
-  { id: 10, nombre: "Juego Mayor", precio: 3000, categoria: "bingo" },
-  { id: 11, nombre: "Once", precio: 3000, categoria: "comida" }
+  { id: 1, nombre: "Completo", precio: 1500, categoria: "comida", activo: true, entregable: true },
+  { id: 2, nombre: "Té", precio: 1000, categoria: "comida", activo: true, entregable: true },
+  { id: 3, nombre: "Café", precio: 1000, categoria: "comida", activo: true, entregable: true },
+  { id: 4, nombre: "Bebida", precio: 1000, categoria: "comida", activo: true, entregable: true },
+  { id: 5, nombre: "Agua", precio: 500, categoria: "comida", activo: true, entregable: true },
+  { id: 6, nombre: "Juego 1", precio: 1500, categoria: "bingo", activo: true, entregable: false },
+  { id: 7, nombre: "Juego 2", precio: 1500, categoria: "bingo", activo: true, entregable: false },
+  { id: 8, nombre: "Juego 3", precio: 1500, categoria: "bingo", activo: true, entregable: false },
+  { id: 9, nombre: "Juego 4", precio: 1500, categoria: "bingo", activo: true, entregable: false },
+  { id: 10, nombre: "Juego Mayor", precio: 3000, categoria: "bingo", activo: true, entregable: false },
+  { id: 11, nombre: "Once", precio: 3000, categoria: "comida", activo: true, entregable: true }
 ];
 
 const PRECIO_PREVENTA = 10000;
 
 function limpiarProducto(producto) {
+  const categoria =
+    producto.categoria === "bingo"
+      ? "bingo"
+      : "comida";
+
   return {
     id: Number(producto.id),
     nombre: String(producto.nombre || "").trim(),
     precio: Math.round(Number(producto.precio)),
-    categoria: producto.categoria === "bingo" ? "bingo" : "comida"
+    categoria,
+    activo:
+      producto.activo === undefined
+        ? true
+        : Boolean(producto.activo),
+    entregable:
+      producto.entregable === undefined
+        ? categoria === "comida"
+        : Boolean(producto.entregable)
   };
 }
 
@@ -62,6 +75,30 @@ async function obtenerConfig(store) {
       actualizadoEn: new Date().toISOString()
     };
 
+    await store.setJSON("config", config);
+    return config;
+  }
+
+  // Migra automáticamente configuraciones anteriores que todavía
+  // no tenían los campos activo / entregable.
+  const productosMigrados =
+    config.productos.map(limpiarProducto);
+
+  const necesitaMigracion =
+    config.productos.some(
+      producto =>
+        typeof producto.activo !== "boolean" ||
+        typeof producto.entregable !== "boolean"
+    );
+
+  config = {
+    ...config,
+    productos: productosMigrados,
+    precioPreventa: PRECIO_PREVENTA
+  };
+
+  if (necesitaMigracion) {
+    config.actualizadoEn = new Date().toISOString();
     await store.setJSON("config", config);
   }
 
