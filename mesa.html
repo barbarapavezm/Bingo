@@ -124,6 +124,11 @@ main {
   color: white;
 }
 
+.btn-eliminar {
+  background: #dc2626;
+  color: white;
+}
+
 .vacio {
   background: white;
 
@@ -403,6 +408,110 @@ async function cambiarMesa(
   }
 
 }
+
+
+/* =========================
+   ELIMINAR PERSONA
+========================= */
+
+async function eliminarPersona(
+  personaId,
+  nombre
+) {
+
+  const confirmar =
+    confirm(
+      "¿Eliminar a " +
+      nombre +
+      " de la Mesa " +
+      mesa +
+      "?\n\n" +
+      "Esto eliminará también sus compras, pedidos y entregas de bingo asociadas.\n\n" +
+      "Úsalo solo si esta persona fue creada por error."
+    );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  const confirmarFinal =
+    confirm(
+      "⚠️ Esta acción no se puede deshacer.\n\n" +
+      "¿Seguro que quieres eliminar definitivamente a " +
+      nombre +
+      "?"
+    );
+
+
+  if (!confirmarFinal) {
+    return;
+  }
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        "/.netlify/functions/personas",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              accion:
+                "eliminar-persona",
+
+              personaId
+            })
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        resultado.error ||
+        "No se pudo eliminar la persona."
+      );
+    }
+
+
+    alert(
+      "✅ " +
+      nombre +
+      " fue eliminado/a."
+    );
+
+
+    await cargar();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "❌ " +
+      error.message
+    );
+  }
+}
+
 
 
 /* =========================
@@ -774,6 +883,21 @@ async function cargar() {
               )'
             >
               Cambiar mesa
+            </button>
+
+
+            <button
+              class="btn btn-eliminar"
+              onclick='eliminarPersona(
+                ${JSON.stringify(
+                  persona.id
+                )},
+                ${JSON.stringify(
+                  persona.nombre
+                )}
+              )'
+            >
+              Eliminar persona
             </button>
 
           </div>
