@@ -1,15 +1,14 @@
 import { getStore } from "@netlify/blobs";
 
 
-const ventasStore = getStore({
-  name: "ventas-bingo",
-  consistency: "strong"
-});
-
-const personasStore = getStore({
-  name: "personas-bingo",
-  consistency: "strong"
-});
+/*
+  IMPORTANTE:
+  No abrimos los Netlify Blobs stores al cargar el módulo.
+  Los inicializamos nuevamente en cada ejecución de la Function
+  para evitar reutilizar credenciales/token vencidos.
+*/
+let ventasStore = null;
+let personasStore = null;
 
 
 const PRECIO_PREVENTA =
@@ -752,6 +751,22 @@ function obtenerCantidadPreventa(
 export default async (req) => {
 
   try {
+
+    /*
+      Stores frescos para ESTA ejecución.
+      Ambos apuntan a los mismos datos persistentes,
+      solo renovamos las credenciales usadas por Netlify.
+    */
+    ventasStore = getStore({
+      name: "ventas-bingo",
+      consistency: "strong"
+    });
+
+    personasStore = getStore({
+      name: "personas-bingo",
+      consistency: "strong"
+    });
+
 
 
     /* =========================
@@ -1928,6 +1943,7 @@ export default async (req) => {
     return Response.json(
       {
         error:
+          error?.message ||
           "Error procesando la venta."
       },
       {
