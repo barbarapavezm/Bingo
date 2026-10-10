@@ -2803,7 +2803,12 @@ function cambiarCantidad(
 
   cantidades[
     id
-  ] +=
+  ] =
+    Number(
+      cantidades[
+        id
+      ] || 0
+    ) +
     cambio;
 
 
@@ -3165,22 +3170,40 @@ function cantidadPreventaActual() {
 
 function calcularTotalNormal() {
 
-  return productos.reduce(
-    (
-      suma,
-      producto
-    ) =>
-
-      suma +
+  return productos
+    .filter(
+      producto =>
+        producto.activo !== false
+    )
+    .reduce(
       (
-        producto.precio *
-        cantidades[
-          producto.id
-        ]
-      ),
+        suma,
+        producto
+      ) => {
 
-    0
-  );
+        const precio =
+          Number(
+            producto.precio || 0
+          );
+
+        const cantidad =
+          Number(
+            cantidades[
+              producto.id
+            ] || 0
+          );
+
+        return (
+          suma +
+          (
+            precio *
+            cantidad
+          )
+        );
+      },
+
+      0
+    );
 }
 
 
